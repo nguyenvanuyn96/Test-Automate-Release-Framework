@@ -1,6 +1,6 @@
 name: Auto PR
 on:
-  create:
+  # create:
   push:
     branches:
       - bot/release/*

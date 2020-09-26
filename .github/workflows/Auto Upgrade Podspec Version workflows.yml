@@ -66,9 +66,14 @@ jobs:
           force: true
           directory: .
     
-    # - name: Create Pull Request
-    #   uses: peter-evans/create-pull-request@v3
-    #   id: create_pr
-    #   with:
-    #       branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
-    #       base: ${{ steps.get-branch.outputs.branch }}
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+          ref: ${{ steps.create_bot_branch.outputs.bot_branch }}
+    
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v3
+      id: create_pr
+      with:
+          branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
+          base: ${{ steps.get-branch.outputs.branch }}
