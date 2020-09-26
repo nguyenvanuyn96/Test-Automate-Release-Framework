@@ -3,7 +3,7 @@ name: Auto Create Bot Release Branch
 on:
   create:
     branches:
-      - release/*
+      - 'release/*'
 
 jobs:
   build:

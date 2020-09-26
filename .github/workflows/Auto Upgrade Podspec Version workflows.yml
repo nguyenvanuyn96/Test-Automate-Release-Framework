@@ -3,7 +3,7 @@ name: Auto Upgrade Podspec Version
 on: 
   create:
     branches:
-      - bot/release/*
+      - 'bot/release/*'
 
 jobs:
   build:
@@ -12,7 +12,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@master
         
-    - name: Check and get release version only
+    - name: Get release version only
       id: get-release-version
       run: |
         version=$(echo ${{ github.ref }} | sed -e "s/ref\/heads\/bot\/release\///g")
