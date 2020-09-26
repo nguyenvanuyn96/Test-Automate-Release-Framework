@@ -1,26 +1,33 @@
-name: Auto PR
-on:
-  push:
-    branches:
-      - bot/release/*
-jobs:
-  AutoPR:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          ref: ${{github.ref}}
+# name: Auto PR
+# on:
+#   workflow_run:
+#     workflows: ["Run Tests"]
+#     branches: 
+#       - bot/release/*
+#     types: 
+#       - completed
+# on:
+#   push:
+#     branches:
+#       - bot/release/*
+# jobs:
+#   AutoPR:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v2
+#         with:
+#           ref: ${{github.ref}}
  
-      - name: Get release version only
-        id: get-release-version
-        run: |
-          version=$(echo ${{ github.ref }} | sed -e "s/refs\/heads\/bot\/release\///g")
-          echo "::set-output name=new_release_version::${version}"
-          echo ${version}
+#       - name: Get release version only
+#         id: get-release-version
+#         run: |
+#           version=$(echo ${{ github.ref }} | sed -e "s/refs\/heads\/bot\/release\///g")
+#           echo "::set-output name=new_release_version::${version}"
+#           echo ${version}
 
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v3
-        with:
-          branch: ${{github.ref}}
-          base: "release/${{ steps.get-release-version.outputs.new_release_version }}"
+#       - name: Create Pull Request
+#         uses: peter-evans/create-pull-request@v3
+#         with:
+#           branch: ${{github.ref}}
+#           base: "release/${{ steps.get-release-version.outputs.new_release_version }}"
