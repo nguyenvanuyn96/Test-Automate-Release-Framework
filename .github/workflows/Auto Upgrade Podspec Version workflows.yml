@@ -15,7 +15,7 @@ jobs:
     - name: Check and get release version only
       id: get-release-version
       run: |
-        version=$(echo ${{ github.ref }} | sed -e "s/ref/heads/bot/release\///g")
+        version=$(echo ${{ github.ref }} | sed -e "s/ref\/heads\/bot\/release\///g")
         echo "::set-output name=new_release_version::${version}"
         echo ${version}
 
