@@ -34,14 +34,14 @@ jobs:
           echo "::set-output name=bot_branch::${bot_branch}"
           git checkout -b ${bot_branch}
 
-    - name: Push changes
-      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
-      uses: ad-m/github-push-action@master
-      with:
-          branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          force: true
-          directory: .
+    # - name: Push changes
+    #   if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+    #   uses: ad-m/github-push-action@master
+    #   with:
+    #       branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
+    #       github_token: ${{ secrets.GITHUB_TOKEN }}
+    #       force: true
+    #       directory: .
 
     - name: Find and replace the current spec version to new version
       if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
@@ -71,7 +71,7 @@ jobs:
       uses: ad-m/github-push-action@master
       with:
           branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
           force: true
           directory: .
     
