@@ -4,7 +4,7 @@ on:
   pull_request:
      branches:
        - master
-      #  - bot/release/*
+       - bot/release/*
 
 jobs:
   auto-merge:
@@ -13,7 +13,7 @@ jobs:
       - name: Merge approved PR
         uses: reitermarkus/automerge@v1
         with:
-          token: ${{ secrets.UY_SECRET }}
+          token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
           merge-method: rebase
           do-not-merge-labels: never-merge
           pull-request: ${{ github.event.pull_request.number }}
