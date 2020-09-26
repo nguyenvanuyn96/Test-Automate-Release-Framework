@@ -25,7 +25,7 @@ jobs:
       with:
         find: "\\t*spec.version\\s*=\\s\"[\\S]*\""
         replace: "spec.version      = \"${{ steps.get-release-version.outputs.new_release_version }}\""
-        include: ".podspec"
+        include: "*.podspec"
     
     - name: Check find and replace
       run: |
