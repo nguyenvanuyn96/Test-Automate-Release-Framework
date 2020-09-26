@@ -1,6 +1,6 @@
 # Test-Automate-Release-Framework
 
-[![CI Status](https://img.shields.io/travis/Uy Nguyen/Test-Automate-Release-Framework.svg?style=flat)](https://travis-ci.org/Uy Nguyen/Test-Automate-Release-Framework)
+[![CI Status](https://img.shields.io/travis/Uy-Nguyen/Test-Automate-Release-Framework.svg?style=flat)](https://travis-ci.org/Uy-Nguyen/Test-Automate-Release-Framework)
 [![Version](https://img.shields.io/cocoapods/v/Test-Automate-Release-Framework.svg?style=flat)](https://cocoapods.org/pods/Test-Automate-Release-Framework)
 [![License](https://img.shields.io/cocoapods/l/Test-Automate-Release-Framework.svg?style=flat)](https://cocoapods.org/pods/Test-Automate-Release-Framework)
 [![Platform](https://img.shields.io/cocoapods/p/Test-Automate-Release-Framework.svg?style=flat)](https://cocoapods.org/pods/Test-Automate-Release-Framework)
