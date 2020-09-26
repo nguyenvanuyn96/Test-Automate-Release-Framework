@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - master
+      - bot/release/*
 
 jobs:
   auto-approve:
@@ -13,6 +14,6 @@ jobs:
         uses: hmarr/auto-approve-action@v2.0.0
 #         if: github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]'
         with:
-          token: ${{ secrets.UY_SECRET }}
+          token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
 #           github-token: "${{ secrets.GITHUB_TOKEN }}"
   
