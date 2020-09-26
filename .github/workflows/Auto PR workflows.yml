@@ -2,8 +2,8 @@ name: Auto PR
 on:
   workflow_run:
     workflows: ["Auto Upgrade Podspec Version"]
-    branches: 
-      - bot/release/*
+    # branches: 
+    #   - bot/release/*
     types: 
       - completed
 # on:

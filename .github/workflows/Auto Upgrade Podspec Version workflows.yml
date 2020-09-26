@@ -1,4 +1,4 @@
-name: Auto Upgrade Podspec Version
+name: "Auto Upgrade Podspec Version"
 
 on: 
   create:
