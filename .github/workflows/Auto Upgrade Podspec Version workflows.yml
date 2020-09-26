@@ -70,6 +70,9 @@ jobs:
     needs: upgrade_podspec
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@master
+      
       - name: Get release version only
         id: get-release-version
         run: |
