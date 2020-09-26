@@ -2,8 +2,6 @@ name: Auto PR
 on:
   workflow_run:
     workflows: ["Auto Upgrade Podspec Version"]
-    # branches: 
-    #   - bot/release/*
     types: 
       - completed
 
@@ -11,6 +9,18 @@ jobs:
   AutoPR:
     runs-on: ubuntu-latest
     steps:
+      - name: Print for debugging
+        run: |
+          echo "github.event = {{ github.event }}"
+          echo "github.workflow = {{ github.workflow }}"
+          echo "github.event_name = {{ github.event_name }}"
+          echo "github.ref = {{ github.ref }}"
+          echo "github.head_ref = {{ github.head_ref }}"
+          echo "github.base_ref = {{ github.base_ref }}"
+          echo "github.action = {{ github.action }}"
+          echo "github.repository = {{ github.repository }}"
+          echo "github.base_ref = {{ github.base_ref }}"
+
       - name: Checkout
         uses: actions/checkout@v2
         with:
