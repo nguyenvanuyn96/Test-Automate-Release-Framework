@@ -22,7 +22,7 @@ jobs:
       if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
       id: get-release-version
       run: |
-        version=$(echo ${{ github.ref }} | sed -e "s/release\///g")
+        version=$(echo ${{ github.ref }} | sed -e "s/refs\/heads\/release\///g")
         echo "::set-output name=new_release_version::${version}"
         echo ${version}
 
@@ -65,3 +65,10 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           force: true
           directory: .
+    
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v3
+      id: create_pr
+      with:
+          branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
+          base: ${{ steps.get-branch.outputs.branch }}

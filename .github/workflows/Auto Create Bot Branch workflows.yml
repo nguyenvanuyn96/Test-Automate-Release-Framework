@@ -9,8 +9,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@master
+    # - name: Checkout
+    #   uses: actions/checkout@master
       
     - name: Get and check if branch name is an `release/*`
       uses: uynguyen-wonderlabs/get-branch-name-github-action@master
