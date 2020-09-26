@@ -20,11 +20,16 @@ jobs:
         echo ${version}
 
     - name: Find and replace the current spec version to new version
+      id: find_and_replace
       uses: shitiomatic/str-replace@master
       with:
         find: "\\t*spec.version\\s*=\\s\"[\\S]*\""
         replace: "spec.version      = \"${{ steps.get-release-version.outputs.new_release_version }}\""
         include: ".podspec"
+    
+    - name: Check find and replace
+      run: |
+          echo "Number of files which have been modified = ${{ steps.find_and_replace.outputs.modifiedFiles}}"
            
     - name: Commit the updated podspec file
       run: |
