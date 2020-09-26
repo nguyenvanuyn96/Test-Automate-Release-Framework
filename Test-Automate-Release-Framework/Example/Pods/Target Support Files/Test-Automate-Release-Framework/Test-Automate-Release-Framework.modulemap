@@ -1,0 +1,6 @@
+framework module Test_Automate_Release_Framework {
+  umbrella header "Test-Automate-Release-Framework-umbrella.h"
+
+  export *
+  module * { export * }
+}

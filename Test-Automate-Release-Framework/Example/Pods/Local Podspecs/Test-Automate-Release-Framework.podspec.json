@@ -1,0 +1,22 @@
+{
+  "name": "Test-Automate-Release-Framework",
+  "version": "0.1.0",
+  "summary": "A short description of Test-Automate-Release-Framework.",
+  "description": "TODO: Add long description of the pod here.",
+  "homepage": "https://github.com/Uy Nguyen/Test-Automate-Release-Framework",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "Uy Nguyen": "nguyenvanuyn96@gmail.com"
+  },
+  "source": {
+    "git": "https://github.com/Uy Nguyen/Test-Automate-Release-Framework.git",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "8.0"
+  },
+  "source_files": "Test-Automate-Release-Framework/Classes/**/*"
+}

@@ -1,0 +1,16 @@
+PODS:
+  - Test-Automate-Release-Framework (0.1.0)
+
+DEPENDENCIES:
+  - Test-Automate-Release-Framework (from `../`)
+
+EXTERNAL SOURCES:
+  Test-Automate-Release-Framework:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  Test-Automate-Release-Framework: 564bcdeb2c1a12ad3fba3be6b972a508c0734505
+
+PODFILE CHECKSUM: f6d91a391f7decde7e5d4a1c38f879aac113f138
+
+COCOAPODS: 1.9.3

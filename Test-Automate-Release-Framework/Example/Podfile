@@ -1,0 +1,11 @@
+use_frameworks!
+
+target 'Test-Automate-Release-Framework_Example' do
+  pod 'Test-Automate-Release-Framework', :path => '../'
+
+  target 'Test-Automate-Release-Framework_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end
