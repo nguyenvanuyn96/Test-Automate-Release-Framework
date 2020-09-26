@@ -71,7 +71,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Get release version only
-        if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
         id: get-release-version
         run: |
           version=$(echo ${{ github.ref }} | sed -e "s/refs\/heads\/release\///g")
