@@ -1,0 +1,43 @@
+name: Auto Upgrade Podspec Version
+
+on: 
+  create:
+    branches:
+      - bot/release/*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@master
+        
+    - name: Check and get release version only
+      id: get-release-version
+      run: |
+        version=$(echo ${{ github.ref }} | sed -e "s/ref/heads/bot/release\///g")
+        echo "::set-output name=new_release_version::${version}"
+        echo ${version}
+
+    - name: Find and replace the current spec version to new version
+      uses: shitiomatic/str-replace@master
+      with:
+        find: "\\t*spec.version\\s*=\\s\"[\\S]*\""
+        replace: "spec.version      = \"${{ steps.get-release-version.outputs.new_release_version }}\""
+        include: ".podspec"
+           
+    - name: Commit the updated podspec file
+      run: |
+          git config --local user.email "uy.nguyen@wonderlabs.io"
+          git config --local user.name "Uy Nguyen"
+          git add -A
+          git commit -m "Upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
+          git status
+          
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+          branch: ${{ github.ref }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          force: true
+          directory: .

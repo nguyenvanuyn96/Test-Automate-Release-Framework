@@ -1,0 +1,61 @@
+name: Auto Release Tag
+on: 
+  pull_request:
+    branches: 
+      - master
+    types:
+      - closed
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: 1. Get branch name of PR
+      uses: andrevalentin/get-branch-name-by-pr@master
+      id: pr_data
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        pr-id: ${{ github.event.pull_request.number }}
+        
+    - name: 2. Print branch name for debugging
+      run: |
+        echo "This is PR from branch ${{ steps.pr_data.outputs.branch }}"
+    
+    - name: 3. Check if branch name is an `release/*`
+      uses: uynguyen-wonderlabs/get-branch-name-github-action@master
+      id: check-branch
+      with:
+        branch: ${{ steps.pr_data.outputs.branch }}
+        
+    - name: 4. Get release version only
+      if: ${{ steps.check-branch.outputs.is_release_branch == 'YES' }}
+      id: get-version
+      run: |
+        version=$(echo ${{ steps.pr_data.outputs.branch }} | sed -e "s/release\///g")
+        echo "::set-output name=release_version::${version}"
+        echo "This is the version which is detected from release branch name: ${version}"
+        
+    - name: 5. Print data for debugging
+      run: |
+        echo "The branch ${{ steps.pr_data.outputs.branch }} is used for checking"
+        echo "This branch has is_release_branch = ${{ steps.check-branch.outputs.is_release_branch }}"
+        echo "This branch has release_version = ${{ steps.get-version.outputs.release_version }}"
+   
+    - name: 6. Get change log
+      uses: scottbrenner/generate-changelog-action@master
+      id: get_changelog
+      env:
+          REPO: ${{ github.repository }}
+          
+    - name: 7. Create Release tag
+      if: ${{ steps.check-branch.outputs.is_release_branch == 'YES' }}
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      with:
+          tag_name: v${{ steps.get-version.outputs.release_version }}
+          release_name: Release ${{ steps.get-version.outputs.release_version }}
+          commitish: master
+          body: ${{ steps.get_changelog.outputs.changelog }}
+          draft: false
+          prerelease: false
