@@ -3,7 +3,7 @@ name: Auto Upgrade Podspec Version
 on: 
   create:
     branches:
-      - 'bot/release/*'
+      - 'release/*'
 
 jobs:
   build:
@@ -12,14 +12,30 @@ jobs:
     - name: Checkout
       uses: actions/checkout@master
         
+    - name: Get and check if branch name is an `release/*`
+      uses: uynguyen-wonderlabs/get-branch-name-github-action@master
+      id: get-branch
+      with:
+          branch: ${{ github.ref }}
+        
     - name: Get release version only
+      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
       id: get-release-version
       run: |
-        version=$(echo ${{ github.ref }} | sed -e "s/ref\/heads\/bot\/release\///g")
+        version=$(echo ${{ github.ref }} | sed -e "s/release\///g")
         echo "::set-output name=new_release_version::${version}"
         echo ${version}
 
+    - name: Create bot branch
+      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      id: create_bot_branch
+      run: |
+          bot_branch="bot/${{ steps.get-branch.outputs.branch }}"
+          echo "::set-output name=bot_branch::${bot_branch}"
+          git checkout -b ${bot_branch}
+
     - name: Find and replace the current spec version to new version
+      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
       id: find_and_replace
       uses: shitiomatic/str-replace@master
       with:
@@ -27,11 +43,13 @@ jobs:
         replace: "s.version      = \"${{ steps.get-release-version.outputs.new_release_version }}\""
         include: ".podspec"
     
-    - name: Check find and replace
+    - name: Check result of Find and replace
+      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
       run: |
           echo "Number of files which have been modified = ${{ steps.find_and_replace.outputs.modifiedFiles}}"
            
-    - name: Commit the updated podspec file
+    - name: Commit the modified podspec file
+      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
       run: |
           git config --local user.email "uy.nguyen@wonderlabs.io"
           git config --local user.name "Uy Nguyen"
@@ -40,9 +58,10 @@ jobs:
           git status
           
     - name: Push changes
+      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
       uses: ad-m/github-push-action@master
       with:
-          branch: ${{ github.ref }}
+          branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           force: true
           directory: .

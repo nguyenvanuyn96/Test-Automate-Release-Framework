@@ -18,27 +18,27 @@ jobs:
       with:
           branch: ${{ github.ref }}
         
-    - name: Create bot branch
-      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
-      id: create_bot_branch
-      run: |
-          bot_branch="bot/${{ steps.get-branch.outputs.branch }}"
-          echo "::set-output name=bot_branch::${bot_branch}"
-          git checkout -b ${bot_branch}
+    # - name: Create bot branch
+    #   if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+    #   id: create_bot_branch
+    #   run: |
+    #       bot_branch="bot/${{ steps.get-branch.outputs.branch }}"
+    #       echo "::set-output name=bot_branch::${bot_branch}"
+    #       git checkout -b ${bot_branch}
           
-    - name: Push bot branch
-      if: ${{ steps.get-branch.outputs.is_release_branch == 'YES' }}
-      uses: ad-m/github-push-action@master
-      with:
-          branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          force: true
+    # - name: Push bot branch
+    #   if: ${{ steps.get-branch.outputs.is_release_branch == 'YES' }}
+    #   uses: ad-m/github-push-action@master
+    #   with:
+    #       branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
+    #       github_token: ${{ secrets.GITHUB_TOKEN }}
+    #       force: true
     
-    - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v3
-      with:
-          branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
-          base: ${{ steps.get-branch.outputs.branch }}
+    # - name: Create Pull Request
+    #   uses: peter-evans/create-pull-request@v3
+    #   with:
+    #       branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
+    #       base: ${{ steps.get-branch.outputs.branch }}
           
 #     - name: Checkout bot branch
 #       uses: actions/checkout@master
