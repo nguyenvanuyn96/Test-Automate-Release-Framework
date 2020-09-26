@@ -23,8 +23,8 @@ jobs:
       id: find_and_replace
       uses: shitiomatic/str-replace@master
       with:
-        find: "\\t*s.version\\s*=\\s'[\\S]*'"
-        replace: "s.version      = '${{ steps.get-release-version.outputs.new_release_version }}''
+        find: "\\t*s.version\\s*=\\s\'[\\S]*\'"
+        replace: "s.version      = \'${{ steps.get-release-version.outputs.new_release_version }}\''
         include: ".podspec"
     
     - name: Check find and replace
