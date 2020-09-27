@@ -32,10 +32,10 @@ jobs:
       #     echo "::set-output name=release_branch::${value}"
       #     echo ${value}
 
-      # - name: Checkout
-      #   uses: actions/checkout@v2
-      #   with:
-      #     ref: ${{ github.event.inputs.release_branch }}
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.bot_release_branch }}
  
       # - name: Get release version only
       #   id: get-release-version
