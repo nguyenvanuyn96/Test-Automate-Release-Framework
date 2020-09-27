@@ -69,7 +69,7 @@ jobs:
           head: ${{ steps.create_bot_branch.outputs.bot_branch }}
           base: ${{ steps.get-branch.outputs.branch }}
           title: "An automatically created PR to modified podspec version!"
-          reviewers: "nguyenvanuyn96"
+          # reviewers: "nguyenvanuyn96"
 
     # - name: Auto Approve PR
     #   uses: nguyenvanuyn96/approve-pull-request-action@v1
