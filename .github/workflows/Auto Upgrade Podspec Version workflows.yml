@@ -20,9 +20,9 @@ jobs:
       if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
       id: get-release-version
       run: |
-        version=$(echo ${{ github.ref }} | sed -e "s/refs\/heads\/release\///g")
-        echo "::set-output name=new_release_version::${version}"
-        echo ${version}
+          version=$(echo ${{ github.ref }} | sed -e "s/refs\/heads\/release\///g")
+          echo "::set-output name=new_release_version::${version}"
+          echo ${version}
 
     - name: Create bot branch
       if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
@@ -37,9 +37,9 @@ jobs:
       id: find_and_replace
       uses: shitiomatic/str-replace@master
       with:
-        find: "\\t*s.version\\s*=\\s\"[\\S]*\""
-        replace: "s.version      = \"${{ steps.get-release-version.outputs.new_release_version }}\""
-        include: ".podspec"
+          find: "\\t*s.version\\s*=\\s\"[\\S]*\""
+          replace: "s.version      = \"${{ steps.get-release-version.outputs.new_release_version }}\""
+          include: ".podspec"
     
     - name: Check result of Find and replace
       if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
@@ -49,13 +49,13 @@ jobs:
     - name: Commit and Push changes
       uses: dciborow/commit@master
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        push-branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
-        commit-message: "Upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
-        force-add: 'true'
-        force-push: 'true'
-        name: "Uy Nguyen"
-        email: "uy.nguyen@wonderlabs.io"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          push-branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
+          commit-message: "Upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
+          force-add: 'true'
+          force-push: 'true'
+          name: "automate-bot"
+          email: "automate-bot@sph.com.sg"
 
     - name: Create pull request
       id: create_pr
@@ -65,21 +65,19 @@ jobs:
           head: ${{ steps.create_bot_branch.outputs.bot_branch }}
           base: ${{ steps.get-branch.outputs.branch }}
           title: "[Bot] An automate upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
-          # reviewers: "nguyenvanuyn96,uynguyen-wonderlabs"
 
     - name: Auto approve release branch
       if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
       uses: juliangruber/approve-pull-request-action@v1
       with:
-          github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           number: "${{ steps.create_pr.outputs.number }}"
 
-    - name: merge a pull request without any need of a label (automatic merge)
+    - name: Merge approved PR
       uses: sudo-bot/action-pull-request-merge@v1.1.1
       with:
-          github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           number: ${{ steps.create_pr.outputs.number }}
-          # allowed-usernames-regex: ^williamdes$
 
     # - name: Merge approved PR
     #   uses: reitermarkus/automerge@v1
