@@ -53,27 +53,8 @@ jobs:
         commit-message: "Upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
         force-add: 'true'
         force-push: 'true'
-        # files: a.txt b.txt c.txt dirA/ dirB/ dirC/a.txt
         name: "Uy Nguyen"
         email: "uy.nguyen@wonderlabs.io"
-
-    # - name: Commit the modified podspec file
-    #   if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
-    #   run: |
-    #       git config --local user.email "uy.nguyen@wonderlabs.io"
-    #       git config --local user.name "Uy Nguyen"
-    #       git add -A
-    #       git commit -m "Upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
-    #       git status
-          
-    # - name: Push changes
-    #   if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
-    #   uses: ad-m/github-push-action@master
-    #   with:
-    #       branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
-    #       github_token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
-    #       force: true
-    #       directory: .
 
     - name: Checkout
       uses: actions/checkout@v2
@@ -81,20 +62,10 @@ jobs:
           ref: ${{ steps.create_bot_branch.outputs.bot_branch }}
 
     - name: Create pull request
+      id: create_pr
       uses: thomaseizinger/create-pull-request@master
       with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
           head: ${{ steps.create_bot_branch.outputs.bot_branch }}
           base: ${{ steps.get-branch.outputs.branch }}
-          title: "An automatically created PR!"
-
-    # - name: Is "release_branch": "${{ steps.get-branch.outputs.branch }}", "bot_release_branch": "${{ steps.create_bot_branch.outputs.bot_branch }}" }'
-    
-    # - name: Create artifact file
-    #   run: |
-    #     echo ${{ steps.get-branch.outputs.branch }} > release_branch.txt
-
-    # - uses: actions/upload-artifact@master
-    #   with:
-    #       name: release_artifact
-    #       path: release_branch.txt
+          title: "[Bot] An automate upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
