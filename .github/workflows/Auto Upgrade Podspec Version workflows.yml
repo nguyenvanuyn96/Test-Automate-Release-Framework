@@ -74,6 +74,16 @@ jobs:
           github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
           number: "${{ steps.create_pr.outputs.number }}"
 
+    - name: Merge approved PR
+      uses: reitermarkus/automerge@v1
+      with:
+          token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+          merge-method: rebase
+          do-not-merge-labels: never-merge
+          pull-request: ${{ steps.create_pr.outputs.number }}
+          dry-run: true
+          
+
     # - name: Invoke Auto Approve PR workflow
     #   uses: benc-uk/workflow-dispatch@v1
     #   with:
