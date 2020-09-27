@@ -68,7 +68,7 @@ jobs:
       with:
         workflow: Auto PR
         token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
-        inputs: '{ "release_branch": ${{ steps.get-branch.outputs.branch }}, "bot_release_branch": ${{ steps.create_bot_branch.outputs.bot_branch }} }'
+        inputs: '{ "release_branch": "${{ steps.get-branch.outputs.branch }}"", "bot_release_branch": "${{ steps.create_bot_branch.outputs.bot_branch }}"" }'
     
     # - name: Create artifact file
     #   run: |
