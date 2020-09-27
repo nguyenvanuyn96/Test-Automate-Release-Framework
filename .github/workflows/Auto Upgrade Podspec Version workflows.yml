@@ -6,6 +6,7 @@ jobs:
   upgrade_podspec:
     runs-on: ubuntu-latest
     steps:
+
     - name: Checkout
       uses: actions/checkout@master
         
@@ -69,3 +70,29 @@ jobs:
           head: ${{ steps.create_bot_branch.outputs.bot_branch }}
           base: ${{ steps.get-branch.outputs.branch }}
           title: "[Bot] An automate upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
+          reviewers: ["nguyenvanuyn96"]
+
+    - name: Auto approve release branch
+      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      uses: juliangruber/approve-pull-request-action@v1
+      with:
+          github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+          number: "${{ steps.create_pr.outputs.number }}"
+
+    - name: Merge approved PR
+      uses: reitermarkus/automerge@v1
+      with:
+          token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+          merge-method: rebase
+          do-not-merge-labels: never-merge
+          pull-request: ${{ steps.create_pr.outputs.number }}
+          dry-run: true
+          
+
+    # - name: Invoke Auto Approve PR workflow
+    #   uses: benc-uk/workflow-dispatch@v1
+    #   with:
+    #     workflow: Auto Approve
+    #     token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+    #     inputs: '{ "pr_number": "${{ steps.create_pr.outputs.number }}", }'
+    
