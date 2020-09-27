@@ -44,8 +44,16 @@ jobs:
       #     echo "::set-output name=new_release_version::${version}"
       #     echo ${version}
 
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v3
-        with:
-          branch: ${{ github.event.inputs.bot_release_branch }}
-          base: ${{ github.event.inputs.release_branch }}
+      # - name: Create pull request
+      #   uses: thomaseizinger/create-pull-request@master
+      #   with:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     head: ${{ github.event.inputs.bot_release_branch }}
+      #     base: ${{ github.event.inputs.release_branch }}
+      #     title: "An automatically created PR!"
+
+      # - name: Create Pull Request
+      #   uses: peter-evans/create-pull-request@v3
+      #   with:
+      #     branch: ${{ github.event.inputs.bot_release_branch }}
+      #     base: ${{ github.event.inputs.release_branch }}

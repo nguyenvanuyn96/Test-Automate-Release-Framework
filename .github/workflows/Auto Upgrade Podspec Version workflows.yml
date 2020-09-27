@@ -80,12 +80,15 @@ jobs:
       with:
           ref: ${{ steps.create_bot_branch.outputs.bot_branch }}
 
-    - name: Invoke Auto PR workflow
-      uses: benc-uk/workflow-dispatch@v1
+    - name: Create pull request
+      uses: thomaseizinger/create-pull-request@master
       with:
-        workflow: Auto PR
-        token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
-        inputs: '{ "release_branch": "${{ steps.get-branch.outputs.branch }}", "bot_release_branch": "${{ steps.create_bot_branch.outputs.bot_branch }}" }'
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          head: ${{ steps.create_bot_branch.outputs.bot_branch }}
+          base: ${{ steps.get-branch.outputs.branch }}
+          title: "An automatically created PR!"
+
+    # - name: Is "release_branch": "${{ steps.get-branch.outputs.branch }}", "bot_release_branch": "${{ steps.create_bot_branch.outputs.bot_branch }}" }'
     
     # - name: Create artifact file
     #   run: |
