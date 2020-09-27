@@ -66,7 +66,7 @@ jobs:
       id: create_pr
       uses: thomaseizinger/create-pull-request@master
       with:
-          GITHUB_TOKEN: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           head: ${{ steps.create_bot_branch.outputs.bot_branch }}
           base: ${{ steps.get-branch.outputs.branch }}
           title: "[Bot] An automate upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
