@@ -6,7 +6,7 @@ on:
     types:
       - closed
 jobs:
-  build:
+  auto_release_tag:
     runs-on: ubuntu-latest
     steps:
     - name: 1. Get branch name of PR
