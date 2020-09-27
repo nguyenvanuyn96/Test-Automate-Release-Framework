@@ -57,11 +57,6 @@ jobs:
         name: "Uy Nguyen"
         email: "uy.nguyen@wonderlabs.io"
 
-    - name: Checkout
-      uses: actions/checkout@v2
-      with:
-          ref: ${{ steps.create_bot_branch.outputs.bot_branch }}
-
     - name: Create pull request
       id: create_pr
       uses: thomaseizinger/create-pull-request@master
@@ -70,7 +65,7 @@ jobs:
           head: ${{ steps.create_bot_branch.outputs.bot_branch }}
           base: ${{ steps.get-branch.outputs.branch }}
           title: "[Bot] An automate upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
-          reviewers: "nguyenvanuyn96,uynguyen-wonderlabs"
+          # reviewers: "nguyenvanuyn96,uynguyen-wonderlabs"
 
     - name: Auto approve release branch
       if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
@@ -79,14 +74,21 @@ jobs:
           github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
           number: "${{ steps.create_pr.outputs.number }}"
 
-    - name: Merge approved PR
-      uses: reitermarkus/automerge@v1
+    - name: merge a pull request without any need of a label (automatic merge)
+      uses: sudo-bot/action-pull-request-merge@v1.1.1
       with:
-          token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
-          merge-method: rebase
-          do-not-merge-labels: never-merge
-          pull-request: ${{ steps.create_pr.outputs.number }}
-          dry-run: true
+          github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+          number: ${{ steps.create_pr.outputs.number }}
+          # allowed-usernames-regex: ^williamdes$
+
+    # - name: Merge approved PR
+    #   uses: reitermarkus/automerge@v1
+    #   with:
+    #       token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+    #       merge-method: rebase
+    #       do-not-merge-labels: never-merge
+    #       pull-request: ${{ steps.create_pr.outputs.number }}
+    #       dry-run: true
           
 
     # - name: Invoke Auto Approve PR workflow
