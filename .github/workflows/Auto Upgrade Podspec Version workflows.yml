@@ -46,7 +46,7 @@ jobs:
           echo "Number of files which have been modified = ${{ steps.find_and_replace.outputs.modifiedFiles}}"
            
     - name: Commit and Push changes
-      uses: dciborow/commit@0.0.2
+      uses: dciborow/commit@master
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         push-branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
