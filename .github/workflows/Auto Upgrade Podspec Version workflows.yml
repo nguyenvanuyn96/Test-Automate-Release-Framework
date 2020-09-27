@@ -70,8 +70,8 @@ jobs:
           base: ${{ steps.get-branch.outputs.branch }}
           title: "An automatically created PR to modified podspec version!"
 
-    # - name: Auto Approve PR
-      # uses: juliangruber/approve-pull-request-action@v1
-      # with:
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
-      #     number: ${{ steps.create_pr.outputs.number }}
+    - name: Auto Approve PR
+      uses: juliangruber/approve-pull-request-action@v1
+      with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ steps.create_pr.outputs.number }}

@@ -4,7 +4,7 @@ on:
   pull_request:
     branches:
       - master
-      - bot/release/*
+      # - bot/release/*
 
 jobs:
   auto-approve:
