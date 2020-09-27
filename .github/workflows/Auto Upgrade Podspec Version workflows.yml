@@ -62,3 +62,12 @@ jobs:
           github_token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
           force: true
           directory: .
+
+    - name: Create artifact file
+      run: |
+        echo ${{ steps.get-branch.outputs.branch }} > release_branch.txt
+
+    - uses: actions/upload-artifact@master
+      with:
+          name: release_artifact
+          path: release_branch.txt

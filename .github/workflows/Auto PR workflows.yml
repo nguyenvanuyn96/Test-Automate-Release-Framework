@@ -9,32 +9,33 @@ jobs:
   AutoPR:
     runs-on: ubuntu-latest
     steps:
-      - name: Print for debugging
+      - name: Download artifact file
+        uses: actions/download-artifact@master
+        with:
+          name: release_artifact
+          path: release_branch.txt
+
+      - name: Read the artifact file
+        id: read_artifact
         run: |
-          echo "github.event = ${{ github.event }}"
-          echo "github.workflow = ${{ github.workflow }}"
-          echo "github.event_name = ${{ github.event_name }}"
-          echo "github.ref = ${{ github.ref }}"
-          echo "github.head_ref = ${{ github.head_ref }}"
-          echo "github.base_ref = ${{ github.base_ref }}"
-          echo "github.action = ${{ github.action }}"
-          echo "github.repository = ${{ github.repository }}"
-          echo "github.base_ref = ${{ github.base_ref }}"
+          value=`cat release_branch.txt`
+          echo "::set-output name=release_branch::${value}"
+          echo ${value}
 
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          ref: ${{github.ref}}
+          ref: ${{ steps.read_artifact.outputs.release_branch }}
  
-      - name: Get release version only
-        id: get-release-version
-        run: |
-          version=$(echo ${{ github.ref }} | sed -e "s/refs\/heads\/bot\/release\///g")
-          echo "::set-output name=new_release_version::${version}"
-          echo ${version}
+      # - name: Get release version only
+      #   id: get-release-version
+      #   run: |
+      #     version=$(echo ${{ steps.read_artifact.outputs.release_branch }} | sed -e "s/refs\/heads\/release\///g")
+      #     echo "::set-output name=new_release_version::${version}"
+      #     echo ${version}
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
         with:
-          branch: ${{github.ref}}
-          base: "release/${{ steps.get-release-version.outputs.new_release_version }}"
+          branch: "bot/${{ steps.read_artifact.outputs.release_branch }}"
+          base: ${{ steps.read_artifact.outputs.release_branch }}
