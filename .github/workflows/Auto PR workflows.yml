@@ -1,9 +1,5 @@
 name: Auto PR
 on:
-  # workflow_run:
-  #   workflows: ["Auto Upgrade Podspec Version"]
-  #   types: 
-  #     - completed
   workflow_dispatch:
     inputs:
       release_branch:
@@ -19,41 +15,22 @@ jobs:
   AutoPR:
     runs-on: ubuntu-latest
     steps:
-      # - name: Download artifact file
-      #   uses: actions/download-artifact@master
-      #   with:
-      #     name: release_artifact
-      #     path: release_branch.txt
-
-      # - name: Read the artifact file
-      #   id: read_artifact
-      #   run: |
-      #     value=`cat release_branch.txt`
-      #     echo "::set-output name=release_branch::${value}"
-      #     echo ${value}
-
       - name: Checkout
         uses: actions/checkout@v2
         with:
           ref: ${{ github.event.inputs.bot_release_branch }}
  
-      # - name: Get release version only
-      #   id: get-release-version
-      #   run: |
-      #     version=$(echo ${{ steps.read_artifact.outputs.release_branch }} | sed -e "s/refs\/heads\/release\///g")
-      #     echo "::set-output name=new_release_version::${version}"
-      #     echo ${version}
+      - name: Get release version only
+        id: get-release-version
+        run: |
+          version=$(echo ${{ github.event.inputs.release_branch  }} | sed -e "s/release\///g")
+          echo "::set-output name=new_release_version::${version}"
+          echo ${version}
 
-      # - name: Create pull request
-      #   uses: thomaseizinger/create-pull-request@master
-      #   with:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #     head: ${{ github.event.inputs.bot_release_branch }}
-      #     base: ${{ github.event.inputs.release_branch }}
-      #     title: "An automatically created PR!"
-
-      # - name: Create Pull Request
-      #   uses: peter-evans/create-pull-request@v3
-      #   with:
-      #     branch: ${{ github.event.inputs.bot_release_branch }}
-      #     base: ${{ github.event.inputs.release_branch }}
+      - name: Create pull request
+        uses: thomaseizinger/create-pull-request@master
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          head: ${{ github.event.inputs.bot_release_branch }}
+          base: ${{ github.event.inputs.release_branch }}
+          title: "[Bot] Automate upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
