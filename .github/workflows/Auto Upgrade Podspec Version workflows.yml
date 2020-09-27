@@ -22,7 +22,7 @@ jobs:
       run: |
           version=$(echo ${{ github.ref }} | sed -e "s/refs\/heads\/release\///g")
           echo "::set-output name=new_release_version::${version}"
-          echo "The detected release version = ${{version}}"
+          echo "The detected release version = ${version}"
 
     - name: 4. Create bot branch
       if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
