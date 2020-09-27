@@ -46,6 +46,7 @@ jobs:
           echo "Number of files which have been modified = ${{ steps.find_and_replace.outputs.modifiedFiles}}"
            
     - name: Commit and Push changes
+      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
       uses: dciborow/commit@master
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -57,6 +58,7 @@ jobs:
         email: "uy.nguyen@wonderlabs.io"
 
     - name: Create pull request
+      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
       id: create_pr
       uses: thomaseizinger/create-pull-request@master
       with:
@@ -65,10 +67,17 @@ jobs:
           base: ${{ steps.get-branch.outputs.branch }}
           title: "[Bot] An automate upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
 
-    - name: Invoke Auto Approve PR workflow
-      uses: benc-uk/workflow-dispatch@v1
+    - name: Auto approve release branch
+      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      uses: juliangruber/approve-pull-request-action@v1
       with:
-        workflow: Auto Approve
-        token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
-        inputs: '{ "pr_number": "${{ steps.create_pr.outputs.number }}" }'
+          github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+          number: "${{ steps.create_pr.outputs.number }}"
+
+    # - name: Invoke Auto Approve PR workflow
+    #   uses: benc-uk/workflow-dispatch@v1
+    #   with:
+    #     workflow: Auto Approve
+    #     token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+    #     inputs: '{ "pr_number": "${{ steps.create_pr.outputs.number }}", }'
     
