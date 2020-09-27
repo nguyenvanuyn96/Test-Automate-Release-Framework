@@ -80,12 +80,12 @@ jobs:
       with:
           ref: ${{ steps.create_bot_branch.outputs.bot_branch }}
 
-    # - name: Invoke Auto PR workflow
-    #   uses: benc-uk/workflow-dispatch@v1
-    #   with:
-    #     workflow: Auto PR
-    #     token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
-    #     inputs: '{ "release_branch": "${{ steps.get-branch.outputs.branch }}", "bot_release_branch": "${{ steps.create_bot_branch.outputs.bot_branch }}" }'
+    - name: Invoke Auto PR workflow
+      uses: benc-uk/workflow-dispatch@v1
+      with:
+        workflow: Auto PR
+        token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+        inputs: '{ "release_branch": "${{ steps.get-branch.outputs.branch }}", "bot_release_branch": "${{ steps.create_bot_branch.outputs.bot_branch }}" }'
     
     # - name: Create artifact file
     #   run: |
