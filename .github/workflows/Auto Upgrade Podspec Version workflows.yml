@@ -6,24 +6,25 @@ jobs:
   upgrade_podspec:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
+
+    - name: 1. Checkout
       uses: actions/checkout@master
         
-    - name: Get and check if branch name is an `release/*`
+    - name: 2. Get and check if branch name is an `release/*`
       uses: uynguyen-wonderlabs/get-branch-name-github-action@master
       id: get-branch
       with:
           branch: ${{ github.ref }}
         
-    - name: Get release version only
+    - name: 3. Get release version only
       if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
       id: get-release-version
       run: |
-        version=$(echo ${{ github.ref }} | sed -e "s/refs\/heads\/release\///g")
-        echo "::set-output name=new_release_version::${version}"
-        echo ${version}
+          version=$(echo ${{ github.ref }} | sed -e "s/refs\/heads\/release\///g")
+          echo "::set-output name=new_release_version::${version}"
+          echo "The detected release version = ${version}"
 
-    - name: Create bot branch
+    - name: 4. Create bot branch
       if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
       id: create_bot_branch
       run: |
@@ -31,41 +32,52 @@ jobs:
           echo "::set-output name=bot_branch::${bot_branch}"
           git checkout -b ${bot_branch}
 
-    - name: Find and replace the current spec version to new version
+    - name: 5. Find and replace the current spec version to new version
       if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
       id: find_and_replace
       uses: shitiomatic/str-replace@master
       with:
-        find: "\\t*s.version\\s*=\\s\"[\\S]*\""
-        replace: "s.version      = \"${{ steps.get-release-version.outputs.new_release_version }}\""
-        include: ".podspec"
+          find: "\\t*s.version\\s*=\\s\"[\\S]*\""
+          replace: "s.version      = \"${{ steps.get-release-version.outputs.new_release_version }}\""
+          include: ".podspec"
     
-    - name: Check result of Find and replace
+    - name: 6. Check result of Find and replace
       if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
       run: |
           echo "Number of files which have been modified = ${{ steps.find_and_replace.outputs.modifiedFiles}}"
            
-    - name: Commit and Push changes
+    - name: 7. Commit and Push changes
+      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
       uses: dciborow/commit@master
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        push-branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
-        commit-message: "Upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
-        force-add: 'true'
-        force-push: 'true'
-        name: "Uy Nguyen"
-        email: "uy.nguyen@wonderlabs.io"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          push-branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
+          commit-message: "Upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
+          force-add: 'true'
+          force-push: 'true'
+          name: "automate-bot"
+          email: "automate-bot@sph.com.sg"
 
-    - name: Checkout
-      uses: actions/checkout@v2
-      with:
-          ref: ${{ steps.create_bot_branch.outputs.bot_branch }}
-
-    - name: Create pull request
+    - name: 8. Create pull request
+      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
       id: create_pr
       uses: thomaseizinger/create-pull-request@master
       with:
-          GITHUB_TOKEN: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           head: ${{ steps.create_bot_branch.outputs.bot_branch }}
           base: ${{ steps.get-branch.outputs.branch }}
-          title: "[Bot] An automate upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
+          title: "[Bot] Upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
+
+    - name: 9. Auto approve release branch
+      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      uses: juliangruber/approve-pull-request-action@v1
+      with:
+          github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+          number: "${{ steps.create_pr.outputs.number }}"
+
+    - name: Merge approved PR
+      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      uses: sudo-bot/action-pull-request-merge@v1.1.1
+      with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ steps.create_pr.outputs.number }}
