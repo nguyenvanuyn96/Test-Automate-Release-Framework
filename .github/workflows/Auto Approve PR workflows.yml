@@ -67,8 +67,8 @@ jobs:
         # if: ${{ steps.check-branch.outputs.is_release_branch == 'YES' }}
         uses: juliangruber/approve-pull-request-action@v1
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          number: ${{ github.events.inputs.pr_number }}
+          github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+          number: "${{ github.events.inputs.pr_number }}"
 
         # uses: hmarr/auto-approve-action@v2.0.0
         # with:
