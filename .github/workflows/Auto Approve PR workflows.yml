@@ -34,7 +34,7 @@ jobs:
         uses: hmarr/auto-approve-action@v2.0.0
         # if: github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]'
         with:
-          github-token: "${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}"
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
   
 
   auto-approve_bot_release_branch:
@@ -58,8 +58,8 @@ jobs:
       #     branch: ${{ steps.pr_data.outputs.branch }}
       
       - name: Auto approve release branch
-        if: ${{ steps.check-branch.outputs.is_release_branch == 'YES' }}
+        # if: ${{ steps.check-branch.outputs.is_release_branch == 'YES' }}
         uses: hmarr/auto-approve-action@v2.0.0
         with:
-          github-token: "${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}"
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
   
