@@ -45,23 +45,35 @@ jobs:
       run: |
           echo "Number of files which have been modified = ${{ steps.find_and_replace.outputs.modifiedFiles}}"
            
-    - name: Commit the modified podspec file
-      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
-      run: |
-          git config --local user.email "uy.nguyen@wonderlabs.io"
-          git config --local user.name "Uy Nguyen"
-          git add -A
-          git commit -m "Upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
-          git status
-          
-    - name: Push changes
-      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
-      uses: ad-m/github-push-action@master
+    - name: Commit and Push changes
+      uses: dciborow/commit@0.0.2
       with:
-          branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
-          github_token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
-          force: true
-          directory: .
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        push-branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
+        commit-message: "Upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
+        force-add: 'true'
+        force-push: 'true'
+        # files: a.txt b.txt c.txt dirA/ dirB/ dirC/a.txt
+        name: "Uy Nguyen"
+        email: "uy.nguyen@wonderlabs.io"
+
+    # - name: Commit the modified podspec file
+    #   if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+    #   run: |
+    #       git config --local user.email "uy.nguyen@wonderlabs.io"
+    #       git config --local user.name "Uy Nguyen"
+    #       git add -A
+    #       git commit -m "Upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
+    #       git status
+          
+    # - name: Push changes
+    #   if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+    #   uses: ad-m/github-push-action@master
+    #   with:
+    #       branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
+    #       github_token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+    #       force: true
+    #       directory: .
 
     - name: Checkout
       uses: actions/checkout@v2
