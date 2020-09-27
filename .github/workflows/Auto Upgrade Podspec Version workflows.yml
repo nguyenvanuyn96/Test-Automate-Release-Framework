@@ -65,7 +65,7 @@ jobs:
       id: create_pr
       uses: thomaseizinger/create-pull-request@master
       with:
-          GITHUB_TOKEN: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           head: ${{ steps.create_bot_branch.outputs.bot_branch }}
           base: ${{ steps.get-branch.outputs.branch }}
           title: "An automatically created PR to modified podspec version!"
