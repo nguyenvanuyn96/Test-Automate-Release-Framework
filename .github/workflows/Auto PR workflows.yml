@@ -1,31 +1,41 @@
 name: Auto PR
 on:
-  workflow_run:
-    workflows: ["Auto Upgrade Podspec Version"]
-    types: 
-      - completed
+  # workflow_run:
+  #   workflows: ["Auto Upgrade Podspec Version"]
+  #   types: 
+  #     - completed
+  workflow_dispatch:
+    inputs:
+      release_branch:
+        description: 'The release branch. Ex: release/1.0.0'     
+        required: true
+        default: 'master'
+      bot_release_branch:
+        description: 'The bot release branch. Ex: bot/release/1.0.0'     
+        required: true
+        default: 'master'
 
 jobs:
   AutoPR:
     runs-on: ubuntu-latest
     steps:
-      - name: Download artifact file
-        uses: actions/download-artifact@master
-        with:
-          name: release_artifact
-          path: release_branch.txt
+      # - name: Download artifact file
+      #   uses: actions/download-artifact@master
+      #   with:
+      #     name: release_artifact
+      #     path: release_branch.txt
 
-      - name: Read the artifact file
-        id: read_artifact
-        run: |
-          value=`cat release_branch.txt`
-          echo "::set-output name=release_branch::${value}"
-          echo ${value}
+      # - name: Read the artifact file
+      #   id: read_artifact
+      #   run: |
+      #     value=`cat release_branch.txt`
+      #     echo "::set-output name=release_branch::${value}"
+      #     echo ${value}
 
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ steps.read_artifact.outputs.release_branch }}
+      # - name: Checkout
+      #   uses: actions/checkout@v2
+      #   with:
+      #     ref: ${{ github.event.inputs.release_branch }}
  
       # - name: Get release version only
       #   id: get-release-version
@@ -37,5 +47,5 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
         with:
-          branch: "bot/${{ steps.read_artifact.outputs.release_branch }}"
-          base: ${{ steps.read_artifact.outputs.release_branch }}
+          branch: ${{ github.event.inputs.bot_release_branch }}
+          base: ${{ github.event.inputs.release_branch }}
