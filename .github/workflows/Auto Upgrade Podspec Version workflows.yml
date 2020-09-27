@@ -70,5 +70,5 @@ jobs:
       with:
         workflow: Auto Approve
         token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
-        inputs: '{ "pr_number": "${{ steps.create_pr.outputs.number }}" }'
+        inputs: '{ "pr_number": ${{ steps.create_pr.outputs.number }} }'
     
