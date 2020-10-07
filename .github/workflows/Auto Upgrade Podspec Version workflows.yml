@@ -6,6 +6,20 @@ jobs:
   upgrade_podspec:
     runs-on: ubuntu-latest
     steps:
+    - name: Get Koha Version Branch Name
+      id: koha-version
+      uses: "bywatersolutions/github-action-koha-get-version-by-label@master"
+      with:
+          version_label: 'master'
+
+    - name: Test Koha version
+      run: |
+        echo "The Koha current-branch-name  ${{ steps.koha-version.outputs.current-branch-name }}"
+        echo "The Koha branch-name  ${{ steps.koha-version.outputs.branch-name }}"
+        echo "The Koha version-major-minor  ${{ steps.koha-version.outputs.version-major-minor }}"
+        echo "The Koha version-major  ${{ steps.koha-version.outputs.version-major }}"
+        echo "The Koha version-minor  ${{ steps.koha-version.outputs.version-minor }}"
+      
 
     - name: 1. Checkout
       uses: actions/checkout@master
