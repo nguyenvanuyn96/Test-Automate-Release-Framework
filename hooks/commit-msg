@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+
+# ======================================================================================
+# ====================================== STEP 1. =======================================
+# ======================================================================================
+
+# Check a commit into the develop|master set this to your active development branch
+develop_branch="develop"
+
+# ==================================================
+
+
+# echo "develop_branch = ${develop_branch}"
+# echo "current_branch = ${current_branch}"
+# echo "most_recent_release_tag = ${most_recent_release_tag}"
+
+# echo "Version 1.2.4.1.90 (release mode)" | sed -nre 's/^[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p'
+
+
+# prefer_next_revision=`expr $revision + 1`
+
+# echo "new_release_tag=$major.$minor.$prefer_next_revision"
+
+
+# exit 1
+
+# # only check commit messages on main development branch
+# [ "$current_branch" != "$develop_branch" ] && exit 0
+
+# # regex to validate in commit msg
+# commit_regex='([JIRA-[0-9]+]|merge)'
+# error_msg="Aborting commit. Your commit message is missing either a JIRA Issue ('[JRA-1111]') or 'Merge'"
+
+
+# if ! grep -iqE "$commit_regex" "$1"; then
+#     echo "$error_msg" >&2
+#     exit 1
+# fi
