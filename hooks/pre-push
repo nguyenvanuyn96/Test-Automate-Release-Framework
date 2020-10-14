@@ -115,7 +115,7 @@ if [ $is_release_branch == "YES" ]; then
     fi;
 fi;
 
-if [ -n "${warning_branch_name_message}" ]; then 
+if [ -n "$warning_branch_name_message" ]; then 
     echo "$warning_branch_name_message"
 fi;
 
