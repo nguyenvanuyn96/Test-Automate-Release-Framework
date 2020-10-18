@@ -91,13 +91,12 @@ jobs:
           head: ${{ steps.get-branch.outputs.branch }}
           base: "master"
           draft: "true"
-          title: "[DO NOT MERGE IMMEDIATELY] Release ${{ steps.get-release-version.outputs.new_release_version }}"
+          title: "[DO NOT MERGE] Release ${{ steps.get-release-version.outputs.new_release_version }}"
           body: |
               # Description
               <!--Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.-->
               Merge for release version ${{ steps.get-release-version.outputs.new_release_version }}
-              Fixes # (issue)
-
+              
               ## Jira tickets
               <!--Please list your relevant jira tickets here.-->
 
@@ -107,7 +106,7 @@ jobs:
               <!--**Before submitting a pull request,** please make sure the following is done:-->
 
               - [ ] Ensure the test passes 
-              - [ ] Rebase your branch on to `develop/` branch.
+              - [ ] Rebase your branch on to `master/` branch.
 
               ## What type of PR is this?
               <!--Please delete options that are not relevant.-->
