@@ -54,7 +54,13 @@ jobs:
       if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
       id: prepare_for_update
       run: |
-          firstString="${{steps.find_podspec_string.outputs.resultArray}}"
+          myvar="string1,string2,string3"
+
+          IFS=", " read -a myarray <<< ${{steps.find_podspec_string.outputs.resultArray}}"
+          echo "My array: ${myarray[@]}"
+          echo "Number of elements in the array: ${#myarray[@]}"
+
+          firstString="${{myarray[0]}}"
           secondString="${{steps.get-release-version.outputs.new_release_version}}"
           new_string="${firstString/[0-9]*[\.]*[0-9]/$secondString}"
 
