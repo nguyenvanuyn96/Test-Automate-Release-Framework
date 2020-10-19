@@ -55,8 +55,12 @@ jobs:
       id: prepare_for_update
       run: |
           temp=$(echo ${{steps.find_podspec_string.outputs.resultArray}} | sed -e 's/^.//' -e 's/.$//')
-          echo "::set-output name=podspec_line_string::${temp}"
           echo "TEMP = ${temp}"
+          # Change comma (,) to whitespace and add under braces
+          myarray=$(echo $temp | tr ',' ' ')
+          echo "myarray = ${myarray}"
+
+          echo "::set-output name=podspec_line_string::${temp}"
 
     - name: 5.4. Find and replace the current spec version to new version
       if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
