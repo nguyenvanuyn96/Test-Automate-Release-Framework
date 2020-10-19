@@ -1,10 +1,10 @@
 name: "Auto Upgrade Podspec Version"
 
 on: 
-  push
+  push:
     branches:
       - main
-  create
+  create:
 
 jobs:
   upgrade_podspec:
