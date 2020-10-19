@@ -54,7 +54,7 @@ jobs:
       if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
       id: prepare_for_update
       run: |
-          temp=$(echo ${{steps.find_podspec_string.outputs.resultArray}} | sed 's/^[\(.*\)]$//')
+          temp=$(echo ${steps.find_podspec_string.outputs.resultArray} | sed 's/^[\(.*\)]$//')
           echo "Temp: ${{temp}}"
 
 
