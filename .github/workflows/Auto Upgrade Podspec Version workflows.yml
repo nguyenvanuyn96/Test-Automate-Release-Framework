@@ -1,6 +1,10 @@
 name: "Auto Upgrade Podspec Version"
 
-on: create
+on: 
+  push
+    branches:
+      - main
+  create
 
 jobs:
   upgrade_podspec:
@@ -50,10 +54,10 @@ jobs:
       if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
       id: prepare_for_update
       run: |
-          firstString="${steps.find_podspec_string.outputs.resultArray}"
-          secondString="${steps.get-release-version.outputs.new_release_version}"
+          firstString="${{steps.find_podspec_string.outputs.resultArray}}"
+          secondString="${{steps.get-release-version.outputs.new_release_version}}"
           new_string="${firstString/[0-9]*[\.]*[0-9]/$secondString}"
-          echo "::set-output name=new_podspec_string::${new_string}" 
+          echo "::set-output name=new_podspec_string::${ new_string }" 
 
           echo $firstString
           echo ${secondString}
