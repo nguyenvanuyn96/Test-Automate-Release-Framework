@@ -52,8 +52,8 @@ jobs:
       run: |
           firstString=${{ steps.find_podspec_string.outputs.resultArray[0] }}
           secondString=${{ steps.get-release-version.outputs.new_release_version }}
-          new_string=${{firstString//[\\S]*/$secondString}}
-          echo "::set-output name=new_podspec_string::${{ new_string }}" 
+      # new_string="${firstString//[\\S]*/$secondString}""
+      # echo "::set-output name=new_podspec_string::${{ new_string }}" 
           echo "firstString ${{ firstString }}"
           echo "secondString ${{ secondString }}"
           echo "new_podspec_string ${{ new_string }}"
