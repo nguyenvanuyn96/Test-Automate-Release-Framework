@@ -50,7 +50,7 @@ jobs:
       if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
       id: prepare_for_update
       run: |
-          firstString=${{ steps.find_podspec_string.outputs.resultArray[0] }}
+          firstString=${{ steps.find_podspec_string.outputs.resultArray }}
           secondString=${{ steps.get-release-version.outputs.new_release_version }}
           echo "firstString ${{ firstString }}"
           echo "secondString ${{ secondString }}"
