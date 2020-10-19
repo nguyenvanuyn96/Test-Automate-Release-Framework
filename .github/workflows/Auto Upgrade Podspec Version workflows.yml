@@ -61,7 +61,7 @@ jobs:
 
           echo $firstString
           echo ${secondString}
-          echo "new_podspec_string = ${{new_string}}"
+          echo "new_podspec_string = ${new_string}"
 
 
     - name: 5.4. Find and replace the current spec version to new version
