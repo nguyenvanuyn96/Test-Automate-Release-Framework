@@ -43,15 +43,15 @@ jobs:
     - name: 5.2. Debug logging info
       if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
       run: |
-          echo "fileFoundCount ${{ steps.find_podspec_string.outputs.fileFoundCount }}"
-          echo "resultArray ${{ steps.find_podspec_string.outputs.resultArray }}"
+          echo "fileFoundCount = ${{ steps.find_podspec_string.outputs.fileFoundCount }}"
+          echo "resultArray = ${{ steps.find_podspec_string.outputs.resultArray }}"
     
     - name: 5.3 Prepare for update podspec version in file
       if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
       id: prepare_for_update
       run: |
-          firstString=${steps.find_podspec_string.outputs.resultArray}
-          secondString=${steps.get-release-version.outputs.new_release_version}
+          firstString=""${steps.find_podspec_string.outputs.resultArray}""
+          secondString=""${steps.get-release-version.outputs.new_release_version}""
           new_string="${firstString/[0-9]*[\.]*[0-9]/$secondString}"
           echo "::set-output name=new_podspec_string::${ new_string }" 
 
