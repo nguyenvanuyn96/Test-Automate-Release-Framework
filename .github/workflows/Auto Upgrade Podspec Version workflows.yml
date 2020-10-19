@@ -55,7 +55,7 @@ jobs:
       id: prepare_for_update
       run: |
           temp=$(echo ${{steps.find_podspec_string.outputs.resultArray}} | sed 's/^[\(.*\)]$/\1/')
-          echo "Temp: ${temp}"
+          echo "Temp: ${{temp}}"
 
 
     - name: 5.4. Find and replace the current spec version to new version
