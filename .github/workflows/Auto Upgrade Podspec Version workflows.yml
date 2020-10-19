@@ -54,9 +54,11 @@ jobs:
       if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
       id: prepare_for_update
       run: |
-          myvar="string1,string2,string3"
+          # Change comma (,) to whitespace and add under braces
+          temp=$(echo ${{steps.find_podspec_string.outputs.resultArray}} | sed 's/^[\(.*\)]$/\1/')
+          myarray=$(`echo $temp | tr ',' ' '`)
 
-          IFS=", " read -a myarray <<< ${{steps.find_podspec_string.outputs.resultArray}}"
+          # IFS=", " read -a myarray <<< ${{steps.find_podspec_string.outputs.resultArray}}"
           echo "My array: ${myarray[@]}"
           echo "Number of elements in the array: ${#myarray[@]}"
 
