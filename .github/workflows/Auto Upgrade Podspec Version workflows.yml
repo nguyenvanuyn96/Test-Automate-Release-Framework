@@ -55,8 +55,8 @@ jobs:
           new_string="${firstString/[0-9]*[\.]*[0-9]/$secondString}"
           echo "::set-output name=new_podspec_string::${new_string}" 
 
-          echo "firstString = $firstString"
-          echo "secondString = ${secondString}"
+          echo $firstString
+          echo ${secondString}
           echo "new_podspec_string = ${{new_string}}"
 
 
