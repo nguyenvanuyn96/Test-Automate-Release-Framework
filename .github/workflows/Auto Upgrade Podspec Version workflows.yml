@@ -56,8 +56,8 @@ jobs:
       run: |
           temp=$(echo ${{steps.find_podspec_string.outputs.resultArray}} | sed -e 's/^.//' -e 's/.$//')
           echo "temp = ${{temp}}"
-          myarray=$(echo ${temp} | tr ',' ' ')
-          echo "myarray = ${{myarray}}"
+          # myarray=$(echo ${temp} | tr ',' ' ')
+          # echo "myarray = ${{myarray}}"
 
     - name: 5.4. Find and replace the current spec version to new version
       if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
