@@ -56,7 +56,7 @@ jobs:
       run: |
           # Change comma (,) to whitespace and add under braces
           temp=$(echo ${{steps.find_podspec_string.outputs.resultArray}} | sed 's/^[\(.*\)]$/\1/')
-          myarray=$(`echo $temp | tr ',' ' '`)
+          # myarray=$(`echo $temp | tr ',' ' '`)
           echo "Temp: ${temp}"
 
           # IFS=", " read -a myarray <<< ${{steps.find_podspec_string.outputs.resultArray}}"
