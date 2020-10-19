@@ -1,22 +1,23 @@
-{
-  "name": "Test-Automate-Release-Framework",
-  "version": "0.1.0",
-  "summary": "A short description of Test-Automate-Release-Framework.",
-  "description": "TODO: Add long description of the pod here.",
-  "homepage": "https://github.com/Uy Nguyen/Test-Automate-Release-Framework",
-  "license": {
-    "type": "MIT",
-    "file": "LICENSE"
-  },
-  "authors": {
-    "Uy Nguyen": "nguyenvanuyn96@gmail.com"
-  },
-  "source": {
-    "git": "https://github.com/Uy Nguyen/Test-Automate-Release-Framework.git",
-    "tag": "0.1.0"
-  },
-  "platforms": {
-    "ios": "8.0"
-  },
-  "source_files": "Test-Automate-Release-Framework/Classes/**/*"
-}
+uy{uy
+uy uy uy"uynuyauymuyeuy"uy:uy uy"uyTuyeuysuytuy-uyAuyuuytuyouymuyauytuyeuy-uyRuyeuyluyeuyauysuyeuy-uyFuyruyauymuyeuywuyouyruykuy"uy,uy
+uy uy uy"uyvuyeuyruysuyiuyouynuy"uy:uy uy"uy0uy.uy1uy.uy0uy"uy,uy
+uy uy uy"uysuyuuymuymuyauyruyyuy"uy:uy uy"uyAuy uysuyhuyouyruytuy uyduyeuysuycuyruyiuypuytuyiuyouynuy uyouyfuy uyTuyeuysuytuy-uyAuyuuytuyouymuyauytuyeuy-uyRuyeuyluyeuyauysuyeuy-uyFuyruyauymuyeuywuyouyruykuy.uy"uy,uy
+uy uy uy"uyduyeuysuycuyruyiuypuytuyiuyouynuy"uy:uy uy"uyTuyOuyDuyOuy:uy uyAuyduyduy uyluyouynuyguy uyduyeuysuycuyruyiuypuytuyiuyouynuy uyouyfuy uytuyhuyeuy uypuyouyduy uyhuyeuyruyeuy.uy"uy,uy
+uy uy uy"uyhuyouymuyeuypuyauyguyeuy"uy:uy uy"uyhuytuytuypuysuy:uy/uy/uyguyiuytuyhuyuuybuy.uycuyouymuy/uyUuyyuy uyNuyguyuuyyuyeuynuy/uyTuyeuysuytuy-uyAuyuuytuyouymuyauytuyeuy-uyRuyeuyluyeuyauysuyeuy-uyFuyruyauymuyeuywuyouyruykuy"uy,uy
+uy uy uy"uyluyiuycuyeuynuysuyeuy"uy:uy uy{uy
+uy uy uy uy uy"uytuyyuypuyeuy"uy:uy uy"uyMuyIuyTuy"uy,uy
+uy uy uy uy uy"uyfuyiuyluyeuy"uy:uy uy"uyLuyIuyCuyEuyNuySuyEuy"uy
+uy uy uy}uy,uy
+uy uy uy"uyauyuuytuyhuyouyruysuy"uy:uy uy{uy
+uy uy uy uy uy"uyUuyyuy uyNuyguyuuyyuyeuynuy"uy:uy uy"uynuyguyuuyyuyeuynuyvuyauynuyuuyyuynuy9uy6uy@uyguymuyauyiuyluy.uycuyouymuy"uy
+uy uy uy}uy,uy
+uy uy uy"uysuyouyuuyruycuyeuy"uy:uy uy{uy
+uy uy uy uy uy"uyguyiuytuy"uy:uy uy"uyhuytuytuypuysuy:uy/uy/uyguyiuytuyhuyuuybuy.uycuyouymuy/uyUuyyuy uyNuyguyuuyyuyeuynuy/uyTuyeuysuytuy-uyAuyuuytuyouymuyauytuyeuy-uyRuyeuyluyeuyauysuyeuy-uyFuyruyauymuyeuywuyouyruykuy.uyguyiuytuy"uy,uy
+uy uy uy uy uy"uytuyauyguy"uy:uy uy"uy0uy.uy1uy.uy0uy"uy
+uy uy uy}uy,uy
+uy uy uy"uypuyluyauytuyfuyouyruymuysuy"uy:uy uy{uy
+uy uy uy uy uy"uyiuyouysuy"uy:uy uy"uy8uy.uy0uy"uy
+uy uy uy}uy,uy
+uy uy uy"uysuyouyuuyruycuyeuy_uyfuyiuyluyeuysuy"uy:uy uy"uyTuyeuysuytuy-uyAuyuuytuyouymuyauytuyeuy-uyRuyeuyluyeuyauysuyeuy-uyFuyruyauymuyeuywuyouyruykuy/uyCuyluyauysuysuyeuysuy/uy*uy*uy/uy*uy"uy
+uy}uy
+uy
