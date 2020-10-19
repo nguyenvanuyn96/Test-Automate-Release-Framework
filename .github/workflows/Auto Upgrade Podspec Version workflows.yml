@@ -35,8 +35,6 @@ jobs:
           bot_branch="bot/${{ steps.get-branch.outputs.branch }}"
           echo "::set-output name=bot_branch::${bot_branch}"
           git checkout -b ${bot_branch}
-
-
     
     - name: 5.1 Find the current spec version string line
       if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
@@ -56,8 +54,8 @@ jobs:
       if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
       id: prepare_for_update
       run: |
-          temp=$(echo ${steps.find_podspec_string.outputs.resultArray} | sed 's/^.//')
-          temp=$(echo ${temp} | sed 's/.$//')
+          temp=$(echo ${steps.find_podspec_string.outputs.resultArray} | sed 's/^[\(.*\)]$//')
+          temp=$(echo ${temp} | sed 's/^[\(.*\)]$//')
           echo "temp = ${{temp}}"
 
     - name: 5.4. Find and replace the current spec version to new version
