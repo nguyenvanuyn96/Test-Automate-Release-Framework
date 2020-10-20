@@ -1,13 +1,6 @@
 # Change logs
 This is change log of TKProductDetails module in 2020.
 
-## [Unreleased]
-- Recommend user submit app review when they review product successfully - [TAS-4172](https://jira.tiki.com.vn/browse/TAS-4172)
-- A/B - Add 'Write review' button to 'bought products' page - [TAS-4142](https://jira.tiki.com.vn/browse/TAS-4142)
-- A/B - Make photo uploading button more prominent - [TAS-4159](https://jira.tiki.com.vn/browse/TAS-4159)
-- Force login when user open cart - [TAS-4151](https://jira.tiki.com.vn/browse/TAS-4151)
-- Add and update tracking data of ProductReview, ViewPDP, AddToCart event for Amplitude - [TAS-4176](https://jira.tiki.com.vn/browse/TAS-4176)
-
 ## [Released] 4.52.2
 - Fix crash by get wrong data for tracking Amplitude in PDP
 - Add logic for support tap gesture in the TikiNow/TikiPro icon into the ProductNameLabel
@@ -28,8 +21,13 @@ This is change log of TKProductDetails module in 2020.
 - Show Best price badge - [TAS-4115](https://jira.tiki.com.vn/browse/TAS-4115)
 
 ## [Released] 4.50.1
-* Fix crash because of using UIColor.random
-* Show full content for TikiNow Description View
+- Fix crash because of using UIColor.random
+- Show full content for TikiNow Description View
+- Recommend user submit app review when they review product successfully - [TAS-4172](https://jira.tiki.com.vn/browse/TAS-4172)
+- A/B - Add 'Write review' button to 'bought products' page - [TAS-4142](https://jira.tiki.com.vn/browse/TAS-4142)
+- A/B - Make photo uploading button more prominent - [TAS-4159](https://jira.tiki.com.vn/browse/TAS-4159)
+- Force login when user open cart - [TAS-4151](https://jira.tiki.com.vn/browse/TAS-4151)
+- Add and update tracking data of ProductReview, ViewPDP, AddToCart event for Amplitude - [TAS-4176](https://jira.tiki.com.vn/browse/TAS-4176)
 
 ## [Released] 4.50.0
 
