@@ -60,7 +60,15 @@ jobs:
           myarray=$(echo $temp | tr ',' ' ')
           echo "myarray = ${myarray}"
 
-          echo "::set-output name=podspec_line_string::${temp}"
+          firstString=$temp
+          secondString=$steps.get-release-version.outputs.new_release_version
+          new_string="${firstString/[0-9]*[\.]*[0-9]/$secondString}"
+
+          echo "::set-output name=podspec_line_string::${new_string}"
+
+          echo "firstString = $firstString"
+          echo "secondString = ${secondString}"
+          echo "new_podspec_string = ${new_string}"
 
     - name: 5.4. Find and replace the current spec version to new version
       if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
