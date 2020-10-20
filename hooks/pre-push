@@ -57,9 +57,9 @@ if [ $is_need_check_branch_name == "YES" ]; then
                 if [ $current_revision == $prefer_next_revision ]; then # Tăng đều
                     is_accept_branch="YES";
                     warning_branch_name_message="";
-                # elif [ $current_revision > $prefer_next_revision ]; then # Tăng nhảy cóc. VD: từ 1.0.0 nhảy lên version mới là 1.0.3
-                #     is_accept_branch="YES";
-                #     warning_branch_name_message="[WARNING] The next release version should be $current_major.$current_minor.$prefer_next_revision. Please update if needed."
+                elif [ $current_revision > $prefer_next_revision ]; then # Tăng nhảy cóc. VD: từ 1.0.0 nhảy lên version mới là 1.0.3
+                    is_accept_branch="YES";
+                    warning_branch_name_message="[WARNING] The next release version should be $current_major.$current_minor.$prefer_next_revision. Please update if needed."
                 else
                     is_accept_branch="NO";
                     warning_branch_name_message="[ERROR] The next release version should be $current_major.$current_minor.$prefer_next_revision. Please correct the branch name first."
@@ -68,21 +68,21 @@ if [ $is_need_check_branch_name == "YES" ]; then
                 if [ $current_revision == 0 ]; then # Bắt đầu revision mới
                     is_accept_branch="YES";
                     warning_branch_name_message="";
-                # elif [ $current_revision -ge 1 ]; then # Tăng nhảy cóc. VD: từ 1.0.0 nhảy lên vision mới là 1.1.3
-                #     is_accept_branch="YES";
-                #     warning_branch_name_message="[WARNING] The next release version should be $current_major.$current_minor.0. Please update if needed."
+                elif [ $current_revision -ge 1 ]; then # Tăng nhảy cóc. VD: từ 1.0.0 nhảy lên vision mới là 1.1.3
+                    is_accept_branch="YES";
+                    warning_branch_name_message="[WARNING] The next release version should be $current_major.$current_minor.0. Please update if needed."
                 else
                     is_accept_branch="NO";
                     warning_branch_name_message="[ERROR] The next release version should be $current_major.$current_minor.0. Please correct the branch name first."
                 fi;
-            # elif [ $current_minor > $prefer_next_minor ]; then # Tăng nhảy cóc. VD: từ 1.0.0 nhảy lên version mới là 1.2.0
-            #     if [ $current_revision -ge 0 ]; then # Bắt đầu revision mới hoặc nhảy cóc lên revision mới
-            #         is_accept_branch="YES";
-            #         warning_branch_name_message="[WARNING] The next release version should be $current_major.$prefer_next_minor.0. Please update if needed.";
-            #     else
-            #         is_accept_branch="NO";
-            #         warning_branch_name_message="[ERROR] The next release version should be $current_major.$prefer_next_minor.0. Please correct the branch name first."
-            #     fi;
+            elif [ $current_minor > $prefer_next_minor ]; then # Tăng nhảy cóc. VD: từ 1.0.0 nhảy lên version mới là 1.2.0
+                if [ $current_revision -ge 0 ]; then # Bắt đầu revision mới hoặc nhảy cóc lên revision mới
+                    is_accept_branch="YES";
+                    warning_branch_name_message="[WARNING] The next release version should be $current_major.$prefer_next_minor.0. Please update if needed.";
+                else
+                    is_accept_branch="NO";
+                    warning_branch_name_message="[ERROR] The next release version should be $current_major.$prefer_next_minor.0. Please correct the branch name first."
+                fi;
             else
                 is_accept_branch="NO";
                 warning_branch_name_message="[ERROR] The next release version should be $current_major.$prefer_next_minor.0. Please correct the branch name first."
@@ -92,38 +92,38 @@ if [ $is_need_check_branch_name == "YES" ]; then
                 if [ $current_revision == 0 ]; then
                     is_accept_branch="YES"
                     warning_branch_name_message="";
-                # elif [ $current_revision > 0 ]; then # Tăng nhảy cóc. VD: từ 1.0.0 nhảy lên version mới là 2.0.1
-                #     is_accept_branch="YES";
-                #     warning_branch_name_message="[WARNING] The next release version should be $prefer_next_major.0.0. Please update if needed."
+                elif [ $current_revision > 0 ]; then # Tăng nhảy cóc. VD: từ 1.0.0 nhảy lên version mới là 2.0.1
+                    is_accept_branch="YES";
+                    warning_branch_name_message="[WARNING] The next release version should be $prefer_next_major.0.0. Please update if needed."
                 else
                     is_accept_branch="NO";
                     warning_branch_name_message="[ERROR] The next release version should be $prefer_next_major.0.0. Please correct the branch name first."
                 fi;
-            # elif [ $current_minor > 0 ]; then # Tăng nhảy cóc. VD: từ 1.0.0 nhảy lên version mới là 2.1.0
-            #     if [ $current_revision -ge 0 ]; then # Bắt đầu revision mới hoặc nhảy cóc lên revision mới
-            #         is_accept_branch="YES";
-            #         warning_branch_name_message="[WARNING] The next release version should be  $prefer_next_major.0.0. Please update if needed.";
-            #     else
-            #         is_accept_branch="NO";
-            #         warning_branch_name_message="[ERROR] The next release version should be  $prefer_next_major.0.0. Please correct the branch name first."
-            #     fi;
+            elif [ $current_minor > 0 ]; then # Tăng nhảy cóc. VD: từ 1.0.0 nhảy lên version mới là 2.1.0
+                if [ $current_revision -ge 0 ]; then # Bắt đầu revision mới hoặc nhảy cóc lên revision mới
+                    is_accept_branch="YES";
+                    warning_branch_name_message="[WARNING] The next release version should be  $prefer_next_major.0.0. Please update if needed.";
+                else
+                    is_accept_branch="NO";
+                    warning_branch_name_message="[ERROR] The next release version should be  $prefer_next_major.0.0. Please correct the branch name first."
+                fi;
             else
                 is_accept_branch="NO";
                 warning_branch_name_message="[ERROR] The next release version should be $prefer_next_major.0.0. Please correct the branch name first."
             fi;
-        # elif [ $current_major > $prefer_next_major ]; then # Tăng nhảy cóc. VD: từ 1.0.0 nhảy lên version mới là 3.0.0
-        #     if [ $current_minor -ge 0 ]; then # Bắt đầu minor mới hoặc nhảy cóc lên minor mới
-        #         if [ $current_revision -ge 0 ]; then # Bắt đầu revision mới hoặc nhảy cóc. VD: từ 1.0.0 nhảy lên version mới là 2.0.1
-        #             is_accept_branch="YES";
-        #             warning_branch_name_message="[WARNING] The next release version should be $prefer_next_major.0.0. Please update if needed."
-        #         else
-        #             is_accept_branch="NO";
-        #             warning_branch_name_message="[ERROR] The next release version should be $prefer_next_major.0.0. Please correct the branch name first."
-        #         fi;
-        #     else
-        #         is_accept_branch="NO";
-        #         warning_branch_name_message="[ERROR] The next release version should be $prefer_next_major.0.0. Please correct the branch name first."
-        #     fi;
+        elif [ $current_major > $prefer_next_major ]; then # Tăng nhảy cóc. VD: từ 1.0.0 nhảy lên version mới là 3.0.0
+            if [ $current_minor -ge 0 ]; then # Bắt đầu minor mới hoặc nhảy cóc lên minor mới
+                if [ $current_revision -ge 0 ]; then # Bắt đầu revision mới hoặc nhảy cóc. VD: từ 1.0.0 nhảy lên version mới là 2.0.1
+                    is_accept_branch="YES";
+                    warning_branch_name_message="[WARNING] The next release version should be $prefer_next_major.0.0. Please update if needed."
+                else
+                    is_accept_branch="NO";
+                    warning_branch_name_message="[ERROR] The next release version should be $prefer_next_major.0.0. Please correct the branch name first."
+                fi;
+            else
+                is_accept_branch="NO";
+                warning_branch_name_message="[ERROR] The next release version should be $prefer_next_major.0.0. Please correct the branch name first."
+            fi;
         else
             is_accept_branch="NO";
             warning_branch_name_message="[ERROR] The next release version should be $prefer_next_major.0.0. Please correct the branch name first."
