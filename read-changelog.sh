@@ -27,6 +27,6 @@ while read line; do
 done < $filename
 
 new_change_log="$(echo "$new_change_log" | sed "1 d")"
-echo "::set-output name=unreleased_change_log::"${new_change_log}""
+echo "::set-output name=unreleased_change_log::"${new_change_log}"khjaskldjflkjdlsf"
 echo "==========================================================="
-echo "$new_change_log"
+echo ${new_change_log}

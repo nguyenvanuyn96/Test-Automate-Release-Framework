@@ -96,7 +96,10 @@ jobs:
 
           done < $filename
           new_change_log="$(echo "$new_change_log" | sed "1 d")"
-          echo "::set-output name=unreleased_change_log::"${new_change_log}""
+          new_change_log="${new_change_log//'%'/'%25'}"
+          new_change_log="${new_change_log//$'\n'/'%0A'}"
+          new_change_log="${new_change_log//$'\r'/'%0D'}"
+          echo "::set-output name=unreleased_change_log::${new_change_log}"
           echo "============================================================"
           echo "$new_change_log"
     
