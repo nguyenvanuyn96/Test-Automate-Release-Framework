@@ -121,7 +121,6 @@ jobs:
 
               if [ "$can_appending" == "YES" ] && [ ! -z "$line" ]; then 
                   new_change_log+="$line";
-                  # new_change_log+=$'\n';
               fi;
 
               if [ "$can_appending" == "NO" ] && [ ! -z "$new_change_log" ]; then 
@@ -138,13 +137,11 @@ jobs:
       run: |
         echo "unreleased_change_log = ${{ steps.get_changelog_manually.outputs.unreleased_change_log }}"
         echo "====================================================>>>>>>>>>>>>>>>>>>>>>"
-        echo ${{ steps.get_changelog_manually.outputs.unreleased_change_log }}
         echo "====================================================>>>>>>>>>>>>>>>>>>>>>"
         echo "====================================================>>>>>>>>>>>>>>>>>>>>>"
         echo "====================================================>>>>>>>>>>>>>>>>>>>>>"
         echo "unreleased_change_log = ${{ steps.get_changelog_manually_1.outputs.unreleased_change_log }}"
         echo "====================================================>>>>>>>>>>>>>>>>>>>>>"
-        echo ${{ steps.get_changelog_manually_1.outputs.unreleased_change_log }}
 
     - name: 9. Create Release tag
       if: ${{ steps.check-branch.outputs.is_release_branch == 'YES' }}
