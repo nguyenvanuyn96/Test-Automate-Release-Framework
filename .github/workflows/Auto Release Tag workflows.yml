@@ -25,28 +25,45 @@ jobs:
       id: check-branch
       with:
         branch: ${{ steps.pr_data.outputs.branch }}
+
+    - name: 4. Checkout
+      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      uses: actions/checkout@master
         
-    - name: 4. Get release version only
+    - name: 5. Find the current pod version line string from podspec file
+      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      id: find_podspec_string
+      uses: uynguyen-wonderlabs/str-replace@master
+      with:
+          find: "\\t*[s|spec].version\\s*=\\s*[\"|'][\\S]*[\"|']"
+          include: ".podspec"
+
+    - name: 6. Get release version from step 5's result
       if: ${{ steps.check-branch.outputs.is_release_branch == 'YES' }}
       id: get-version
       run: |
-        version=$(echo ${{ steps.pr_data.outputs.branch }} | sed -e "s/release\///g")
+        resultArray=${{steps.find_podspec_string.outputs.resultArray}}
+        truncatedFirstLastBracketString=$(echo "${resultArray:1:-1}")
+        echo "truncatedFirstLastBracketString = ${truncatedFirstLastBracketString}"
+
+        firstString=$truncatedFirstLastBracketString
+        version=$(echo ${firstString} | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
         echo "::set-output name=release_version::${version}"
         echo "This is the version which is detected from release branch name: ${version}"
         
-    - name: 5. Print data for debugging
+    - name: 7. Print data for debugging
       run: |
         echo "The branch ${{ steps.pr_data.outputs.branch }} is used for checking"
         echo "This branch has is_release_branch = ${{ steps.check-branch.outputs.is_release_branch }}"
         echo "This branch has release_version = ${{ steps.get-version.outputs.release_version }}"
    
-    - name: 6. Get change log
+    - name: 8. Get change log
       uses: scottbrenner/generate-changelog-action@master
       id: get_changelog
       env:
           REPO: ${{ github.repository }}
           
-    - name: 7. Create Release tag
+    - name: 9. Create Release tag
       if: ${{ steps.check-branch.outputs.is_release_branch == 'YES' }}
       id: create_release
       uses: actions/create-release@v1

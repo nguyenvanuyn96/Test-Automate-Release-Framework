@@ -1,6 +1,9 @@
 name: "Auto Upgrade Podspec Version"
 
-on: create
+on: 
+  create:
+    branches:
+      - release/*
 
 jobs:
   upgrade_podspec:
@@ -31,14 +34,46 @@ jobs:
           bot_branch="bot/${{ steps.get-branch.outputs.branch }}"
           echo "::set-output name=bot_branch::${bot_branch}"
           git checkout -b ${bot_branch}
+    
+    - name: 5.1 Find the current spec version string line
+      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      id: find_podspec_string
+      uses: uynguyen-wonderlabs/str-replace@master
+      with:
+          find: "\\t*[s|spec].version\\s*=\\s*[\"|'][\\S]*[\"|']"
+          include: ".podspec"
 
-    - name: 5. Find and replace the current spec version to new version
+    - name: 5.2. Debug logging info
+      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      run: |
+          echo "fileFoundCount = ${{ steps.find_podspec_string.outputs.fileFoundCount }}"
+          echo "resultArray = ${{ steps.find_podspec_string.outputs.resultArray }}"
+    
+    - name: 5.3 Prepare for update podspec version in file
+      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      id: prepare_for_update
+      run: |
+          resultArray=${{steps.find_podspec_string.outputs.resultArray}}
+          truncatedFirstLastBracketString=$(echo "${resultArray:1:-1}")
+          echo "TEMP = ${truncatedFirstLastBracketString}"
+
+          firstString=${truncatedFirstLastBracketString}
+          secondString=${{steps.get-release-version.outputs.new_release_version}}
+          new_string="${firstString/[0-9]*[\.]*[0-9]/$secondString}"
+
+          echo "firstString = $firstString"
+          echo "secondString = ${secondString}"
+          echo "new_podspec_string = ${new_string}"
+
+          echo "::set-output name=podspec_line_string::${new_string}"
+
+    - name: 5.4. Find and replace the current spec version to new version
       if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
       id: find_and_replace
       uses: shitiomatic/str-replace@master
       with:
-          find: "\\t*s.version\\s*=\\s\"[\\S]*\""
-          replace: "s.version      = \"${{ steps.get-release-version.outputs.new_release_version }}\""
+          find: "\\t*[s|spec].version\\s*=\\s*[\"|'][\\S]*[\"|']"
+          replace: ${{ steps.prepare_for_update.outputs.podspec_line_string }}
           include: ".podspec"
     
     - name: 6. Check result of Find and replace
