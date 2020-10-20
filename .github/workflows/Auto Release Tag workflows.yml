@@ -27,11 +27,11 @@ jobs:
         branch: ${{ steps.pr_data.outputs.branch }}
 
     - name: 4. Checkout
-      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_release_branch =='YES' }}
       uses: actions/checkout@master
         
     - name: 5. Find the current pod version line string from podspec file
-      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_release_branch =='YES' }}
       id: find_podspec_string
       uses: uynguyen-wonderlabs/str-replace@master
       with:
@@ -52,12 +52,14 @@ jobs:
         echo "This is the version which is detected from release branch name: ${version}"
         
     - name: 7. Print data for debugging
+      if: ${{ steps.check-branch.outputs.is_release_branch == 'YES' }}
       run: |
         echo "The branch ${{ steps.pr_data.outputs.branch }} is used for checking"
         echo "This branch has is_release_branch = ${{ steps.check-branch.outputs.is_release_branch }}"
         echo "This branch has release_version = ${{ steps.get-version.outputs.release_version }}"
    
     - name: 8. Get change log
+      if: ${{ steps.check-branch.outputs.is_release_branch == 'YES' }}
       uses: scottbrenner/generate-changelog-action@master
       id: get_changelog
       env:
