@@ -57,19 +57,20 @@ jobs:
         echo "The branch ${{ steps.pr_data.outputs.branch }} is used for checking"
         echo "This branch has is_release_branch = ${{ steps.check-branch.outputs.is_release_branch }}"
         echo "This branch has release_version = ${{ steps.get-version.outputs.release_version }}"
-   
-    - name: 8. Get change log
-      if: ${{ steps.check-branch.outputs.is_release_branch == 'YES' }}
-      uses: scottbrenner/generate-changelog-action@master
-      id: get_changelog
-      env:
-          REPO: ${{ github.repository }}
 
-    - name: 8.1 Get change log manually
+    - name: 8. Get the current change log file name
+      if: ${{ steps.check-branch.outputs.is_release_branch == 'YES' }}
+      id: get_changelog_file
+      run: |
+          current_year=$(echo $(date +"%Y"))
+          change_log_file_name="CHANGE-LOG-$current_year.md"
+          echo "::set-output name=change_log_file_name::${change_log_file_name}"
+
+    - name: 9.1. Get change log from the CHANGE-LOG-XXX.md file
       if: ${{ steps.check-branch.outputs.is_release_branch == 'YES' }}
       id: get_changelog_manually
       run: |
-          filename='CHANGE-LOG-2020.md'
+          filename=${{steps.get_changelog_file.outputs.change_log_file_name}}
           n=0
           new_change_log=""
           can_appending="NO"
@@ -103,50 +104,65 @@ jobs:
           echo "============================================================"
           echo "$new_change_log"
     
-    - name: 8.1 Get change log manually
-      if: ${{ steps.check-branch.outputs.is_release_branch == 'YES' }}
-      id: get_changelog_manually_1
-      run: |
-          filename='CHANGE-LOG-2020.md'
-          n=0
-          new_change_log=""
-          can_appending="NO"
-          while read line; do
-              # reading each line
-              n=$((n+1))
-
-              echo "Line No $n"
-
-              if [ "$line" == "## [Unreleased]" ]; then
-                  can_appending="YES"
-              elif [[ "$line" == *"## [Released] "* ]]; then
-                  can_appending="NO"
-              fi;
-
-              if [ "$can_appending" == "YES" ] && [ ! -z "$line" ]; then 
-                  new_change_log+="$line";
-              fi;
-
-              if [ "$can_appending" == "NO" ] && [ ! -z "$new_change_log" ]; then 
-                  break;
-              fi;
-
-          done < $filename
-          echo "::set-output name=unreleased_change_log::${new_change_log}"
-          echo "$new_change_log"
-          
-    - name: 8.2. Print data for debugging
+    - name: 9.2. Print data for debugging
       if: ${{ steps.check-branch.outputs.is_release_branch == 'YES' }}
       run: |
         echo "unreleased_change_log = ${{ steps.get_changelog_manually.outputs.unreleased_change_log }}"
-        echo "====================================================>>>>>>>>>>>>>>>>>>>>>"
-        echo "====================================================>>>>>>>>>>>>>>>>>>>>>"
-        echo "====================================================>>>>>>>>>>>>>>>>>>>>>"
-        echo "====================================================>>>>>>>>>>>>>>>>>>>>>"
-        echo "unreleased_change_log = ${{ steps.get_changelog_manually_1.outputs.unreleased_change_log }}"
-        echo "====================================================>>>>>>>>>>>>>>>>>>>>>"
 
-    - name: 9. Create Release tag
+    - name: 10. Create new branch bot/master/release/*
+      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      id: create_bot_branch
+      run: |
+          bot_branch="bot/master/release/${{ steps.get-version.outputs.release_version }}"
+          echo "::set-output name=bot_branch::${bot_branch}"
+          git checkout -b ${bot_branch}
+
+    - name: 11. Find and replace the title [Unreleased] of CHANGE-LOG-XXX.md file to [Released] 
+      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      id: find_and_replace
+      uses: shitiomatic/str-replace@master
+      with:
+          find: "## [Unreleased]"
+          replace: "## [Released] ${{ steps.get-version.outputs.release_version }}"
+          include: ${{steps.get_changelog_file.outputs.change_log_file_name}}
+
+    - name: 12. Commit and Push changes
+      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      uses: dciborow/commit@master
+      with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          push-branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
+          commit-message: "Upgrade ${{steps.get_changelog_file.outputs.change_log_file_name}} for changing the [Unreleased] title to [Released] ${{ steps.get-version.outputs.release_version }}"
+          force-add: 'true'
+          force-push: 'true'
+          name: "automate-bot"
+          email: "automate-bot@sph.com.sg"
+
+    - name: 13. Create pull request
+      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      id: create_pr
+      uses: thomaseizinger/create-pull-request@master
+      with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          head: ${{ steps.create_bot_branch.outputs.bot_branch }}
+          base: master
+          title: "Upgrade ${{steps.get_changelog_file.outputs.change_log_file_name}} for changing the [Unreleased] title to [Released] ${{ steps.get-version.outputs.release_version }}"
+
+    - name: 14. Auto approve bot branch
+      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      uses: juliangruber/approve-pull-request-action@v1
+      with:
+          github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+          number: "${{ steps.create_pr.outputs.number }}"
+
+    - name: 15. Merge approved PR
+      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      uses: sudo-bot/action-pull-request-merge@v1.1.1
+      with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ steps.create_pr.outputs.number }}
+
+    - name: 16. Create Release tag
       if: ${{ steps.check-branch.outputs.is_release_branch == 'YES' }}
       id: create_release
       uses: actions/create-release@v1
@@ -159,3 +175,8 @@ jobs:
           body: "${{ steps.get_changelog_manually.outputs.unreleased_change_log }}"
           draft: false
           prerelease: false
+
+    - name: 17. Notify to slack channel
+      if: ${{ steps.check-branch.outputs.is_release_branch == 'YES' }}
+      run: |
+        echo "TODO: Notify to slack channel"
