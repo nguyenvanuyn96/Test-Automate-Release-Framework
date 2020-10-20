@@ -55,7 +55,7 @@ jobs:
       id: prepare_for_update
       run: |
           resultArray=${{steps.find_podspec_string.outputs.resultArray}}
-          truncatedFirstLastBracketString=$(echo ${resultArray:1:-1})
+          truncatedFirstLastBracketString=$(echo "${resultArray:1:-1}")
           echo "TEMP = ${truncatedFirstLastBracketString}"
 
           firstString=${truncatedFirstLastBracketString}
