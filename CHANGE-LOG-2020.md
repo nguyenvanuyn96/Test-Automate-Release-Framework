@@ -1,7 +1,7 @@
 # Change logs
 This is change log of TKProductDetails module in 2020.
 
-## [Unreleased]
+## [Released] 1.0.22
 - Test release again
 - Fix crash because of using UIColor.random
 - Show full content for TikiNow Description View
