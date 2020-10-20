@@ -1,5 +1,5 @@
 #
-# Be sure to run `pod lib lint TKTrackingSDK.podspec' to ensure this is a
+# Be sure to run `pod lib lint Test-Automate-Release-Framework.podspec' to ensure this is a
 # valid spec before submitting.
 #
 # Any lines starting with a # are optional, but their use is encouraged
@@ -7,9 +7,9 @@
 #
 
 Pod::Spec.new do |s|
-  s.name             = 'TKTrackingSDK'
-  s.version          = '1.0.6'
-  s.summary          = 'A short description of TKTrackingSDK.'
+  s.name             = 'Test-Automate-Release-Framework'
+  s.version          = "1.0.5"
+  s.summary          = 'A short description of Test-Automate-Release-Framework.'
 
 # This description is used to generate tags and improve search results.
 #   * Think: What does it do? Why did you write it? What is the focus?
@@ -21,27 +21,22 @@ Pod::Spec.new do |s|
 TODO: Add long description of the pod here.
                        DESC
 
-  s.homepage         = 'https://github.com/tikivn/TikiTrackingSDK'
+  s.homepage         = 'https://github.com/nguyenvanuyn96/Test-Automate-Release-Framework'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'Long.Vu' => 'long.vu@tiki.vn' }
-  s.source           = { :git => 'https://github.com/Long.Vu/TKTrackingSDK.git', :tag => s.version.to_s }
+  s.author           = { 'Uy Nguyen' => 'nguyenvanuyn96@gmail.com' }
+  s.source           = { :git => 'https://github.com/nguyenvanuyn96/Test-Automate-Release-Framework.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
-  s.ios.deployment_target = '8.2'
-#  s.swift_version = '4.0'
+  s.ios.deployment_target = '8.0'
 
-  s.static_framework = true
-
- s.source_files = 'TKTrackingSDK/**/*.{h,m,swift}'
- s.resource = 'TKTrackingSDK/**/*.plist'
+  s.source_files = 'Test-Automate-Release-Framework/Classes/**/*'
   
   # s.resource_bundles = {
-  #   'TKTrackingSDK' => ['TKTrackingSDK/Assets/*.png']
+  #   'Test-Automate-Release-Framework' => ['Test-Automate-Release-Framework/Assets/*.png']
   # }
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
-  s.frameworks = 'AdSupport'
-  s.dependency 'Alamofire'
-  s.dependency 'FMDB'
+  # s.frameworks = 'UIKit', 'MapKit'
+  # s.dependency 'AFNetworking', '~> 2.3'
 end
