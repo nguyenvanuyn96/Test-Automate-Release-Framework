@@ -2,6 +2,7 @@
 This is change log of TKProductDetails module in 2020.
 
 ## [Unreleased]
+- Test release again
 - Fix crash because of using UIColor.random
 - Show full content for TikiNow Description View
 - Recommend user submit app review when they review product successfully - [TAS-4172](https://jira.tiki.com.vn/browse/TAS-4172)
