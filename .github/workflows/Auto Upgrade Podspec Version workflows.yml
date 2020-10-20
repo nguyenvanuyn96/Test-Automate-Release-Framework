@@ -41,7 +41,7 @@ jobs:
       id: find_podspec_string
       uses: uynguyen-wonderlabs/str-replace@master
       with:
-          find: "\\t*s.version\\s*=\\s+[\"|'][\\S]*[\"|']'"
+          find: "\\t*s.version\\s*=\\s*[\"|'][\\S]*[\"|']"
           include: ".podspec"
 
     - name: 5.2. Debug logging info
