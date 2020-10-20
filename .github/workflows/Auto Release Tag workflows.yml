@@ -64,7 +64,7 @@ jobs:
       id: get_changelog
       env:
           REPO: ${{ github.repository }}
-    
+
     - name: 8.1 Get change log manually
       if: ${{ steps.check-branch.outputs.is_release_branch == 'YES' }}
       id: get_changelog_manually
@@ -98,7 +98,54 @@ jobs:
           new_change_log="$(echo "$new_change_log" | sed "1 d")"
           echo "::set-output name=unreleased_change_log::${new_change_log}"
           echo "$new_change_log"
+    
+    - name: 8.1 Get change log manually
+      if: ${{ steps.check-branch.outputs.is_release_branch == 'YES' }}
+      id: get_changelog_manually_1
+      run: |
+          filename='CHANGE-LOG-2020.md'
+          n=0
+          new_change_log=""
+          can_appending="NO"
+          while read line; do
+              # reading each line
+              n=$((n+1))
+
+              echo "Line No $n"
+
+              if [ "$line" == "## [Unreleased]" ]; then
+                  can_appending="YES"
+              elif [[ "$line" == *"## [Released] "* ]]; then
+                  can_appending="NO"
+              fi;
+
+              if [ "$can_appending" == "YES" ] && [ ! -z "$line" ]; then 
+                  new_change_log+="$line";
+                  # new_change_log+=$'\n';
+              fi;
+
+              if [ "$can_appending" == "NO" ] && [ ! -z "$new_change_log" ]; then 
+                  break;
+              fi;
+
+          done < $filename
+          new_change_log="$(echo "$new_change_log" | sed "1 d")"
+          echo "::set-output name=unreleased_change_log::${new_change_log}"
+          echo "$new_change_log"
           
+    - name: 8.2. Print data for debugging
+      if: ${{ steps.check-branch.outputs.is_release_branch == 'YES' }}
+      run: |
+        echo "unreleased_change_log = ${{ steps.get_changelog_manually.outputs.unreleased_change_log }}"
+        echo "====================================================>>>>>>>>>>>>>>>>>>>>>"
+        echo ${{ steps.get_changelog_manually.outputs.unreleased_change_log }}
+        echo "====================================================>>>>>>>>>>>>>>>>>>>>>"
+        echo "====================================================>>>>>>>>>>>>>>>>>>>>>"
+        echo "====================================================>>>>>>>>>>>>>>>>>>>>>"
+        echo "unreleased_change_log = ${{ steps.get_changelog_manually_1.outputs.unreleased_change_log }}"
+        echo "====================================================>>>>>>>>>>>>>>>>>>>>>"
+        echo ${{ steps.get_changelog_manually_1.outputs.unreleased_change_log }}
+
     - name: 9. Create Release tag
       if: ${{ steps.check-branch.outputs.is_release_branch == 'YES' }}
       id: create_release
@@ -109,6 +156,6 @@ jobs:
           tag_name: ${{ steps.get-version.outputs.release_version }}
           release_name: Release ${{ steps.get-version.outputs.release_version }}
           commitish: master
-          body: "${{ steps.get_changelog_manually.outputs.unreleased_change_log }}"
+          body: "${{ steps.get_changelog_manually_1.outputs.unreleased_change_log }}"
           draft: false
           prerelease: false
