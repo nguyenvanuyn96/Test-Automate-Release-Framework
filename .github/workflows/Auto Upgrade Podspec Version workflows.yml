@@ -61,7 +61,7 @@ jobs:
           echo "myarray = ${myarray}"
 
           firstString=$temp
-          secondString=${steps.get-release-version.outputs.new_release_version}
+          secondString=${{steps.get-release-version.outputs.new_release_version}}
           new_string="${firstString/[0-9]*[\.]*[0-9]/$secondString}"
 
           echo "::set-output name=podspec_line_string::${new_string}"
