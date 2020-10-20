@@ -110,7 +110,7 @@ jobs:
         echo "unreleased_change_log = ${{ steps.get_changelog_manually.outputs.unreleased_change_log }}"
 
     - name: 10. Create new branch bot/master/release/*
-      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_release_branch =='YES' }}
       id: create_bot_branch
       run: |
           bot_branch="bot/master/release/${{ steps.get-version.outputs.release_version }}"
@@ -118,7 +118,7 @@ jobs:
           git checkout -b ${bot_branch}
 
     - name: 11. Find and replace the title [Unreleased] of CHANGE-LOG-XXX.md file to [Released] 
-      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_release_branch =='YES' }}
       id: find_and_replace
       uses: shitiomatic/str-replace@master
       with:
@@ -127,7 +127,7 @@ jobs:
           include: ${{steps.get_changelog_file.outputs.change_log_file_name}}
 
     - name: 12. Commit and Push changes
-      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_release_branch =='YES' }}
       uses: dciborow/commit@master
       with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -139,7 +139,7 @@ jobs:
           email: "automate-bot@sph.com.sg"
 
     - name: 13. Create pull request
-      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_release_branch =='YES' }}
       id: create_pr
       uses: thomaseizinger/create-pull-request@master
       with:
@@ -149,14 +149,14 @@ jobs:
           title: "Upgrade ${{steps.get_changelog_file.outputs.change_log_file_name}} for changing the [Unreleased] title to [Released] ${{ steps.get-version.outputs.release_version }}"
 
     - name: 14. Auto approve bot branch
-      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_release_branch =='YES' }}
       uses: juliangruber/approve-pull-request-action@v1
       with:
           github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
           number: "${{ steps.create_pr.outputs.number }}"
 
     - name: 15. Merge approved PR
-      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_release_branch =='YES' }}
       uses: sudo-bot/action-pull-request-merge@v1.1.1
       with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
