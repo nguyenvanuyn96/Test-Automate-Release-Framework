@@ -41,7 +41,7 @@ jobs:
       id: find_podspec_string
       uses: uynguyen-wonderlabs/str-replace@master
       with:
-          find: "^[\\n]\\s*[s|spec].version\\s*=\\s*[\"|'][\\S]*[\"|']"
+          find: "\\t*[s|spec].version\\s*=\\s*[\"|'][\\S]*[\"|']"
           include: ".podspec"
 
     - name: 5.2. Debug logging info
@@ -72,7 +72,7 @@ jobs:
       id: find_and_replace
       uses: shitiomatic/str-replace@master
       with:
-          find: "^[\\n]\\s*[s|spec].version\\s*=\\s*[\"|'][\\S]*[\"|']"
+          find: "\\t*[s|spec].version\\s*=\\s*[\"|'][\\S]*[\"|']"
           replace: ${{ steps.prepare_for_update.outputs.podspec_line_string }}
           include: ".podspec"
     
