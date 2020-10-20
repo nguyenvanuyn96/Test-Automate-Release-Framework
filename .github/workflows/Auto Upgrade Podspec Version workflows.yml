@@ -54,7 +54,8 @@ jobs:
       if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
       id: prepare_for_update
       run: |
-          truncatedFirstLastBracketString=$(echo ${{steps.find_podspec_string.outputs.resultArray}} | sed -e 's/^.//' -e 's/.$//')
+          resultArray=${{steps.find_podspec_string.outputs.resultArray}}
+          truncatedFirstLastBracketString=$(echo ${resultArray:1:-1})
           echo "TEMP = ${truncatedFirstLastBracketString}"
 
           firstString=${truncatedFirstLastBracketString}
