@@ -42,7 +42,8 @@ jobs:
       if: ${{ steps.check-branch.outputs.is_release_branch == 'YES' }}
       id: get-version
       run: |
-        truncatedFirstLastBracketString=$(echo ${{steps.find_podspec_string.outputs.resultArray}} | sed -e 's/^.//' -e 's/.$//')
+        resultArray=${{steps.find_podspec_string.outputs.resultArray}}
+        truncatedFirstLastBracketString=$(echo "${resultArray:1:-1}")
         echo "truncatedFirstLastBracketString = ${truncatedFirstLastBracketString}"
 
         firstString=$truncatedFirstLastBracketString
