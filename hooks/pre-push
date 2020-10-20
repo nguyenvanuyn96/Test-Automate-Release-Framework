@@ -22,7 +22,7 @@ if [ $is_need_check_branch_name == "YES" ]; then
     # ======================================================================================
 
     # Check if the branch is release/* branch and it name is correct or not
-    # if contains release/
+    # if contains release/ or hotfix/
     if [ $(echo ${current_branch} | sed -e "s/release\///g") != ${current_branch} ]; then
         is_release_branch="YES"
         current_version=$(echo $current_branch | sed -e "s/release\///g")
