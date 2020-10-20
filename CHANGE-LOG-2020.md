@@ -20,7 +20,7 @@ This is change log of TKProductDetails module in 2020.
 - Update Listing Ux and UI - [TAS-4102](https://jira.tiki.com.vn/browse/TAS-4102)
 - Show Best price badge - [TAS-4115](https://jira.tiki.com.vn/browse/TAS-4115)
 
-## [Released] 4.50.1
+## [Unreleased]
 - Fix crash because of using UIColor.random
 - Show full content for TikiNow Description View
 - Recommend user submit app review when they review product successfully - [TAS-4172](https://jira.tiki.com.vn/browse/TAS-4172)
