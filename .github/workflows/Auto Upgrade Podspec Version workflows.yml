@@ -41,7 +41,7 @@ jobs:
       id: find_podspec_string
       uses: uynguyen-wonderlabs/str-replace@master
       with:
-          find: "\\t*s.version\\s*=\\s\"[\\S]*\""
+          find: "\\t*s.version\\s*=\\s+[\"|'][\\S]*[\"|']'"
           include: ".podspec"
 
     - name: 5.2. Debug logging info
@@ -54,21 +54,18 @@ jobs:
       if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
       id: prepare_for_update
       run: |
-          temp=$(echo ${{steps.find_podspec_string.outputs.resultArray}} | sed -e 's/^.//' -e 's/.$//')
-          echo "TEMP = ${temp}"
-          # Change comma (,) to whitespace and add under braces
-          myarray=$(echo $temp | tr ',' ' ')
-          echo "myarray = ${myarray}"
+          truncatedFirstLastBracketString=$(echo ${{steps.find_podspec_string.outputs.resultArray}} | sed -e 's/^.//' -e 's/.$//')
+          echo "TEMP = ${truncatedFirstLastBracketString}"
 
-          firstString=$temp
+          firstString=$truncatedFirstLastBracketString
           secondString=${{steps.get-release-version.outputs.new_release_version}}
           new_string="${firstString/[0-9]*[\.]*[0-9]/$secondString}"
-
-          echo "::set-output name=podspec_line_string::${new_string}"
 
           echo "firstString = $firstString"
           echo "secondString = ${secondString}"
           echo "new_podspec_string = ${new_string}"
+
+          echo "::set-output name=podspec_line_string::${new_string}"
 
     - name: 5.4. Find and replace the current spec version to new version
       if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
