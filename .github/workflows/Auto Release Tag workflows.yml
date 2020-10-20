@@ -137,7 +137,7 @@ jobs:
       with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           push-branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
-          commit-message: "Update ${{steps.get_changelog_file.outputs.change_log_file_name}} file for changing \"[Unreleased]\"" title to \"[Released] ${{ steps.get-version.outputs.release_version }}\""
+          commit-message: "Update ${{steps.get_changelog_file.outputs.change_log_file_name}} file for changing \"[Unreleased]\" title to \"[Released] ${{ steps.get-version.outputs.release_version }}\""
           force-add: 'true'
           force-push: 'true'
           name: "automate-bot"
@@ -151,7 +151,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           head: ${{ steps.create_bot_branch.outputs.bot_branch }}
           base: master
-          title: "Update ${{steps.get_changelog_file.outputs.change_log_file_name}} file for changing \"[Unreleased]\"" title to \"[Released] ${{ steps.get-version.outputs.release_version }}\""
+          title: "Update ${{steps.get_changelog_file.outputs.change_log_file_name}} file for changing \"[Unreleased]\" title to \"[Released] ${{ steps.get-version.outputs.release_version }}\""
 
     - name: 14. Auto approve bot branch
       if: ${{ steps.check-branch.outputs.is_release_branch =='YES' }}
