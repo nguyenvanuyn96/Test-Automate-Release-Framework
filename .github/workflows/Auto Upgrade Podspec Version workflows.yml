@@ -68,7 +68,7 @@ jobs:
           echo "::set-output name=podspec_line_string::${new_string}"
 
     - name: 5.3.1. Test get release version only
-      if: ${{ steps.check-branch.outputs.is_release_branch == 'YES' }}
+      if: ${{ steps.get-branch.outputs.is_release_branch == 'YES' }}
       run: |
         truncatedFirstLastBracketString=$(echo ${{steps.find_podspec_string.outputs.resultArray}} | sed -e 's/^.//' -e 's/.$//')
         echo "truncatedFirstLastBracketString = ${truncatedFirstLastBracketString}"
