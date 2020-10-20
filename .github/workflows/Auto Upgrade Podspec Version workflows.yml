@@ -57,7 +57,7 @@ jobs:
           truncatedFirstLastBracketString=$(echo ${{steps.find_podspec_string.outputs.resultArray}} | sed -e 's/^.//' -e 's/.$//')
           echo "TEMP = ${truncatedFirstLastBracketString}"
 
-          firstString=$truncatedFirstLastBracketString
+          firstString=${truncatedFirstLastBracketString}
           secondString=${{steps.get-release-version.outputs.new_release_version}}
           new_string="${firstString/[0-9]*[\.]*[0-9]/$secondString}"
 
