@@ -122,8 +122,8 @@ jobs:
       id: find_and_replace
       uses: shitiomatic/str-replace@master
       with:
-          find: "## [Unreleased]"
-          replace: "## [Released] ${{ steps.get-version.outputs.release_version }}"
+          find: "[Unreleased]"
+          replace: "[Released] ${{ steps.get-version.outputs.release_version }}"
           include: "${{steps.get_changelog_file.outputs.change_log_file_name}}"
 
     - name: 11.1. Check result of Find and replace
