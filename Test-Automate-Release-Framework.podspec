@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'TKTrackingSDK'
-  s.version          = '4.53.0'
+  s.version          = '1.0.7'
   s.summary          = 'A short description of TKTrackingSDK.'
 
 # This description is used to generate tags and improve search results.
