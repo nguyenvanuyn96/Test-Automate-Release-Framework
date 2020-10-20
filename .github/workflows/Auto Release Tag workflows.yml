@@ -96,7 +96,8 @@ jobs:
 
           done < $filename
           new_change_log="$(echo "$new_change_log" | sed "1 d")"
-          echo "::set-output name=unreleased_change_log::${new_change_log}"
+          echo "::set-output name=unreleased_change_log::"${new_change_log}""
+          echo "============================================================"
           echo "$new_change_log"
     
     - name: 8.1 Get change log manually
@@ -152,6 +153,6 @@ jobs:
           tag_name: ${{ steps.get-version.outputs.release_version }}
           release_name: Release ${{ steps.get-version.outputs.release_version }}
           commitish: master
-          body: "${{ steps.get_changelog_manually_1.outputs.unreleased_change_log }}"
+          body: "${{ steps.get_changelog_manually.outputs.unreleased_change_log }}"
           draft: false
           prerelease: false
