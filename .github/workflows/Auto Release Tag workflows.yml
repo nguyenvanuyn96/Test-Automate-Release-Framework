@@ -62,7 +62,7 @@ jobs:
 
     - name: 6. Get the release version number from podspec file (step 5's result)
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
-      id: get-version
+      id: get-release-version
       run: |
         resultArray=${{steps.find_podspec_string.outputs.resultArray}}
         truncatedFirstLastBracketString=$(echo "${resultArray:1:-1}")
@@ -79,7 +79,7 @@ jobs:
       run: |
         echo "The branch ${{ steps.pr_data.outputs.branch }} is used for checking"
         echo "This branch has is_releasable_branch = ${{ steps.check-branch.outputs.is_releasable_branch }}"
-        echo "This branch has release_version = ${{ steps.get-version.outputs.release_version }}"
+        echo "This branch has release_version = ${{ steps.get-release-version.outputs.release_version }}"
 
     - name: 8. Get the current change log file name
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
@@ -99,7 +99,7 @@ jobs:
           can_appending="NO"
           while read line; do
               # reading each line
-              if [ "$line" == "## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-version.outputs.release_version }}" ]; then
+              if [ "$line" == "## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.release_version }}" ]; then
                   can_appending="YES"
               elif [[ "$line" == *"## [Released] "* ]]; then
                   can_appending="NO"
@@ -107,7 +107,7 @@ jobs:
                   can_appending="NO"
               fi;
 
-              if [ "$can_appending" == "YES" ] && [ ! -z "$line" ]; then 
+              if [ "$can_appending" == "YES" ]; then # && [ ! -z "$line" ]; then 
                   new_change_log+="$line";
                   new_change_log+=$'\n';
               fi;
@@ -136,8 +136,8 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
-          tag_name: ${{ steps.get-version.outputs.release_version }}
-          release_name: "${{ steps.check-branch.outputs.releasable_prefix_branchname_capitalize }} ${{ steps.get-version.outputs.release_version }}"
+          tag_name: ${{ steps.get-release-version.outputs.release_version }}
+          release_name: "${{ steps.check-branch.outputs.releasable_prefix_branchname_capitalize }} ${{ steps.get-release-version.outputs.release_version }}"
           commitish: master
           body: "${{ steps.get_changelog_manually.outputs.unreleased_change_log }}"
           draft: false
@@ -228,19 +228,19 @@ jobs:
           final_changelog+="${new_change_log}"
           final_changelog+=$'\n';
           final_changelog+=$'\n';
-          final_changelog+="## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-version.outputs.release_version }}"
+          final_changelog+="## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.release_version }}"
           final_changelog+=$'\n';
           final_changelog+="$released_change_log"
           final_changelog="${final_changelog//'%'/'%25'}"
           final_changelog="${final_changelog//$'\n'/'%0A'}"
           final_changelog="${final_changelog//$'\r'/'%0D'}"
 
-          finding_changelog="## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-version.outputs.release_version }}"
+          finding_changelog="## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.release_version }}"
           finding_changelog+=$'\n';
-          finding_changelog+="$released_change_log"
-          finding_changelog="${finding_changelog//'%'/'%25'}"
-          finding_changelog="${finding_changelog//$'\n'/'%0A'}"
-          finding_changelog="${finding_changelog//$'\r'/'%0D'}"
+          finding_changelog+=$released_change_log
+          # finding_changelog="${finding_changelog//'%'/'%25'}"
+          # finding_changelog="${finding_changelog//$'\n'/'%0A'}"
+          # finding_changelog="${finding_changelog//$'\r'/'%0D'}"
 
           echo "::set-output name=final_changelog::${final_changelog}"
           echo "::set-output name=finding_changelog::${finding_changelog}"
@@ -306,11 +306,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           head: ${{ steps.pr_data.outputs.branch }}
           base: develop
-          title: "Merge ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} ${{ steps.get-version.outputs.release_version }} into develop"
+          title: "Merge ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} ${{ steps.get-release-version.outputs.release_version }} into develop"
           body: |
               # Description
               <!--Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.-->
-              Merge ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} ${{ steps.get-version.outputs.release_version }} into develop
+              Merge ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} ${{ steps.get-release-version.outputs.release_version }} into develop
               
               ## Jira tickets
               <!--Please list your relevant jira tickets here.-->
