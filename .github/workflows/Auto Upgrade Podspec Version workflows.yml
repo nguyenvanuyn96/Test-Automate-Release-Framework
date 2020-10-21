@@ -4,6 +4,7 @@ on:
   create:
     branches:
       - release/*
+      - hotfix/*
 
 jobs:
   upgrade_podspec:
@@ -13,30 +14,52 @@ jobs:
     - name: 1. Checkout
       uses: actions/checkout@master
         
-    - name: 2. Get and check if branch name is an `release/*`
-      uses: uynguyen-wonderlabs/get-branch-name-github-action@master
-      id: get-branch
-      with:
-          branch: ${{ github.ref }}
+    - name: 2. Check if branch name is an `release/*` or `hotfix/*`
+      id: check-branch
+      run: |
+          input_branch=${{ github.ref }}
+
+          branch=$(echo ${input_branch} | sed -e "s/refs\/heads\///g")
+          is_releasable_branch='NO'
+          releasable_prefix_branchname=''
+
+          # if contains release/
+          if [ $(echo ${input_branch} | sed -e "s/release\///g") != ${input_branch} ]; then
+              is_releasable_branch='YES'
+              releasable_prefix_branchname='release'
+          elif [ $(echo ${input_branch} | sed -e "s/hotfix\///g") != ${input_branch} ]; then
+              is_releasable_branch='YES'
+              releasable_prefix_branchname='hotfix'
+          fi;
+
+          echo "::set-output name=branch::${branch}"
+          echo "::set-output name=is_releasable_branch::${is_releasable_branch}" 
+          echo "::set-output name=releasable_prefix_branchname::${releasable_prefix_branchname}"          
+    
+    # - name: 2. Get and check if branch name is an `release/*`
+    #   uses: uynguyen-wonderlabs/check-branch-name-github-action@master
+    #   id: check-branch
+    #   with:
+    #       branch: ${{ github.ref }}
         
-    - name: 3. Get release version only
-      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+    - name: 3. Get release version number only
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: get-release-version
       run: |
-          version=$(echo ${{ github.ref }} | sed -e "s/refs\/heads\/release\///g")
+          version=$(echo ${{ steps.check-branch.outputs.branch }} | sed -e "s/${{ steps.check-branch.outputs.releasable_prefix_branchname }}\///g")
           echo "::set-output name=new_release_version::${version}"
           echo "The detected release version = ${version}"
 
     - name: 4. Create bot branch
-      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: create_bot_branch
       run: |
-          bot_branch="bot/${{ steps.get-branch.outputs.branch }}"
+          bot_branch="bot/${{ steps.check-branch.outputs.branch }}"
           echo "::set-output name=bot_branch::${bot_branch}"
           git checkout -b ${bot_branch}
     
     - name: 5.1 Find the current spec version string line
-      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: find_podspec_string
       uses: uynguyen-wonderlabs/str-replace@master
       with:
@@ -44,13 +67,13 @@ jobs:
           include: ".podspec"
 
     - name: 5.2. Debug logging info
-      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       run: |
           echo "fileFoundCount = ${{ steps.find_podspec_string.outputs.fileFoundCount }}"
           echo "resultArray = ${{ steps.find_podspec_string.outputs.resultArray }}"
     
     - name: 5.3 Prepare for update podspec version in file
-      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: prepare_for_update
       run: |
           resultArray=${{steps.find_podspec_string.outputs.resultArray}}
@@ -68,7 +91,7 @@ jobs:
           echo "::set-output name=podspec_line_string::${new_string}"
 
     - name: 5.4. Find and replace the current spec version to new version
-      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: find_and_replace
       uses: shitiomatic/str-replace@master
       with:
@@ -77,12 +100,12 @@ jobs:
           include: ".podspec"
     
     - name: 6. Check result of Find and replace
-      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       run: |
           echo "Number of files which have been modified = ${{ steps.find_and_replace.outputs.modifiedFiles}}"
            
     - name: 7. Commit and Push changes
-      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       uses: dciborow/commit@master
       with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -94,43 +117,43 @@ jobs:
           email: "automate-bot@sph.com.sg"
 
     - name: 8. Create pull request
-      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: create_pr
       uses: thomaseizinger/create-pull-request@master
       with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           head: ${{ steps.create_bot_branch.outputs.bot_branch }}
-          base: ${{ steps.get-branch.outputs.branch }}
+          base: ${{ steps.check-branch.outputs.branch }}
           title: "[Bot] Upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
 
-    - name: 9. Auto approve release branch
-      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+    - name: 9. Auto approve bot `release/*` or `hotfix/*` branch
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       uses: juliangruber/approve-pull-request-action@v1
       with:
           github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
           number: "${{ steps.create_pr.outputs.number }}"
 
     - name: 10. Merge approved PR
-      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       uses: sudo-bot/action-pull-request-merge@v1.1.1
       with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           number: ${{ steps.create_pr.outputs.number }}
 
     - name: 11. Create pull request for release branch into master
-      if: ${{ steps.get-branch.outputs.is_release_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: create_release_pr
       uses: thomaseizinger/create-pull-request@master
       with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          head: ${{ steps.get-branch.outputs.branch }}
+          head: ${{ steps.check-branch.outputs.branch }}
           base: "master"
           draft: "true"
-          title: "[DO NOT MERGE] Release ${{ steps.get-release-version.outputs.new_release_version }}"
+          title: "[DO NOT MERGE] ${{ steps.check-branch.outputs.releasable_prefix_branchname }}^ ${{ steps.get-release-version.outputs.new_release_version }}"
           body: |
               # Description
               <!--Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.-->
-              Merge for release version ${{ steps.get-release-version.outputs.new_release_version }}
+              Merge for ${{ steps.check-branch.outputs.releasable_prefix_branchname }} version ${{ steps.get-release-version.outputs.new_release_version }}
               
               ## Jira tickets
               <!--Please list your relevant jira tickets here.-->
@@ -141,7 +164,7 @@ jobs:
               <!--**Before submitting a pull request,** please make sure the following is done:-->
 
               - [ ] Ensure the test passes 
-              - [ ] Rebase your branch on to `master/` branch.
+              - [ ] Rebase your branch on to `master` branch.
 
               ## What type of PR is this?
               <!--Please delete options that are not relevant.-->
