@@ -1,12 +1,22 @@
 # Change logs
 This is change log of TKProductDetails module in 2020.
 
+## [Released] 1.0.27
+- Implement new feature `Chat with seller` in PDP
+- Fix bug crash in chat
+- Implement DeliveryShipPromotionCampaign in PDP - This is a emergency task
+- Implement UnsupportedMessageChatUI for chat in PDP
+
 ## [Released] 1.0.26
 ### Enhancements
 - start adding test cases and integrate CI
+- Create TikiNGON Hub Home Screen - https://jira.tiki.com.vn/browse/TAS-3693
+- Create new Fresh Seller Store - https://jira.tiki.com.vn/browse/TAS-3694
 
 ### Bug Fixing
 - Fixed ads x-axis position issue.
+- Fix lost words of title "Sản phẩm thường được xem cùng" - https://jira.tiki.com.vn/browse/TAS-3718
+- Discover similar products in an unsalable PDP - https://jira.tiki.com.vn/browse/TAS-3727.
 
 ## [Released] 1.0.25
 - Fix crash by get wrong data for tracking Amplitude in PDP
