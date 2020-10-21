@@ -216,7 +216,7 @@ jobs:
           can_appending="NO"
           while read line; do
               # reading each line
-              if [ "$line" == "## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.release_version }}" ]; then
+              if [ "$line" == "## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }}" ]; then
                   can_appending="YES"
               elif [[ "$line" == *"## [Released] "* ]]; then
                   can_appending="NO"
@@ -331,14 +331,14 @@ jobs:
           final_changelog+="${new_change_log}"
           final_changelog+=$'\n';
           final_changelog+=$'\n';
-          final_changelog+="## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.release_version }}"
+          final_changelog+="## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }}"
           final_changelog+=$'\n';
           final_changelog+="$released_change_log"
           final_changelog="${final_changelog//'%'/'%25'}"
           final_changelog="${final_changelog//$'\n'/'%0A'}"
           final_changelog="${final_changelog//$'\r'/'%0D'}"
 
-          finding_changelog="## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.release_version }}"
+          finding_changelog="## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }}"
           finding_changelog+=$'\n';
           finding_changelog+=$released_change_log
           # finding_changelog="${finding_changelog//'%'/'%25'}"
