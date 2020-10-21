@@ -1,7 +1,7 @@
 # Change logs
 This is change log of TKProductDetails module in 2020.
 
-## [Unreleased]
+## [Released] 1.0.32
 ### Enhancements
 - Item 4
 - Item 5
