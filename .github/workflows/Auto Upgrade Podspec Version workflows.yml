@@ -364,6 +364,8 @@ jobs:
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       run: |
           echo "Number of files which have been modified = ${{ steps.find_and_replace_changelog_content.outputs.modifiedFiles}}"
+          echo "==========================================================="
+          echo $(cat ${{steps.get_changelog_file.outputs.change_log_file_name}})
            
     - name: 21. Notify to slack channel
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
