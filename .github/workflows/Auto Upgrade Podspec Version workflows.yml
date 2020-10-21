@@ -341,9 +341,9 @@ jobs:
           finding_changelog="## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }}"
           finding_changelog+=$'\n';
           finding_changelog+=$released_change_log
-          # finding_changelog="${finding_changelog//'%'/'%25'}"
-          # finding_changelog="${finding_changelog//$'\n'/'%0A'}"
-          # finding_changelog="${finding_changelog//$'\r'/'%0D'}"
+          finding_changelog="${finding_changelog//'%'/'%25'}"
+          finding_changelog="${finding_changelog//$'\n'/'%0A'}"
+          finding_changelog="${finding_changelog//$'\r'/'%0D'}"
 
           echo "::set-output name=final_changelog::${final_changelog}"
           echo "::set-output name=finding_changelog::${finding_changelog}"
