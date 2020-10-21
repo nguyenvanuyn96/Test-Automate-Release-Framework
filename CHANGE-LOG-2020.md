@@ -1,7 +1,7 @@
 # Change logs
 This is change log of TKProductDetails module in 2020.
 
-## [Unreleased]
+## [Releaseed] 
 - Test release again
 - Fix crash because of using UIColor.random
 
