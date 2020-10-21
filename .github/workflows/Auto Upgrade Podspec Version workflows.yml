@@ -219,10 +219,10 @@ jobs:
               if [ "$line" == "## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }}" ]; then
                   can_appending="YES"
               elif [[ "$line" == *"## [Released] "* ]]; then
-                  new_change_log+="$line";
+                  new_change_log+="## [Released]";
                   can_appending="NO"
               elif [[ "$line" == *"## [Hotfixed] "* ]]; then
-                  new_change_log+="$line";
+                  new_change_log+="## [Hotfixed]";
                   can_appending="NO"
               fi;
 
