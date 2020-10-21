@@ -3,17 +3,22 @@ This is change log of TKProductDetails module in 2020.
 
 ## [Unreleased]
 ### Enhancements
+- Update Listing Ux and UI - [TAS-4102](https://jira.tiki.com.vn/browse/TAS-4102)
+- Show Best price badge - [TAS-4115](https://jira.tiki.com.vn/browse/TAS-4115)
+
+### Bug Fixing
+- Fix wrong mapping event in trackity
+
+## [Released] 1.0.28
+### Enhancements
 - start adding test cases and integrate CI
 - Create TikiNGON Hub Home Screen - https://jira.tiki.com.vn/browse/TAS-3693
 - Create new Fresh Seller Store - https://jira.tiki.com.vn/browse/TAS-3694
-- Update Listing Ux and UI - [TAS-4102](https://jira.tiki.com.vn/browse/TAS-4102)
-- Show Best price badge - [TAS-4115](https://jira.tiki.com.vn/browse/TAS-4115)
 
 ### Bug Fixing
 - Fixed ads x-axis position issue.
 - Fix lost words of title "Sản phẩm thường được xem cùng" - https://jira.tiki.com.vn/browse/TAS-3718
 - Discover similar products in an unsalable PDP - https://jira.tiki.com.vn/browse/TAS-3727.
-- Fix wrong mapping event in trackity
 
 ## [Released] 1.0.27
 - Implement new feature `Chat with seller` in PDP

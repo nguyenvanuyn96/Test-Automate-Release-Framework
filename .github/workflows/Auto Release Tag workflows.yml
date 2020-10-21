@@ -324,8 +324,6 @@ jobs:
 
               - NA
 
-    - name: 
-
     # - name: 12. Auto approve the `create_pr_develop`
     #   if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
     #   uses: juliangruber/approve-pull-request-action@v1
