@@ -236,16 +236,20 @@ jobs:
               fi;
           done < $filename
           new_change_log="$(echo "$new_change_log" | sed "1 d")"
-          new_change_log="${new_change_log//'%'/'%25'}"
-          new_change_log="${new_change_log//$'\n'/'%0A'}"
-          new_change_log="${new_change_log//$'\r'/'%0D'}"
+          unreleased_change_log_with_last_title=$new_change_log
 
-          echo "::set-output name=unreleased_change_log_with_last_title::${new_change_log}"
+          unreleased_change_log_with_last_title="${unreleased_change_log_with_last_title//'%'/'%25'}"
+          unreleased_change_log_with_last_title="${unreleased_change_log_with_last_title//$'\n'/'%0A'}"
+          unreleased_change_log_with_last_title="${unreleased_change_log_with_last_title//$'\r'/'%0D'}"
+
+          echo "::set-output name=unreleased_change_log_with_last_title::${unreleased_change_log_with_last_title}"
 
           new_change_log_line=$(echo "$new_change_log" | wc -l)
           echo "new_change_log_line = $new_change_log_line"
-          temp=$(($new_change_log_line - 1))
           new_change_log="$(echo "$new_change_log" | sed "$new_change_log_line d")"
+          new_change_log="${new_change_log//'%'/'%25'}"
+          new_change_log="${new_change_log//$'\n'/'%0A'}"
+          new_change_log="${new_change_log//$'\r'/'%0D'}"
           echo "::set-output name=unreleased_change_log::${new_change_log}"
           
           echo "============================================================"
