@@ -40,7 +40,9 @@ jobs:
 
           echo "::set-output name=branch::${branch}"
           echo "::set-output name=is_releasable_branch::${is_releasable_branch}" 
-          echo "::set-output name=releasable_prefix_branchname::${releasable_prefix_branchname}"          
+          echo "::set-output name=releasable_prefix_branchname_lowercase::${releasable_prefix_branchname}"
+          echo "::set-output name=releasable_prefix_branchname_uppercase::${releasable_prefix_branchname^^}"
+          echo "::set-output name=releasable_prefix_branchname_capitalize::${releasable_prefix_branchname^}"      
     
     # - name: 3. Check if branch name is an `release/*`
     #   uses: uynguyen-wonderlabs/get-branch-name-github-action@master
@@ -137,7 +139,7 @@ jobs:
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: create_bot_branch
       run: |
-          prefix_branch="${{ steps.check-branch.outputs.releasable_prefix_branchname }}"
+          prefix_branch="${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }}"
           bot_branch="bot/master/${prefix_branch}/${{ steps.get-version.outputs.release_version }}"
           echo "::set-output name=bot_branch::${bot_branch}"
           git checkout -b ${bot_branch}
@@ -148,7 +150,7 @@ jobs:
       uses: shitiomatic/str-replace@master
       with:
           find: "\\[Unreleased\\]"
-          replace: "[${{ steps.check-branch.outputs.releasable_prefix_branchname }}^ed] ${{ steps.get-version.outputs.release_version }}"
+          replace: "[${{ steps.check-branch.outputs.releasable_prefix_branchname_capitalize }}ed] ${{ steps.get-version.outputs.release_version }}"
           include: "${{steps.get_changelog_file.outputs.change_log_file_name}}"
 
     - name: 11.1. Check result of Find and replace
@@ -162,7 +164,7 @@ jobs:
       with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           push-branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
-          commit-message: "Update ${{steps.get_changelog_file.outputs.change_log_file_name}} file for changing \"[Unreleased]\" title to \"[${{ steps.check-branch.outputs.releasable_prefix_branchname }}^ed] ${{ steps.get-version.outputs.release_version }}\""
+          commit-message: "Update ${{steps.get_changelog_file.outputs.change_log_file_name}} file for changing \"[Unreleased]\" title to \"[${{ steps.check-branch.outputs.releasable_prefix_branchname_capitalize }}ed] ${{ steps.get-version.outputs.release_version }}\""
           force-add: 'true'
           force-push: 'true'
           name: "automate-bot"
@@ -176,7 +178,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           head: ${{ steps.create_bot_branch.outputs.bot_branch }}
           base: master
-          title: "[Bot] Update ${{steps.get_changelog_file.outputs.change_log_file_name}} file for changing \"[Unreleased]\" title to \"[${{ steps.check-branch.outputs.releasable_prefix_branchname }}^ed] ${{ steps.get-version.outputs.release_version }}\""
+          title: "[Bot] Update ${{steps.get_changelog_file.outputs.change_log_file_name}} file for changing \"[Unreleased]\" title to \"[${{ steps.check-branch.outputs.releasable_prefix_branchname_capitalize }}ed] ${{ steps.get-version.outputs.release_version }}\""
 
     - name: 14. Auto approve bot branch
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
@@ -200,7 +202,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
           tag_name: ${{ steps.get-version.outputs.release_version }}
-          release_name: "${{ steps.check-branch.outputs.releasable_prefix_branchname }}^ ${{ steps.get-version.outputs.release_version }}"
+          release_name: "${{ steps.check-branch.outputs.releasable_prefix_branchname_capitalize }} ${{ steps.get-version.outputs.release_version }}"
           commitish: master
           body: "${{ steps.get_changelog_manually.outputs.unreleased_change_log }}"
           draft: false
@@ -214,7 +216,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           head: ${{ steps.pr_data.outputs.branch }}
           base: develop
-          title: "Merge ${{ steps.check-branch.outputs.releasable_prefix_branchname }} ${{ steps.get-version.outputs.release_version }} into develop"
+          title: "Merge ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} ${{ steps.get-version.outputs.release_version }} into develop"
 
     - name: 17. Notify to slack channel
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}

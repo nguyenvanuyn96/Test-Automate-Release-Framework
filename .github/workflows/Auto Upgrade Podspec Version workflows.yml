@@ -34,8 +34,10 @@ jobs:
 
           echo "::set-output name=branch::${branch}"
           echo "::set-output name=is_releasable_branch::${is_releasable_branch}" 
-          echo "::set-output name=releasable_prefix_branchname::${releasable_prefix_branchname}"          
-    
+          echo "::set-output name=releasable_prefix_branchname_lowercase::${releasable_prefix_branchname}"
+          echo "::set-output name=releasable_prefix_branchname_uppercase::${releasable_prefix_branchname^^}"
+          echo "::set-output name=releasable_prefix_branchname_capitalize::${releasable_prefix_branchname^}"
+
     # - name: 2. Get and check if branch name is an `release/*`
     #   uses: uynguyen-wonderlabs/check-branch-name-github-action@master
     #   id: check-branch
@@ -46,7 +48,7 @@ jobs:
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: get-release-version
       run: |
-          version=$(echo ${{ steps.check-branch.outputs.branch }} | sed -e "s/${{ steps.check-branch.outputs.releasable_prefix_branchname }}\///g")
+          version=$(echo ${{ steps.check-branch.outputs.branch }} | sed -e "s/${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }}\///g")
           echo "::set-output name=new_release_version::${version}"
           echo "The detected release version = ${version}"
 
@@ -149,11 +151,11 @@ jobs:
           head: ${{ steps.check-branch.outputs.branch }}
           base: "master"
           draft: "true"
-          title: "[DO NOT MERGE] ${{ steps.check-branch.outputs.releasable_prefix_branchname }}^ ${{ steps.get-release-version.outputs.new_release_version }}"
+          title: "[DO NOT MERGE] ${{ steps.check-branch.outputs.releasable_prefix_branchname_capitalize }} ${{ steps.get-release-version.outputs.new_release_version }}"
           body: |
               # Description
               <!--Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.-->
-              Merge for ${{ steps.check-branch.outputs.releasable_prefix_branchname }} version ${{ steps.get-release-version.outputs.new_release_version }}
+              Merge for ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} version ${{ steps.get-release-version.outputs.new_release_version }}
               
               ## Jira tickets
               <!--Please list your relevant jira tickets here.-->
