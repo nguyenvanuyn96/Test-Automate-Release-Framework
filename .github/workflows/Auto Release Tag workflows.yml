@@ -142,8 +142,146 @@ jobs:
           body: "${{ steps.get_changelog_manually.outputs.unreleased_change_log }}"
           draft: false
           prerelease: false
+    
+    - name: 11. Checkout and get `[Unreleased]` change log from `develop` branch
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      id: get_develop_changelog
+      run: |
+          git checkout -b develop
+          filename=${{steps.get_changelog_file.outputs.change_log_file_name}}
+          n=0
+          new_change_log=""
+          can_appending="NO"
+          while read line; do
+              # reading each line
+              if [ "$line" == "## [Unreleased]" ]; then
+                  can_appending="YES"
+              elif [[ "$line" == *"## [Released] "* ]]; then
+                  can_appending="NO"
+              elif [[ "$line" == *"## [Hotfixed] "* ]]; then
+                  can_appending="NO"
+              fi;
 
-    - name: 11. Create pull request to merge the `release/*` or `hotfix/*` into `develop`
+              if [ "$can_appending" == "YES" ] && [ ! -z "$line" ]; then 
+                  new_change_log+="$line";
+                  new_change_log+=$'\n';
+              fi;
+
+              if [ "$can_appending" == "NO" ] && [ ! -z "$new_change_log" ]; then 
+                  break;
+              fi;
+          done < $filename
+          new_change_log="$(echo "$new_change_log" | sed "1 d")"
+          new_change_log="${new_change_log//'%'/'%25'}"
+          new_change_log="${new_change_log//$'\n'/'%0A'}"
+          new_change_log="${new_change_log//$'\r'/'%0D'}"
+          echo "::set-output name=unreleased_change_log::${new_change_log}"
+          echo "============================================================"
+          echo "$new_change_log"
+
+    - name: 12. Checkout the `release/*` or `hotfix/*` branch 
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      run: |
+          git checkout -b ${{ steps.check-branch.outputs.branch }}
+          git status
+
+    - name: 13. Create bot branch
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      id: create_bot_branch
+      run: |
+          bot_branch="bot/develop/${{ steps.check-branch.outputs.branch }}"
+          echo "::set-output name=bot_branch::${bot_branch}"
+          git checkout -b ${bot_branch}
+
+    - name: 14. Get the new change logs
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      id: get_new_changelogs
+      run: |
+          new_change_log="${{ steps.get_develop_changelog.outputs.unreleased_change_log }}"
+          released_change_log="${{ steps.get_changelog_manually.outputs.unreleased_change_log }}"
+          
+          while read -r released_line
+          do
+              # reading each line
+              unreleased_n=0
+
+              while read -r unreleased_line
+              do
+                  # reading each line
+                  unreleased_n=$((unreleased_n+1))
+
+                  if [ "$unreleased_line" == "$released_line" ] && [[ $unreleased_line != "### "* ]]; then
+                      new_change_log="$(echo "$new_change_log" | sed "$unreleased_n d")"
+                      unreleased_n=$((unreleased_n-1))
+                      break;
+                  fi;
+              done < <(printf '%s\n' "$new_change_log")
+          done < <(printf '%s\n' "$released_change_log")
+
+          final_changelog="## [Unreleased]"
+          final_changelog+=$'\n';
+          final_changelog+="$new_change_log"
+          final_changelog+=$'\n';
+          final_changelog+=$'\n';
+          final_changelog+="## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-version.outputs.release_version }}"
+          final_changelog+="$released_change_log"
+          final_changelog="${final_changelog//'%'/'%25'}"
+          final_changelog="${final_changelog//$'\n'/'%0A'}"
+          final_changelog="${final_changelog//$'\r'/'%0D'}"
+
+          echo "::set-output name=final_changelog::${final_changelog}"
+
+    - name: 15. Update the content of CHANGE-LOG-XXX.md file to correct
+      if: ${{ steps.check-branch.outputs.is_release_branch =='YES' }}
+      id: find_and_replace
+      uses: shitiomatic/str-replace@master
+      with:
+          find: "${{ steps.get_changelog_manually.outputs.unreleased_change_log }}"
+          replace: "${{ steps.get_new_changelogs.outputs.final_changelog }}"
+          include: "${{steps.get_changelog_file.outputs.change_log_file_name}}"
+
+    - name: 15.1. Check result of Find and replace
+      if: ${{ steps.check-branch.outputs.is_release_branch =='YES' }}
+      run: |
+          echo "Number of files which have been modified = ${{ steps.find_and_replace.outputs.modifiedFiles}}"
+           
+    - name: 16. Commit and Push changes
+      if: ${{ steps.check-branch.outputs.is_release_branch =='YES' }}
+      uses: dciborow/commit@master
+      with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          push-branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
+          commit-message: "Update ${{steps.get_changelog_file.outputs.change_log_file_name}}"
+          force-add: 'true'
+          force-push: 'true'
+          name: "automate-bot"
+          email: "automate-bot@sph.com.sg"
+
+    - name: 17. Create pull request
+      if: ${{ steps.check-branch.outputs.is_release_branch =='YES' }}
+      id: create_pr
+      uses: thomaseizinger/create-pull-request@master
+      with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          head: ${{ steps.create_bot_branch.outputs.bot_branch }}
+          base: develop
+          title: "[Bot] Update ${{steps.get_changelog_file.outputs.change_log_file_name}}"
+
+    - name: 18. Auto approve bot branch
+      if: ${{ steps.check-branch.outputs.is_release_branch =='YES' }}
+      uses: juliangruber/approve-pull-request-action@v1
+      with:
+          github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+          number: "${{ steps.create_pr.outputs.number }}"
+
+    - name: 19. Merge approved PR
+      if: ${{ steps.check-branch.outputs.is_release_branch =='YES' }}
+      uses: sudo-bot/action-pull-request-merge@v1.1.1
+      with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ steps.create_pr.outputs.number }}
+
+    - name: 20. Create pull request to merge the `release/*` or `hotfix/*` into `develop`
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: create_pr_develop
       uses: thomaseizinger/create-pull-request@master
@@ -186,21 +324,23 @@ jobs:
 
               - NA
 
-    - name: 12. Auto approve the `create_pr_develop`
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
-      uses: juliangruber/approve-pull-request-action@v1
-      with:
-          github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
-          number: "${{ steps.create_pr_develop.outputs.number }}"
+    - name: 
 
-    - name: 13. Merge approved PR
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
-      uses: sudo-bot/action-pull-request-merge@v1.1.1
-      with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          number: ${{ steps.create_pr_develop.outputs.number }}
+    # - name: 12. Auto approve the `create_pr_develop`
+    #   if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+    #   uses: juliangruber/approve-pull-request-action@v1
+    #   with:
+    #       github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+    #       number: "${{ steps.create_pr_develop.outputs.number }}"
 
-    - name: 14. Notify to slack channel
+    # - name: 13. Merge approved PR
+    #   if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+    #   uses: sudo-bot/action-pull-request-merge@v1.1.1
+    #   with:
+    #       github-token: ${{ secrets.GITHUB_TOKEN }}
+    #       number: ${{ steps.create_pr_develop.outputs.number }}
+
+    - name: 21. Notify to slack channel
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       run: |
         echo "TODO: Notify to slack channel"
