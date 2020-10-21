@@ -1,6 +1,10 @@
 # Change logs
 This is change log of TKProductDetails module in 2020.
 
+## [Released] 1.0.28
+- Try to fix crash in SelectedProductCell. Link: https://console.firebase.google.com/u/0/project/tikiandroid-1047/crashlytics/app/ios:vn.tiki.app.Tiki/issues/b18c59d826104bac3b6c88cf8c0de1d4
+- Try to fix crash when configApplyCouponButton. Link: https://console.firebase.google.com/u/0/project/tikiandroid-1047/crashlytics/app/ios:vn.tiki.app.Tiki/issues/73ae6ffb314684975f3f2d63b72e6acc
+
 ## [Released] 1.0.27
 - Implement new feature `Chat with seller` in PDP
 - Fix bug crash in chat
