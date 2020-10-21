@@ -208,7 +208,7 @@ jobs:
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: create_bot_branch
       run: |
-          bot_branch="bot/develop/${{ steps.check-branch.outputs.branch }}"
+          bot_branch="bot/${{ steps.check-branch.outputs.branch }}/develop"
           echo "::set-output name=bot_branch::${bot_branch}"
           git checkout -b ${bot_branch}
 
