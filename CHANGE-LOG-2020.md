@@ -5,6 +5,10 @@ This is change log of TKProductDetails module in 2020.
 - Test release again
 - Fix crash because of using UIColor.random
 
+## [Released] 1.0.23
+- Test release again
+- Fix crash because of using UIColor.random
+
 ## [Released] 1.0.22
 - Test release again
 - Fix crash because of using UIColor.random
