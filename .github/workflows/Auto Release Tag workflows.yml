@@ -220,31 +220,42 @@ jobs:
                       unreleased_n=$((unreleased_n-1))
                       break;
                   fi;
-              done < <(printf '%s\n' "${{ steps.get_changelog_manually.outputs.unreleased_change_log }}")
+              done < <(printf '%s\n' "$new_change_log")
           done < <(printf '%s\n' "$released_change_log")
 
           final_changelog="## [Unreleased]"
           final_changelog+=$'\n';
-          final_changelog+="${{ steps.get_changelog_manually.outputs.unreleased_change_log }}"
+          final_changelog+="${new_change_log}"
           final_changelog+=$'\n';
           final_changelog+=$'\n';
           final_changelog+="## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-version.outputs.release_version }}"
+          final_changelog+=$'\n';
           final_changelog+="$released_change_log"
           final_changelog="${final_changelog//'%'/'%25'}"
           final_changelog="${final_changelog//$'\n'/'%0A'}"
           final_changelog="${final_changelog//$'\r'/'%0D'}"
 
+          finding_changelog="## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-version.outputs.release_version }}"
+          finding_changelog+=$'\n';
+          finding_changelog+="$released_change_log"
+          finding_changelog="${finding_changelog//'%'/'%25'}"
+          finding_changelog="${finding_changelog//$'\n'/'%0A'}"
+          finding_changelog="${finding_changelog//$'\r'/'%0D'}"
+
           echo "::set-output name=final_changelog::${final_changelog}"
-          echo "${final_changelog}"
+          echo "::set-output name=finding_changelog::${finding_changelog}"
+          echo ${final_changelog}
+          echo "==========================================================="
+          echo ${finding_changelog}
 
     - name: 15. Update the content of CHANGE-LOG-XXX.md file to correct
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: find_and_replace
       uses: shitiomatic/str-replace@master
       with:
-          find: "${{ steps.get_changelog_manually.outputs.unreleased_change_log }}"
+          find: "${{ steps.get_new_changelogs.outputs.finding_changelog }}"
           replace: "${{ steps.get_new_changelogs.outputs.final_changelog }}"
-          include: "${{steps.get_changelog_file.outputs.change_log_file_name}}"
+          include: "${{ steps.get_changelog_file.outputs.change_log_file_name }}"
 
     - name: 15.1. Check result of Find and replace
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
