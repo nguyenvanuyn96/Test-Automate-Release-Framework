@@ -1,6 +1,12 @@
 # Change logs
 This is change log of TKProductDetails module in 2020.
 
+## [Unreleased]
+- Implement new feature `Chat with seller` in PDP
+- Fix bug crash in chat
+- Implement DeliveryShipPromotionCampaign in PDP - This is a emergency task
+- Implement UnsupportedMessageChatUI for chat in PDP
+
 ## [Released] 1.0.26
 ### Enhancements
 - start adding test cases and integrate CI
