@@ -1,6 +1,13 @@
 # Change logs
 This is change log of TKProductDetails module in 2020.
 
+## [Released] 1.0.26
+### Enhancements
+- start adding test cases and integrate CI
+
+### Bug Fixing
+- Fixed ads x-axis position issue.
+
 ## [Released] 1.0.25
 - Fix crash by get wrong data for tracking Amplitude in PDP
 - Re-utilize listing's image for PDP product image - [TAS-3988](https://jira.tiki.com.vn/browse/TAS-3988)
