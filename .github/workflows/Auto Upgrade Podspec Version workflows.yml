@@ -219,8 +219,10 @@ jobs:
               if [ "$line" == "## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }}" ]; then
                   can_appending="YES"
               elif [[ "$line" == *"## [Released] "* ]]; then
+                  new_change_log+="$line";
                   can_appending="NO"
               elif [[ "$line" == *"## [Hotfixed] "* ]]; then
+                  new_change_log+="$line";
                   can_appending="NO"
               fi;
 
@@ -237,7 +239,13 @@ jobs:
           new_change_log="${new_change_log//'%'/'%25'}"
           new_change_log="${new_change_log//$'\n'/'%0A'}"
           new_change_log="${new_change_log//$'\r'/'%0D'}"
+
+          echo "::set-output name=unreleased_change_log_with_last_title::${new_change_log}"
+
+          new_change_log_line=$(echo "$new_change_log" | wc -l)
+          new_change_log="$(echo "$new_change_log" | sed "$(($new_change_log_line -1)) d")"
           echo "::set-output name=unreleased_change_log::${new_change_log}"
+          
           echo "============================================================"
           echo $new_change_log
     
@@ -306,7 +314,7 @@ jobs:
       id: get_new_changelogs
       run: |
           new_change_log="${{ steps.get_develop_changelog.outputs.unreleased_change_log }}"
-          released_change_log="${{ steps.get_changelog_manually.outputs.unreleased_change_log }}"
+          released_change_log="${{ steps.get_changelog_manually.outputs.unreleased_change_log_with_last_title }}"
           
           while read -r released_line
           do
@@ -356,7 +364,7 @@ jobs:
       id: find_and_replace_changelog_content
       uses: shitiomatic/str-replace@master
       with:
-          find: "((?:\\#\\# \\[Released\\]|\\#\\# \\[Hotfixed\\]) ${{ steps.get-release-version.outputs.new_release_version }}[\\s\\S]*?)(?=\\#\\# \\[Released\\]|\\#\\# \\[Hotfixed\\])"
+          find: "((?:\\#\\# \\[Released\\]|\\#\\# \\[Hotfixed\\]) ${{ steps.get-release-version.outputs.new_release_version }}[\\s\\S]*?)\\#\\# \\[Released\\]|\\#\\# \\[Hotfixed\\]"
           replace: "${{ steps.get_new_changelogs.outputs.final_changelog }}"
           include: "${{ steps.get_changelog_file.outputs.change_log_file_name }}"
 
