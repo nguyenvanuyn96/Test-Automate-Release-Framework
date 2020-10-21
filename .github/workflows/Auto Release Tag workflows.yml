@@ -99,10 +99,6 @@ jobs:
           can_appending="NO"
           while read line; do
               # reading each line
-              n=$((n+1))
-
-              echo "Line No $n"
-
               if [ "$line" == "## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-version.outputs.release_version }}" ]; then
                   can_appending="YES"
               elif [[ "$line" == *"## [Released] "* ]]; then
