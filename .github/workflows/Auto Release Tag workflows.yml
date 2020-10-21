@@ -28,21 +28,25 @@ jobs:
           branch=$(echo ${input_branch} | sed -e "s/refs\/heads\///g")
           is_releasable_branch='NO'
           releasable_prefix_branchname=''
+          releasable_prefix_branchname_v2=''
 
           # if contains release/
           if [ $(echo ${input_branch} | sed -e "s/release\///g") != ${input_branch} ]; then
               is_releasable_branch='YES'
               releasable_prefix_branchname='release'
+              releasable_prefix_branchname_v2='released'
           elif [ $(echo ${input_branch} | sed -e "s/hotfix\///g") != ${input_branch} ]; then
               is_releasable_branch='YES'
               releasable_prefix_branchname='hotfix'
+              releasable_prefix_branchname_v2='hotfixed'
           fi;
 
           echo "::set-output name=branch::${branch}"
           echo "::set-output name=is_releasable_branch::${is_releasable_branch}" 
           echo "::set-output name=releasable_prefix_branchname_lowercase::${releasable_prefix_branchname}"
           echo "::set-output name=releasable_prefix_branchname_uppercase::${releasable_prefix_branchname^^}"
-          echo "::set-output name=releasable_prefix_branchname_capitalize::${releasable_prefix_branchname^}"      
+          echo "::set-output name=releasable_prefix_branchname_capitalize::${releasable_prefix_branchname^}"
+          echo "::set-output name=releasable_prefix_branchname_v2_capitalize::${releasable_prefix_branchname_v2^}"
     
     - name: 4. Checkout
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
@@ -99,7 +103,7 @@ jobs:
 
               echo "Line No $n"
 
-              if [ "$line" == "## [${{ steps.check-branch.outputs.releasable_prefix_branchname_capitalize }}] ${{ steps.get-version.outputs.release_version }}" ]; then
+              if [ "$line" == "## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-version.outputs.release_version }}" ]; then
                   can_appending="YES"
               elif [[ "$line" == *"## [Released] "* ]]; then
                   can_appending="NO"

@@ -22,14 +22,17 @@ jobs:
           branch=$(echo ${input_branch} | sed -e "s/refs\/heads\///g")
           is_releasable_branch='NO'
           releasable_prefix_branchname=''
+          releasable_prefix_branchname_v2=''
 
           # if contains release/
           if [ $(echo ${input_branch} | sed -e "s/release\///g") != ${input_branch} ]; then
               is_releasable_branch='YES'
               releasable_prefix_branchname='release'
+              releasable_prefix_branchname_v2='released'
           elif [ $(echo ${input_branch} | sed -e "s/hotfix\///g") != ${input_branch} ]; then
               is_releasable_branch='YES'
               releasable_prefix_branchname='hotfix'
+              releasable_prefix_branchname_v2='hotfixed'
           fi;
 
           echo "::set-output name=branch::${branch}"
@@ -37,6 +40,7 @@ jobs:
           echo "::set-output name=releasable_prefix_branchname_lowercase::${releasable_prefix_branchname}"
           echo "::set-output name=releasable_prefix_branchname_uppercase::${releasable_prefix_branchname^^}"
           echo "::set-output name=releasable_prefix_branchname_capitalize::${releasable_prefix_branchname^}"
+          echo "::set-output name=releasable_prefix_branchname_v2_capitalize::${releasable_prefix_branchname_v2^}"
 
     - name: 3. Get release version number only
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
@@ -114,7 +118,7 @@ jobs:
       uses: shitiomatic/str-replace@master
       with:
           find: "\\[Unreleased\\]"
-          replace: "[${{ steps.check-branch.outputs.releasable_prefix_branchname_capitalize }}ed] ${{ steps.get-version.outputs.release_version }}"
+          replace: "[${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }}"
           include: "${{steps.get_changelog_file.outputs.change_log_file_name}}"
 
     - name: 9. Check result of Find and replace
