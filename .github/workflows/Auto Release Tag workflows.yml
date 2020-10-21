@@ -198,15 +198,21 @@ jobs:
           echo "============================================================"
           echo "$new_change_log"
 
-    - name: 12. Create bot branch
+    - name: 12. Checkout the `release/*` or `hotfix/*` branch 
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      uses: actions/checkout@master
+      with:
+          ref: ${{ steps.check-branch.outputs.branch }}
+
+    - name: 13. Create bot branch
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: create_bot_branch
       run: |
-          bot_branch="bot/develop/${{ steps.check-branch.outputs.branch }}"
+          bot_branch="bot/${{ steps.check-branch.outputs.branch }}/develop"
           echo "::set-output name=bot_branch::${bot_branch}"
           git checkout -b ${bot_branch}
 
-    - name: 13. Get the new change logs
+    - name: 14. Get the new change logs
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: get_new_changelogs
       run: |
@@ -246,21 +252,21 @@ jobs:
           echo "::set-output name=final_changelog::${final_changelog}"
           echo ${final_changelog}
 
-    - name: 14. Update the content of CHANGE-LOG-XXX.md file to correct
+    - name: 15. Update the content of CHANGE-LOG-XXX.md file to correct
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: find_and_replace
       uses: shitiomatic/str-replace@master
       with:
-          find: "(\\#\\# \\[Unreleased\\][\\s\\S]*?)(\\#\\# \\[Released\\]|\\#\\# \\[Hotfixed\\])"
+          find: "((?:\\#\\# \\[Released\\]|\\#\\# \\[Hotfixed\\]) ${{ steps.get-release-version.outputs.new_release_version }}[\\s\\S]*?)\\#\\# \\[Released\\]|\\#\\# \\[Hotfixed\\]"
           replace: "${{ steps.get_new_changelogs.outputs.final_changelog }}"
           include: "${{ steps.get_changelog_file.outputs.change_log_file_name }}"
 
-    - name: 14.1. Check result of Find and replace
+    - name: 15.1. Check result of Find and replace
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       run: |
           echo "Number of files which have been modified = ${{ steps.find_and_replace.outputs.modifiedFiles}}"
            
-    - name: 15. Commit and Push changes
+    - name: 16. Commit and Push changes
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       uses: dciborow/commit@master
       with:
@@ -272,7 +278,7 @@ jobs:
           name: "automate-bot"
           email: "automate-bot@sph.com.sg"
 
-    - name: 16. Create pull request
+    - name: 17. Create pull request
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: create_pr
       uses: thomaseizinger/create-pull-request@master
@@ -280,31 +286,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           head: ${{ steps.create_bot_branch.outputs.bot_branch }}
           base: develop
-          title: "[Bot] Update ${{steps.get_changelog_file.outputs.change_log_file_name}}"
-
-    - name: 17. Auto approve bot branch
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
-      uses: juliangruber/approve-pull-request-action@v1
-      with:
-          github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
-          number: "${{ steps.create_pr.outputs.number }}"
-
-    - name: 18. Merge approved PR
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
-      uses: sudo-bot/action-pull-request-merge@v1.1.1
-      with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          number: ${{ steps.create_pr.outputs.number }}
-
-    - name: 19. Create pull request to merge the `release/*` or `hotfix/*` into `develop`
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
-      id: create_pr_develop
-      uses: thomaseizinger/create-pull-request@master
-      with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          head: ${{ steps.pr_data.outputs.branch }}
-          base: develop
-          title: "Merge ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} ${{ steps.get-release-version.outputs.new_release_version }} into develop"
+          title: "[Bot] Merge ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} ${{ steps.get-release-version.outputs.new_release_version }} into develop"
           body: |
               # Description
               <!--Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.-->
@@ -319,7 +301,7 @@ jobs:
               <!--**Before submitting a pull request,** please make sure the following is done:-->
 
               - [ ] Ensure the test passes 
-              - [ ] Rebase your branch on to `master` branch.
+              - [ ] Rebase your branch on to `develop` branch.
 
               ## What type of PR is this?
               <!--Please delete options that are not relevant.-->
@@ -339,21 +321,78 @@ jobs:
 
               - NA
 
-    - name: 20. Auto approve the `create_pr_develop`
+    - name: 18. Auto approve bot branch
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       uses: juliangruber/approve-pull-request-action@v1
       with:
           github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
-          number: "${{ steps.create_pr_develop.outputs.number }}"
+          number: "${{ steps.create_pr.outputs.number }}"
 
-    - name: 21. Merge approved PR
+    - name: 19. Merge approved PR
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       uses: sudo-bot/action-pull-request-merge@v1.1.1
       with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          number: ${{ steps.create_pr_develop.outputs.number }}
+          number: ${{ steps.create_pr.outputs.number }}
 
-    - name: 22. Notify to slack channel
+    # - name: 20. Create pull request to merge the `release/*` or `hotfix/*` into `develop`
+    #   if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+    #   id: create_pr_develop
+    #   uses: thomaseizinger/create-pull-request@master
+    #   with:
+    #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #       head: ${{ steps.pr_data.outputs.branch }}
+    #       base: develop
+    #       title: "Merge ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} ${{ steps.get-release-version.outputs.new_release_version }} into develop"
+    #       body: |
+    #           # Description
+    #           <!--Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.-->
+    #           Merge ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} ${{ steps.get-release-version.outputs.new_release_version }} into develop
+              
+    #           ## Jira tickets
+    #           <!--Please list your relevant jira tickets here.-->
+
+    #           - NA
+
+    #           ## Checklist
+    #           <!--**Before submitting a pull request,** please make sure the following is done:-->
+
+    #           - [ ] Ensure the test passes 
+    #           - [ ] Rebase your branch on to `master` branch.
+
+    #           ## What type of PR is this?
+    #           <!--Please delete options that are not relevant.-->
+
+    #           - [x] Bug fix (non-breaking change which fixes an issue)
+    #           - [x] New feature (non-breaking change which adds functionality)
+    #           - [x] Chore (Minor changes, refactor code, ...)
+    #           - [x] Documentation Update
+
+    #           ## Related libraries
+    #           <!--Please list your related module PRs.-->
+
+    #           - NA
+
+    #           ## QA Instructions, Screenshots
+    #           <!--_Please replace this line with instructions on how to test your changes, as well as any relevant images for UI changes._-->
+
+    #           - NA
+
+    # - name: 21. Auto approve the `create_pr_develop`
+    #   if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+    #   uses: juliangruber/approve-pull-request-action@v1
+    #   with:
+    #       github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+    #       number: "${{ steps.create_pr_develop.outputs.number }}"
+
+    # - name: 22. Merge approved PR
+    #   if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+    #   uses: sudo-bot/action-pull-request-merge@v1.1.1
+    #   with:
+    #       github-token: ${{ secrets.GITHUB_TOKEN }}
+    #       number: ${{ steps.create_pr_develop.outputs.number }}
+
+    - name: 23. Notify to slack channel
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       run: |
         echo "TODO: Notify to slack channel"
