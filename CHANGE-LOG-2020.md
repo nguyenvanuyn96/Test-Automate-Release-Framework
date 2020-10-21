@@ -1,6 +1,14 @@
 # Change logs
 This is change log of TKProductDetails module in 2020.
 
+## [Released] 1.0.29
+### Enhancements
+- Update Listing Ux and UI - [TAS-4102](https://jira.tiki.com.vn/browse/TAS-4102)
+- Show Best price badge - [TAS-4115](https://jira.tiki.com.vn/browse/TAS-4115)
+
+### Bug Fixing
+- Fix wrong mapping event in trackity
+
 ## [Released] 1.0.28
 ### Enhancements
 - start adding test cases and integrate CI
