@@ -104,13 +104,13 @@ jobs:
     #   run: |
     #       echo "Number of files which have been modified = ${{ steps.find_and_replace.outputs.modifiedFiles}}"
           
-    # - name: 7. Get the current change log file name
-    #   if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
-    #   id: get_changelog_file
-    #   run: |
-    #       current_year=$(echo $(date +"%Y"))
-    #       change_log_file_name="CHANGE-LOG-$current_year.md"
-    #       echo "::set-output name=change_log_file_name::${change_log_file_name}"
+    - name: 7. Get the current change log file name
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
+      id: get_changelog_file
+      run: |
+          current_year=$(echo $(date +"%Y"))
+          change_log_file_name="CHANGE-LOG-$current_year.md"
+          echo "::set-output name=change_log_file_name::${change_log_file_name}"
  
     # - name: 8. Find and replace the title `[Unreleased]` of CHANGE-LOG-XXX.md file to `[Released] x.y.z` or `[Hotfixed] x.y.z`
     #   if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
