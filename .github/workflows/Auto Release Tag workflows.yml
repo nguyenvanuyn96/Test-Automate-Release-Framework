@@ -62,7 +62,7 @@ jobs:
 
     - name: 6. Get the release version number from podspec file (step 5's result)
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
-      id: get-version
+      id: get-release-version
       run: |
         resultArray=${{steps.find_podspec_string.outputs.resultArray}}
         truncatedFirstLastBracketString=$(echo "${resultArray:1:-1}")
@@ -79,7 +79,7 @@ jobs:
       run: |
         echo "The branch ${{ steps.pr_data.outputs.branch }} is used for checking"
         echo "This branch has is_releasable_branch = ${{ steps.check-branch.outputs.is_releasable_branch }}"
-        echo "This branch has release_version = ${{ steps.get-version.outputs.release_version }}"
+        echo "This branch has release_version = ${{ steps.get-release-version.outputs.new_release_version }}"
 
     - name: 8. Get the current change log file name
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
@@ -99,15 +99,17 @@ jobs:
           can_appending="NO"
           while read line; do
               # reading each line
-              if [ "$line" == "## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-version.outputs.release_version }}" ]; then
+              if [ "$line" == "## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }}" ]; then
                   can_appending="YES"
               elif [[ "$line" == *"## [Released] "* ]]; then
+                  new_change_log+="## [Released]";
                   can_appending="NO"
               elif [[ "$line" == *"## [Hotfixed] "* ]]; then
+                  new_change_log+="## [Hotfixed]";
                   can_appending="NO"
               fi;
 
-              if [ "$can_appending" == "YES" ] && [ ! -z "$line" ]; then 
+              if [ "$can_appending" == "YES" ]; then # && [ ! -z "$line" ]; then 
                   new_change_log+="$line";
                   new_change_log+=$'\n';
               fi;
@@ -117,12 +119,24 @@ jobs:
               fi;
           done < $filename
           new_change_log="$(echo "$new_change_log" | sed "1 d")"
+          unreleased_change_log_with_last_title=$new_change_log
+
+          unreleased_change_log_with_last_title="${unreleased_change_log_with_last_title//'%'/'%25'}"
+          unreleased_change_log_with_last_title="${unreleased_change_log_with_last_title//$'\n'/'%0A'}"
+          unreleased_change_log_with_last_title="${unreleased_change_log_with_last_title//$'\r'/'%0D'}"
+
+          echo "::set-output name=unreleased_change_log_with_last_title::${unreleased_change_log_with_last_title}"
+
+          new_change_log_line=$(echo "$new_change_log" | wc -l)
+          echo "new_change_log_line = $new_change_log_line"
+          new_change_log="$(echo "$new_change_log" | sed "$new_change_log_line d")"
           new_change_log="${new_change_log//'%'/'%25'}"
           new_change_log="${new_change_log//$'\n'/'%0A'}"
           new_change_log="${new_change_log//$'\r'/'%0D'}"
           echo "::set-output name=unreleased_change_log::${new_change_log}"
+          
           echo "============================================================"
-          echo "$new_change_log"
+          echo $new_change_log
     
     - name: 9.2. Print data for debugging
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
@@ -136,8 +150,8 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
-          tag_name: ${{ steps.get-version.outputs.release_version }}
-          release_name: "${{ steps.check-branch.outputs.releasable_prefix_branchname_capitalize }} ${{ steps.get-version.outputs.release_version }}"
+          tag_name: ${{ steps.get-release-version.outputs.new_release_version }}
+          release_name: "${{ steps.check-branch.outputs.releasable_prefix_branchname_capitalize }} ${{ steps.get-release-version.outputs.new_release_version }}"
           commitish: master
           body: "${{ steps.get_changelog_manually.outputs.unreleased_change_log }}"
           draft: false
@@ -203,7 +217,7 @@ jobs:
       id: get_new_changelogs
       run: |
           new_change_log="${{ steps.get_develop_changelog.outputs.unreleased_change_log }}"
-          released_change_log="${{ steps.get_changelog_manually.outputs.unreleased_change_log }}"
+          released_change_log="${{ steps.get_changelog_manually.outputs.unreleased_change_log_with_last_title }}"
           
           while read -r released_line
           do
@@ -228,32 +242,22 @@ jobs:
           final_changelog+="${new_change_log}"
           final_changelog+=$'\n';
           final_changelog+=$'\n';
-          final_changelog+="## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-version.outputs.release_version }}"
+          final_changelog+="## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }}"
           final_changelog+=$'\n';
           final_changelog+="$released_change_log"
           final_changelog="${final_changelog//'%'/'%25'}"
           final_changelog="${final_changelog//$'\n'/'%0A'}"
           final_changelog="${final_changelog//$'\r'/'%0D'}"
 
-          finding_changelog="## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-version.outputs.release_version }}"
-          finding_changelog+=$'\n';
-          finding_changelog+="$released_change_log"
-          finding_changelog="${finding_changelog//'%'/'%25'}"
-          finding_changelog="${finding_changelog//$'\n'/'%0A'}"
-          finding_changelog="${finding_changelog//$'\r'/'%0D'}"
-
           echo "::set-output name=final_changelog::${final_changelog}"
-          echo "::set-output name=finding_changelog::${finding_changelog}"
           echo ${final_changelog}
-          echo "==========================================================="
-          echo ${finding_changelog}
 
     - name: 15. Update the content of CHANGE-LOG-XXX.md file to correct
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: find_and_replace
       uses: shitiomatic/str-replace@master
       with:
-          find: "${{ steps.get_new_changelogs.outputs.finding_changelog }}"
+          find: "((?:\\#\\# \\[Released\\]|\\#\\# \\[Hotfixed\\]) ${{ steps.get-release-version.outputs.new_release_version }}[\\s\\S]*?)\\#\\# \\[Released\\]|\\#\\# \\[Hotfixed\\]"
           replace: "${{ steps.get_new_changelogs.outputs.final_changelog }}"
           include: "${{ steps.get_changelog_file.outputs.change_log_file_name }}"
 
@@ -306,11 +310,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           head: ${{ steps.pr_data.outputs.branch }}
           base: develop
-          title: "Merge ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} ${{ steps.get-version.outputs.release_version }} into develop"
+          title: "Merge ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} ${{ steps.get-release-version.outputs.new_release_version }} into develop"
           body: |
               # Description
               <!--Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.-->
-              Merge ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} ${{ steps.get-version.outputs.release_version }} into develop
+              Merge ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} ${{ steps.get-release-version.outputs.new_release_version }} into develop
               
               ## Jira tickets
               <!--Please list your relevant jira tickets here.-->
@@ -341,21 +345,21 @@ jobs:
 
               - NA
 
-    # - name: 12. Auto approve the `create_pr_develop`
-    #   if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
-    #   uses: juliangruber/approve-pull-request-action@v1
-    #   with:
-    #       github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
-    #       number: "${{ steps.create_pr_develop.outputs.number }}"
+    - name: 21. Auto approve the `create_pr_develop`
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      uses: juliangruber/approve-pull-request-action@v1
+      with:
+          github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+          number: "${{ steps.create_pr_develop.outputs.number }}"
 
-    # - name: 13. Merge approved PR
-    #   if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
-    #   uses: sudo-bot/action-pull-request-merge@v1.1.1
-    #   with:
-    #       github-token: ${{ secrets.GITHUB_TOKEN }}
-    #       number: ${{ steps.create_pr_develop.outputs.number }}
+    - name: 22. Merge approved PR
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      uses: sudo-bot/action-pull-request-merge@v1.1.1
+      with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ steps.create_pr_develop.outputs.number }}
 
-    - name: 21. Notify to slack channel
+    - name: 23. Notify to slack channel
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       run: |
         echo "TODO: Notify to slack channel"
