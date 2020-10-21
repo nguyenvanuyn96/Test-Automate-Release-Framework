@@ -22,14 +22,17 @@ jobs:
           branch=$(echo ${input_branch} | sed -e "s/refs\/heads\///g")
           is_releasable_branch='NO'
           releasable_prefix_branchname=''
+          releasable_prefix_branchname_v2=''
 
           # if contains release/
           if [ $(echo ${input_branch} | sed -e "s/release\///g") != ${input_branch} ]; then
               is_releasable_branch='YES'
               releasable_prefix_branchname='release'
+              releasable_prefix_branchname_v2='released'
           elif [ $(echo ${input_branch} | sed -e "s/hotfix\///g") != ${input_branch} ]; then
               is_releasable_branch='YES'
               releasable_prefix_branchname='hotfix'
+              releasable_prefix_branchname_v2='hotfixed'
           fi;
 
           echo "::set-output name=branch::${branch}"
@@ -37,6 +40,7 @@ jobs:
           echo "::set-output name=releasable_prefix_branchname_lowercase::${releasable_prefix_branchname}"
           echo "::set-output name=releasable_prefix_branchname_uppercase::${releasable_prefix_branchname^^}"
           echo "::set-output name=releasable_prefix_branchname_capitalize::${releasable_prefix_branchname^}"
+          echo "::set-output name=releasable_prefix_branchname_v2_capitalize::${releasable_prefix_branchname_v2^}"
 
     - name: 3. Get release version number only
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
@@ -99,8 +103,30 @@ jobs:
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       run: |
           echo "Number of files which have been modified = ${{ steps.find_and_replace.outputs.modifiedFiles}}"
+          
+    - name: 7. Get the current change log file name
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
+      id: get_changelog_file
+      run: |
+          current_year=$(echo $(date +"%Y"))
+          change_log_file_name="CHANGE-LOG-$current_year.md"
+          echo "::set-output name=change_log_file_name::${change_log_file_name}"
+ 
+    - name: 8. Find and replace the title `[Unreleased]` of CHANGE-LOG-XXX.md file to `[Released] x.y.z` or `[Hotfixed] x.y.z`
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      id: find_and_replace_changelog
+      uses: shitiomatic/str-replace@master
+      with:
+          find: "\\[Unreleased\\]"
+          replace: "[${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }}"
+          include: "${{steps.get_changelog_file.outputs.change_log_file_name}}"
+
+    - name: 9. Check result of Find and replace
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      run: |
+          echo "Number of files which have been modified = ${{ steps.find_and_replace_changelog.outputs.modifiedFiles}}"
            
-    - name: 7. Commit and Push changes
+    - name: 10. Commit and Push changes
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       uses: dciborow/commit@master
       with:
@@ -112,7 +138,7 @@ jobs:
           name: "automate-bot"
           email: "automate-bot@sph.com.sg"
 
-    - name: 8. Create pull request
+    - name: 11. Create bot pull request
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: create_pr
       uses: thomaseizinger/create-pull-request@master
@@ -122,21 +148,21 @@ jobs:
           base: ${{ steps.check-branch.outputs.branch }}
           title: "[Bot] Upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
 
-    - name: 9. Auto approve bot `release/*` or `hotfix/*` branch
+    - name: 12. Auto approve bot `release/*` or `hotfix/*` branch
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       uses: juliangruber/approve-pull-request-action@v1
       with:
           github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
           number: "${{ steps.create_pr.outputs.number }}"
 
-    - name: 10. Merge approved PR
+    - name: 13. Merge approved PR
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       uses: sudo-bot/action-pull-request-merge@v1.1.1
       with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           number: ${{ steps.create_pr.outputs.number }}
 
-    - name: 11. Create pull request for release branch into master
+    - name: 14. Create pull request for release branch into master
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: create_release_pr
       uses: thomaseizinger/create-pull-request@master
@@ -180,3 +206,7 @@ jobs:
 
               - NA
 
+    - name: 21. Notify to slack channel
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
+      run: |
+        echo "TODO: Notify to slack channel"
