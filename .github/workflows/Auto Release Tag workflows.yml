@@ -286,31 +286,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           head: ${{ steps.create_bot_branch.outputs.bot_branch }}
           base: develop
-          title: "[Bot] Update ${{steps.get_changelog_file.outputs.change_log_file_name}}"
-
-    - name: 18. Auto approve bot branch
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
-      uses: juliangruber/approve-pull-request-action@v1
-      with:
-          github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
-          number: "${{ steps.create_pr.outputs.number }}"
-
-    - name: 19. Merge approved PR
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
-      uses: sudo-bot/action-pull-request-merge@v1.1.1
-      with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          number: ${{ steps.create_pr.outputs.number }}
-
-    - name: 20. Create pull request to merge the `release/*` or `hotfix/*` into `develop`
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
-      id: create_pr_develop
-      uses: thomaseizinger/create-pull-request@master
-      with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          head: ${{ steps.pr_data.outputs.branch }}
-          base: develop
-          title: "Merge ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} ${{ steps.get-release-version.outputs.new_release_version }} into develop"
+          title: "[Bot] Merge ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} ${{ steps.get-release-version.outputs.new_release_version }} into develop"
           body: |
               # Description
               <!--Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.-->
@@ -325,7 +301,7 @@ jobs:
               <!--**Before submitting a pull request,** please make sure the following is done:-->
 
               - [ ] Ensure the test passes 
-              - [ ] Rebase your branch on to `master` branch.
+              - [ ] Rebase your branch on to `develop` branch.
 
               ## What type of PR is this?
               <!--Please delete options that are not relevant.-->
@@ -345,19 +321,76 @@ jobs:
 
               - NA
 
-    - name: 21. Auto approve the `create_pr_develop`
+    - name: 18. Auto approve bot branch
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       uses: juliangruber/approve-pull-request-action@v1
       with:
           github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
-          number: "${{ steps.create_pr_develop.outputs.number }}"
+          number: "${{ steps.create_pr.outputs.number }}"
 
-    - name: 22. Merge approved PR
+    - name: 19. Merge approved PR
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       uses: sudo-bot/action-pull-request-merge@v1.1.1
       with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          number: ${{ steps.create_pr_develop.outputs.number }}
+          number: ${{ steps.create_pr.outputs.number }}
+
+    # - name: 20. Create pull request to merge the `release/*` or `hotfix/*` into `develop`
+    #   if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+    #   id: create_pr_develop
+    #   uses: thomaseizinger/create-pull-request@master
+    #   with:
+    #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #       head: ${{ steps.pr_data.outputs.branch }}
+    #       base: develop
+    #       title: "Merge ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} ${{ steps.get-release-version.outputs.new_release_version }} into develop"
+    #       body: |
+    #           # Description
+    #           <!--Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.-->
+    #           Merge ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} ${{ steps.get-release-version.outputs.new_release_version }} into develop
+              
+    #           ## Jira tickets
+    #           <!--Please list your relevant jira tickets here.-->
+
+    #           - NA
+
+    #           ## Checklist
+    #           <!--**Before submitting a pull request,** please make sure the following is done:-->
+
+    #           - [ ] Ensure the test passes 
+    #           - [ ] Rebase your branch on to `master` branch.
+
+    #           ## What type of PR is this?
+    #           <!--Please delete options that are not relevant.-->
+
+    #           - [x] Bug fix (non-breaking change which fixes an issue)
+    #           - [x] New feature (non-breaking change which adds functionality)
+    #           - [x] Chore (Minor changes, refactor code, ...)
+    #           - [x] Documentation Update
+
+    #           ## Related libraries
+    #           <!--Please list your related module PRs.-->
+
+    #           - NA
+
+    #           ## QA Instructions, Screenshots
+    #           <!--_Please replace this line with instructions on how to test your changes, as well as any relevant images for UI changes._-->
+
+    #           - NA
+
+    # - name: 21. Auto approve the `create_pr_develop`
+    #   if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+    #   uses: juliangruber/approve-pull-request-action@v1
+    #   with:
+    #       github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+    #       number: "${{ steps.create_pr_develop.outputs.number }}"
+
+    # - name: 22. Merge approved PR
+    #   if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+    #   uses: sudo-bot/action-pull-request-merge@v1.1.1
+    #   with:
+    #       github-token: ${{ secrets.GITHUB_TOKEN }}
+    #       number: ${{ steps.create_pr_develop.outputs.number }}
 
     - name: 23. Notify to slack channel
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
