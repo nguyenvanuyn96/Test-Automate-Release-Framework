@@ -356,7 +356,7 @@ jobs:
       id: find_and_replace_changelog_content
       uses: shitiomatic/str-replace@master
       with:
-          find: "((?:\#\# \[Released\]|\#\# \[Hotfixed\]) ${{ steps.get-release-version.outputs.new_release_version }}[\s\S]*?)(?:\#\# \[Released\]|\#\# \[Hotfixed\])"
+          find: "((?:\\#\\# \\[Released\\]|\\#\\# \\[Hotfixed\\]) ${{ steps.get-release-version.outputs.new_release_version }}[\\s\\S]*?)(?:\\#\\# \\[Released\\]|\\#\\# \\[Hotfixed\\])"
           replace: "${{ steps.get_new_changelogs.outputs.final_changelog }}"
           include: "${{ steps.get_changelog_file.outputs.change_log_file_name }}"
 
