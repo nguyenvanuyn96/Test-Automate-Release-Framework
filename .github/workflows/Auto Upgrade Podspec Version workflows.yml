@@ -148,7 +148,7 @@ jobs:
           base: ${{ steps.check-branch.outputs.branch }}
           title: "[Bot] Upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
 
-    - name: 12. Auto approve bot `release/*` or `hotfix/*` branch
+    - name: 12. Auto approve `bot/release/*` or `bot/hotfix/*` branch
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       uses: juliangruber/approve-pull-request-action@v1
       with:
