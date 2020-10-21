@@ -71,7 +71,7 @@ jobs:
         firstString=$truncatedFirstLastBracketString
         version=$(echo ${firstString} | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
 
-        echo "::set-output name=release_version::${version}"
+        echo "::set-output name=new_release_version::${version}"
         echo "This is the version which is detected from release branch name: ${version}"
         
     - name: 7. Print data for debugging
