@@ -145,9 +145,9 @@ jobs:
     
     - name: 11.1. Checkout `develop` branch
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
-      run: |
-          git checkout -b develop
-          git status
+      uses: actions/checkout@master
+      with:
+          ref: "develop"
 
     - name: 11.2. Get `[Unreleased]` change log from `develop` branch
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
