@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'Test-Automate-Release-Framework'
-  s.version          = '1.0.33'
+  s.version          = '1.0.34'
   s.summary          = 'A short description of Test-Automate-Release-Framework.'
 
 # This description is used to generate tags and improve search results.
