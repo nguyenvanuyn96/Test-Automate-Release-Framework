@@ -1,7 +1,7 @@
 # Change logs
 This is change log of TKProductDetails module in 2020.
 
-## [Unreleased]
+## [Released] 1.0.28
 ### Enhancements
 - start adding test cases and integrate CI
 - Create TikiNGON Hub Home Screen - https://jira.tiki.com.vn/browse/TAS-3693
