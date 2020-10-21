@@ -38,12 +38,6 @@ jobs:
           echo "::set-output name=releasable_prefix_branchname_uppercase::${releasable_prefix_branchname^^}"
           echo "::set-output name=releasable_prefix_branchname_capitalize::${releasable_prefix_branchname^}"
 
-    # - name: 2. Get and check if branch name is an `release/*`
-    #   uses: uynguyen-wonderlabs/check-branch-name-github-action@master
-    #   id: check-branch
-    #   with:
-    #       branch: ${{ github.ref }}
-        
     - name: 3. Get release version number only
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: get-release-version

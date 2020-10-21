@@ -23,7 +23,7 @@ jobs:
     - name: 3. Check if branch name is an `release/*` or `hotfix/*`
       id: check-branch
       run: |
-          input_branch=${{ github.ref }}
+          input_branch="${{ steps.pr_data.outputs.branch }}"
 
           branch=$(echo ${input_branch} | sed -e "s/refs\/heads\///g")
           is_releasable_branch='NO'
@@ -44,12 +44,6 @@ jobs:
           echo "::set-output name=releasable_prefix_branchname_uppercase::${releasable_prefix_branchname^^}"
           echo "::set-output name=releasable_prefix_branchname_capitalize::${releasable_prefix_branchname^}"      
     
-    # - name: 3. Check if branch name is an `release/*`
-    #   uses: uynguyen-wonderlabs/get-branch-name-github-action@master
-    #   id: check-branch
-    #   with:
-    #     branch: ${{ steps.pr_data.outputs.branch }}
-
     - name: 4. Checkout
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       uses: actions/checkout@master
