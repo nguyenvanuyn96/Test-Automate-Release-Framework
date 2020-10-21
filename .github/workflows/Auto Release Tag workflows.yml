@@ -186,9 +186,9 @@ jobs:
 
     - name: 12. Checkout the `release/*` or `hotfix/*` branch 
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
-      run: |
-          git checkout -b ${{ steps.check-branch.outputs.branch }}
-          git status
+      uses: actions/checkout@master
+      with:
+          ref: ${{ steps.check-branch.outputs.branch }}
 
     - name: 13. Create bot branch
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
@@ -235,9 +235,10 @@ jobs:
           final_changelog="${final_changelog//$'\r'/'%0D'}"
 
           echo "::set-output name=final_changelog::${final_changelog}"
+          echo "${final_changelog}"
 
     - name: 15. Update the content of CHANGE-LOG-XXX.md file to correct
-      if: ${{ steps.check-branch.outputs.is_release_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: find_and_replace
       uses: shitiomatic/str-replace@master
       with:
@@ -246,12 +247,12 @@ jobs:
           include: "${{steps.get_changelog_file.outputs.change_log_file_name}}"
 
     - name: 15.1. Check result of Find and replace
-      if: ${{ steps.check-branch.outputs.is_release_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       run: |
           echo "Number of files which have been modified = ${{ steps.find_and_replace.outputs.modifiedFiles}}"
            
     - name: 16. Commit and Push changes
-      if: ${{ steps.check-branch.outputs.is_release_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       uses: dciborow/commit@master
       with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -263,7 +264,7 @@ jobs:
           email: "automate-bot@sph.com.sg"
 
     - name: 17. Create pull request
-      if: ${{ steps.check-branch.outputs.is_release_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: create_pr
       uses: thomaseizinger/create-pull-request@master
       with:
@@ -273,14 +274,14 @@ jobs:
           title: "[Bot] Update ${{steps.get_changelog_file.outputs.change_log_file_name}}"
 
     - name: 18. Auto approve bot branch
-      if: ${{ steps.check-branch.outputs.is_release_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       uses: juliangruber/approve-pull-request-action@v1
       with:
           github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
           number: "${{ steps.create_pr.outputs.number }}"
 
     - name: 19. Merge approved PR
-      if: ${{ steps.check-branch.outputs.is_release_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       uses: sudo-bot/action-pull-request-merge@v1.1.1
       with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
