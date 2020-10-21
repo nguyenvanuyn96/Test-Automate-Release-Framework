@@ -143,11 +143,16 @@ jobs:
           draft: false
           prerelease: false
     
-    - name: 11. Checkout and get `[Unreleased]` change log from `develop` branch
+    - name: 11.1. Checkout `develop` branch
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      run: |
+          git checkout -b develop
+          git status
+
+    - name: 11.2. Get `[Unreleased]` change log from `develop` branch
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: get_develop_changelog
       run: |
-          git checkout -b develop
           filename=${{steps.get_changelog_file.outputs.change_log_file_name}}
           n=0
           new_change_log=""
@@ -215,12 +220,12 @@ jobs:
                       unreleased_n=$((unreleased_n-1))
                       break;
                   fi;
-              done < <(printf '%s\n' "$new_change_log")
+              done < <(printf '%s\n' "${{ steps.get_changelog_manually.outputs.unreleased_change_log }}")
           done < <(printf '%s\n' "$released_change_log")
 
           final_changelog="## [Unreleased]"
           final_changelog+=$'\n';
-          final_changelog+="$new_change_log"
+          final_changelog+="${{ steps.get_changelog_manually.outputs.unreleased_change_log }}"
           final_changelog+=$'\n';
           final_changelog+=$'\n';
           final_changelog+="## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-version.outputs.release_version }}"
