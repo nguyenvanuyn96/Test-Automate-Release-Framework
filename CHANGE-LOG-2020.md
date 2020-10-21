@@ -1,6 +1,11 @@
 # Change logs
 This is change log of TKProductDetails module in 2020.
 
+## [Released] 1.0.25
+- Fix crash by get wrong data for tracking Amplitude in PDP
+- Re-utilize listing's image for PDP product image - [TAS-3988](https://jira.tiki.com.vn/browse/TAS-3988)
+- Revamp Router - https://jira.tiki.com.vn/browse/AAR-80
+
 ## [Released] 1.0.24
 - Test release again
 - Fix crash because of using UIColor.random
