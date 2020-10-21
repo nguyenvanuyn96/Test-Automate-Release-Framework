@@ -245,7 +245,7 @@ jobs:
           new_change_log_line=$(echo "$new_change_log" | wc -l)
           echo "new_change_log_line = $new_change_log_line"
           temp=$(($new_change_log_line - 1))
-          new_change_log="$(echo "$new_change_log" | sed "$temp d")"
+          new_change_log="$(echo "$new_change_log" | sed "$new_change_log_line d")"
           echo "::set-output name=unreleased_change_log::${new_change_log}"
           
           echo "============================================================"
