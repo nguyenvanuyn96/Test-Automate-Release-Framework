@@ -269,9 +269,9 @@ jobs:
         new_message=${SLACK_MESSAGE}
         new_message+=$'\n'
         new_message+="Message prepare 2"
-        new_message="${new_message//'%'/'%25'}"
-        new_message="${new_message//$'\n'/'%0A'}"
-        new_message="${new_message//$'\r'/'%0D'}"
+        # new_message="${new_message//'%'/'%25'}"
+        # new_message="${new_message//$'\n'/'%0A'}"
+        # new_message="${new_message//$'\r'/'%0D'}"
 
         echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
 
