@@ -216,4 +216,4 @@ jobs:
         MSG_MINIMAL: "true"
         SLACK_TITLE: "Message from [Github Action]"
         SLACK_MESSAGE: "Your develop branch has been updated"
-        SLACK_COLOR: "#28fc03" #[#28fc03 - for good], [#fc2803 - for error], [#ffbb00 - for warning]
+        SLACK_COLOR: "good" #[#28fc03 - for good], [#fc2803 - for error], [#ffbb00 - for warning]
