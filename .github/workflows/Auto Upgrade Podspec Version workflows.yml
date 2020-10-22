@@ -211,7 +211,7 @@ jobs:
       # if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       uses: actions-ecosystem/action-slack-notifier@v1
       env:
-        slack_token: ${{ secrets.SLACK_CP_PUSHING_IOS_BOT_HOOK }}
+        slack_token: ${{ secrets.SLACK_CP_PUSHING_IOS_BOT_TOKEN }}
         channel: "cp-pushing-ios"
         verbose: "false"
         username: rtCamp
