@@ -213,8 +213,8 @@ jobs:
       with:
         slack_token: ${{ secrets.SLACK_BOT_TOKEN }}
         channel: cp-pushing-ios
-        verbose: "false"
-        username: rtCamp
+        # verbose: "false"
+        # username: rtCamp
         color: "good" #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
         custom_payload: |
             {
