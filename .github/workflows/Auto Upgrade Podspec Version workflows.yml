@@ -265,7 +265,7 @@ jobs:
       run: |
         echo "Step 2"
         new_message="${{ env.SLACK_MESSAGE }}"
-        new_message="${new_message//'`'/'\\\`'}"
+        new_message="${new_message//'`'/'\`'}"
 
         echo "SLACK_MESSAGE = $new_message"
 
@@ -279,7 +279,7 @@ jobs:
       run: |
         echo "Step 2"
         new_message="${{ env.SLACK_MESSAGE }}"
-        new_message="${new_message//'`'/'\\\`'}"
+        new_message="${new_message//'`'/'\`'}"
 
         echo "SLACK_MESSAGE = $new_message"
 
