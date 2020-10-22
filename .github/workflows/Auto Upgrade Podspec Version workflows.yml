@@ -132,7 +132,7 @@ jobs:
     - name: 9.2. Prepare slack message
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.find_and_replace_changelog.outputs.modifiedFiles }} >= 0
       run: |
-        echo "SLACK_MESSAGE="1. [Warning] Can not found the \\\`${{steps.get_changelog_file.outputs.change_log_file_name}}\\\` file into \\\`${{ steps.check-branch.outputs.branch }}\\\` branch."" >> $GITHUB_ENV
+        echo "SLACK_MESSAGE="1. [Warning] Can not found the \\\\`${{steps.get_changelog_file.outputs.change_log_file_name}}\\\\` file into \\\\`${{ steps.check-branch.outputs.branch }}\\\\` branch."" >> $GITHUB_ENV
         echo "SLACK_COLOR=yellow" >> $GITHUB_ENV #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
 
     - name: 10. Commit and Push changes
@@ -176,7 +176,7 @@ jobs:
       run: |
         new_message="${{ env.SLACK_MESSAGE }}"
         new_message+="%0A"
-        new_message+="2. Your \\\`${{ steps.check-branch.outputs.branch }}\\\` branch has been updated the podspec version and changelog. *Stay strong and go ahead!!!*"
+        new_message+="2. Your \\\\`${{ steps.check-branch.outputs.branch }}\\\\` branch has been updated the podspec version and changelog. *Stay strong and go ahead!!!*"
 
         echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
 
