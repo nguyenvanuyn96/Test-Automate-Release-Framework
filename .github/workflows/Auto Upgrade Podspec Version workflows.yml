@@ -213,7 +213,44 @@ jobs:
       env:
         SLACK_WEBHOOK: ${{ secrets.SLACK_CP_PUSHING_IOS_BOT_HOOK }}
         SLACK_CHANNEL: "cp-pushing-ios"
-        MSG_MINIMAL: "true"
-        SLACK_TITLE: "Message from [Github Action]"
-        SLACK_MESSAGE: "Your develop branch has been updated"
-        SLACK_COLOR: "good" #[#28fc03 - for good], [#fc2803 - for error], [#ffbb00 - for warning]
+        MSG_MINIMAL: "false"
+        SLACK_TITLE: "Message"
+        SLACK_ICON: https://github.com/rtCamp.png?size=48
+        SLACK_USERNAME: rtCamp
+        SLACK_COLOR: "good" #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
+        SLACK_MESSAGE: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "> message *with some bold text* and _some italicized text_."
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "This is a mrkdwn section block :ghost: *this is bold*, and ~this is crossed out~, and <https://google.com|this is a link>"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "This is a plain text section block.",
+                    "emoji": true
+                  }
+                },
+                {
+                  "type": "context",
+                  "elements": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "For more info, contact <support@acme.inc>"
+                    }
+                  ]
+                }
+              ]
+            }
