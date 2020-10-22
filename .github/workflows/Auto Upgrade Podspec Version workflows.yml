@@ -274,7 +274,6 @@ jobs:
     - name: 4. Notify to slack channel
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       uses: actions-ecosystem/action-slack-notifier@v1
-      env:
       with:
         slack_token: ${{ secrets.SLACK_BOT_TOKEN }}
         channel: $SLACK_CHANNEL #This is the id of the private group `cp-pushing-ios`
