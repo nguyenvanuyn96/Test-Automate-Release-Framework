@@ -176,7 +176,7 @@ jobs:
       run: |
         new_message="${{ env.SLACK_MESSAGE }}"
         new_message+="%0A"
-        new_message+="2. Your \\\\\\`${{ steps.check-branch.outputs.branch }}\\\\\\` branch has been updated the podspec version and changelog. *Stay strong and go ahead!!!*"
+        new_message+="2. Your \\\\`${{ steps.check-branch.outputs.branch }}\\\\` branch has been updated the podspec version and changelog. *Stay strong and go ahead!!!*"
 
         echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
 
