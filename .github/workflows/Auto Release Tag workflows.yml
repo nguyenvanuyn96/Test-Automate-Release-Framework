@@ -7,6 +7,7 @@ on:
       - closed
 jobs:
   build:
+    if: ${{ github.event.pull_request.merged == true }}
     runs-on: ubuntu-latest
     steps:
     - name: 1. Get branch name of PR
@@ -160,7 +161,7 @@ jobs:
     - name: 8.1. Prepare slack message
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       run: |
-        echo "SLACK_MESSAGE=- The framework version \\\`${{ steps.get-release-version.outputs.new_release_version }}\\\` has been created new tag. Click here <${{ steps.create_release.outputs.html_url }}|${{ steps.check-branch.outputs.releasable_prefix_branchname_capitalize }} ${{ steps.get-release-version.outputs.new_release_version }}>" >> $GITHUB_ENV
+        echo "SLACK_MESSAGE=- :white_check_mark: The framework version \\\`${{ steps.get-release-version.outputs.new_release_version }}\\\` has been created new tag :tada::tada::tada:. Click to see the detail <${{ steps.create_release.outputs.html_url }}|${{ steps.check-branch.outputs.releasable_prefix_branchname_capitalize }} ${{ steps.get-release-version.outputs.new_release_version }}>" >> $GITHUB_ENV
         echo "SLACK_COLOR=green" >> $GITHUB_ENV #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
 
     - name: 9. Checkout `develop` branch
@@ -404,7 +405,7 @@ jobs:
         new_message="${{ env.SLACK_MESSAGE }}"
         new_message="${new_message//'`'/'\`'}"
         new_message+="%0A"
-        new_message+="- Already create a PR for merging back \\\`${{steps.pr_data.outputs.branch}}\\\` into \\\`develop\\\`. Click to help review and merge it <https://github.com/${{github.repository}}/pull/${{ steps.create_pr.outputs.number }}|PR ${{ steps.create_pr.outputs.number }}>"
+        new_message+="- :white_check_mark: Already create a PR for merging back \\\`${{steps.pr_data.outputs.branch}}\\\` into \\\`develop\\\`. Click to help review and merge it - <https://github.com/${{github.repository}}/pull/${{ steps.create_pr.outputs.number }}|The PR ${{ steps.create_pr.outputs.number }}>"
 
         echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
 
