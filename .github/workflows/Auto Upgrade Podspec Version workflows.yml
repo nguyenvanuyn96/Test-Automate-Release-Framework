@@ -255,19 +255,19 @@ jobs:
         echo "SLACK_CHANNEL=G01D342CVQS" >> $GITHUB_ENV  #This is the id of the private group `cp-pushing-ios`
         echo "SLACK_USERNAME=GitHub Actions" >> $GITHUB_ENV
         echo "SLACK_COLOR=green" >> $GITHUB_ENV #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
-        echo "SLACK_VERBOSE=false" >> $GITHUB_ENV # optional
+        echo "SLACK_VERBOSE=true" >> $GITHUB_ENV # optional
 
-    - name: 2. Prepare slack message
-      run: |
-        echo "Step 2"
-        new_message="${{ env.SLACK_MESSAGE }}"
-        new_message+=$'\n'
-        new_message+="Message prepare 2"
-        new_message="${new_message//'%'/'%25'}"
-        new_message="${new_message//$'\n'/'%0A'}"
-        new_message="${new_message//$'\r'/'%0D'}"
+    # - name: 2. Prepare slack message
+    #   run: |
+    #     echo "Step 2"
+    #     new_message="${{ env.SLACK_MESSAGE }}"
+    #     new_message+=$'\n'
+    #     new_message+="Message prepare 2"
+    #     new_message="${new_message//'%'/'%25'}"
+    #     new_message="${new_message//$'\n'/'%0A'}"
+    #     new_message="${new_message//$'\r'/'%0D'}"
 
-        echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
+    #     echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
 
     - name: 3. Prepare slack message
       run: |
