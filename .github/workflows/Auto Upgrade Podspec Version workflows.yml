@@ -212,4 +212,5 @@ jobs:
       uses: rtCamp/action-slack-notify@master
       env:
         SLACK_WEBHOOK: ${{ secrets.SLACK_CP_PUSHING_IOS_BOT_HOOK }}
+        MSG_MINIMAL: "true"
         SLACK_MESSAGE: "Your develop branch has been updated"
