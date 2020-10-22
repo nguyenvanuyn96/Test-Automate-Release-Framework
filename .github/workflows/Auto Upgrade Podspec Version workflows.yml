@@ -267,7 +267,7 @@ jobs:
     - name: 1. Prepare slack message
       run: |
         echo "Step 1"
-        echo "SLACK_MESSAGE="==> Already create a PR for release "" >> $GITHUB_ENV
+        echo "SLACK_MESSAGE=Already create a PR for release" >> $GITHUB_ENV
 
     - name: 1.1. Prepare slack message
       run: |
