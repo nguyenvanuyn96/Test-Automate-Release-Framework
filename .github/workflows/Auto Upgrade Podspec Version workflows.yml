@@ -272,6 +272,7 @@ jobs:
         new_message+="%0A"
         new_message+="2. Your \\\`release/1.0.38\\\` branch has been updated the podspec version and changelog. *Stay strong and go ahead!!!*"
 
+        echo "SLACK_MESSAGE_1 = $new_message"
         echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
 
     - name: 3. Prepare slack message
@@ -285,6 +286,7 @@ jobs:
         new_message+="%0A"
         new_message+=" ==> Already create a PR for release the \\\`release/1.0.38\\\`. Click to open <https://github.com/nguyenvanuyn96/Test-Automate-Release-Framework/pull/45|PR 45>"
 
+        echo "SLACK_MESSAGE_1 = $new_message"
         echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
 
     - name: 4. Prepare slack message
@@ -301,8 +303,8 @@ jobs:
         username: "GitHub Actions"
         color: green #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
         verbose: true
-        # message: "${{ env.SLACK_MESSAGE }}"
-        message: "${{ steps.prepare_slack.outputs.message }}"
+        message: "${{ env.SLACK_MESSAGE }}"
+        # message: "${{ steps.prepare_slack.outputs.message }}"
 
 
 
