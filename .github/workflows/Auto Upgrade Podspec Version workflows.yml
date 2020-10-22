@@ -296,7 +296,7 @@ jobs:
         username: ${{ env.SLACK_USERNAME }}
         color: ${{ env.SLACK_COLOR }} #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
         verbose: ${{ env.SLACK_VERBOSE }} # optional
-        message: ${{ steps.prepare_slack.outputs.message }}
+        message: "${{ steps.prepare_slack.outputs.message }}"
 
 
 
