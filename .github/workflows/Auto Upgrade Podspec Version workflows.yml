@@ -279,7 +279,7 @@ jobs:
         new_message="${new_message//$'\n'/'%0A'}"
         new_message="${new_message//$'\r'/'%0D'}"
             
-        # echo "new_message = $new_message"
+        echo "new_message = $new_message"
         echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
 
     - name: 4. Prepare slack message
