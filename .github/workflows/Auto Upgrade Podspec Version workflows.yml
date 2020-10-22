@@ -281,9 +281,9 @@ jobs:
         new_message=${SLACK_MESSAGE}
         new_message+=$'\n'
         new_message+="Already create a PR for release the \`develop\`. Click here to open <https://github.com/nguyenvanuyn96/Test-Automate-Release-Framework/pull/171| PR 171>"
-        new_message="${new_message//'%'/'%25'}"
-        new_message="${new_message//$'\n'/'%0A'}"
-        new_message="${new_message//$'\r'/'%0D'}"
+        # new_message="${new_message//'%'/'%25'}"
+        # new_message="${new_message//$'\n'/'%0A'}"
+        # new_message="${new_message//$'\r'/'%0D'}"
             
         echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
 
