@@ -303,8 +303,8 @@ jobs:
         username: "GitHub Actions"
         color: green #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
         verbose: true
-        message: ${{ env.SLACK_MESSAGE }}
-        # message: "${{ steps.prepare_slack.outputs.message }}"
+        # message: ${{ env.SLACK_MESSAGE }}
+        message: "${{ steps.prepare_slack.outputs.message }}"
 
 
 
