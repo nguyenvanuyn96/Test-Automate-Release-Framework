@@ -210,8 +210,8 @@ jobs:
     - name: 15. Notify to slack channel
       # if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       uses: actions-ecosystem/action-slack-notifier@v1
-      env:
-        slack_token: xoxb-1384428136097-1445371521059-bqpzkUUTNDpbsOPqH8ughvwU #${{ secrets.SLACK_BOT_TOKEN }}
+      with:
+        slack_token: ${{ secrets.SLACK_BOT_TOKEN }}
         channel: "cp-pushing-ios"
         verbose: "false"
         username: rtCamp
