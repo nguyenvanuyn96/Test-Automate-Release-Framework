@@ -248,6 +248,8 @@ jobs:
 
 
     - name: 1. Prepare slack message
+      run: |
+        echo "Step 1"
       env:
         SLACK_MESSAGE: "Message prepare 1"
         SLACK_CHANNEL: "G01D342CVQS" #This is the id of the private group `cp-pushing-ios`
@@ -256,10 +258,14 @@ jobs:
         SLACK_VERBOSE: false # optional
 
     - name: 2. Prepare slack message
+      run: |
+        echo "Step 2"
       env:
         SLACK_MESSAGE: "${{SLACK_MESSAGE}}\nMessage prepare 2"
 
     - name: 3. Prepare slack message
+      run: |
+        echo "Step 3"
       env:
         SLACK_MESSAGE: |
             ${{SLACK_MESSAGE}}
