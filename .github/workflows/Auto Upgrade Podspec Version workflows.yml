@@ -1,6 +1,7 @@
 name: "Auto Upgrade Podspec Version"
 
 on: 
+  
   # create:
   #   branches:
   #     - release/*
@@ -233,19 +234,51 @@ jobs:
 
     #           - NA
 
-    - name: 16. Notify to slack channel
-      # if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
+    # - name: 16. Notify to slack channel
+    #   if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
+    #   uses: actions-ecosystem/action-slack-notifier@v1
+    #   with:
+    #     slack_token: ${{ secrets.SLACK_BOT_TOKEN }}
+    #     channel: "G01D342CVQS" #This is the id of the private group `cp-pushing-ios`
+    #     username: "GitHub Actions"
+    #     color: "green" #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
+    #     verbose: false # optional
+    #     message: |
+    #           Already create a PR for release the `${{ steps.check-branch.outputs.branch }}`. Click to open <https://github.com/${{github.repository}}/pull/${{ steps.create_release_pr.outputs.number }}|PR ${{ steps.create_release_pr.outputs.number }}>
+
+
+    - name: 1. Prepare slack message
+      env:
+        SLACK_MESSAGE: "Message prepare 1"
+        SLACK_CHANNEL: "G01D342CVQS" #This is the id of the private group `cp-pushing-ios`
+        SLACK_USERNAME: "GitHub Actions"
+        SLACK_COLOR: "green" #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
+        SLACK_VERBOSE: false # optional
+
+    - name: 2. Prepare slack message
+      env:
+        SLACK_MESSAGE: "${{SLACK_MESSAGE}}\nMessage prepare 2"
+
+    - name: 3. Prepare slack message
+      env:
+        SLACK_MESSAGE: |
+            ${{SLACK_MESSAGE}}
+            Already create a PR for release the `develop`. Click here to open <https://github.com/nguyenvanuyn96/Test-Automate-Release-Framework/pull/171| PR 171>
+
+    - name: 4. Notify to slack channel
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       uses: actions-ecosystem/action-slack-notifier@v1
+      env:
       with:
         slack_token: ${{ secrets.SLACK_BOT_TOKEN }}
-        channel: "G01D342CVQS" #This is the id of the private group `cp-pushing-ios`
-        username: "GitHub Actions"
-        color: "green" #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
-        verbose: true # optional
-        # message: |
-        #       Already create a PR for release the ${{ steps.check-branch.outputs.branch }}. [Click here](https://github.com/${{github.repository}}/pull/${{ steps.create_release_pr.outputs.number }})
-        message: |
-              Already create a PR for release the `develop`. <https://github.com/nguyenvanuyn96/Test-Automate-Release-Framework/pull/171|PR 171>
+        channel: $SLACK_CHANNEL #This is the id of the private group `cp-pushing-ios`
+        username: $SLACK_USERNAME
+        color: $SLACK_COLOR #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
+        verbose: $SLACK_VERBOSE # optional
+        message: $SLACK_MESSAGE
+
+
+
         # custom_payload: |
         #     {
         #       "blocks": [
