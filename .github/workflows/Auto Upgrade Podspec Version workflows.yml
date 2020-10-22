@@ -251,9 +251,9 @@ jobs:
       run: |
         echo "Step 1"
         echo "::set-env name=SLACK_MESSAGE::"Message prepare 1""
-        echo "::set-env name=SLACK_CHANNEL::"G01D342CVQS"" #This is the id of the private group `cp-pushing-ios`
-        echo "::set-env name=SLACK_USERNAME::"GitHub Actions""
-        echo "::set-env name=SLACK_COLOR::"green"" #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
+        echo "::set-env name=SLACK_CHANNEL::G01D342CVQS" #This is the id of the private group `cp-pushing-ios`
+        echo "::set-env name=SLACK_USERNAME::GitHub Actions"
+        echo "::set-env name=SLACK_COLOR::green" #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
         echo "::set-env name=SLACK_VERBOSE::false" # optional
 
     - name: 2. Prepare slack message
