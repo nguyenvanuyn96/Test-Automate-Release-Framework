@@ -259,14 +259,14 @@ jobs:
     - name: 1. Prepare slack message
       run: |
         echo "Step 1"
-        echo "SLACK_MESSAGE="1. [Warning] Can not found the \\\`CHANGE-LOG-2020.md\\\` file into \\\`release/1.0.38\\\` branch."" >> $GITHUB_ENV
+        echo "SLACK_MESSAGE="1. [Warning] Can not found the \`CHANGE-LOG-2020.md\` file into \`release/1.0.38\` branch."" >> $GITHUB_ENV
 
     - name: 2. Prepare slack message
       run: |
         echo "Step 2"
         new_message="${{ env.SLACK_MESSAGE }}\n"
         # new_message+="%0A"
-        new_message+="2. Your \\\`release/1.0.38\\\` branch has been updated the podspec version and changelog. *Stay strong and go ahead!!!*"
+        new_message+="2. Your \`release/1.0.38\` branch has been updated the podspec version and changelog. *Stay strong and go ahead!!!*"
 
         echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
 
