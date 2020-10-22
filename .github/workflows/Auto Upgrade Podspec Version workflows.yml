@@ -259,7 +259,7 @@ jobs:
     - name: 2. Prepare slack message
       run: |
         echo "Step 2"
-        new_message=${{SLACK_MESSAGE}}
+        new_message=${SLACK_MESSAGE}
         new_message="${new_message}\nMessage prepare 2"
         echo "::set-env name=SLACK_MESSAGE::${new_message}"
 
