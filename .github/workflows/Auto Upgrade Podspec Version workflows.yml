@@ -267,7 +267,7 @@ jobs:
     - name: 1. Prepare slack message
       run: |
         echo "Step 1"
-        echo "SLACK_MESSAGE="- The framework version \\\`1.0.38\\\` has been created new tag. Click to open <https://github.com/nguyenvanuyn96/Test-Automate-Release-Framework/pull/45|Release 1.0.38>"" >> $GITHUB_ENV
+        echo "SLACK_MESSAGE="- The framework version \\\`1.0.38\\\` has been created new tag. Click to open <https://github.com/nguyenvanuyn96/Test-Automate-Release-Framework/releases/tag/1.0.38|[Release 1.0.38]>"" >> $GITHUB_ENV
 
     - name: 1.1. Prepare slack message
       run: |
