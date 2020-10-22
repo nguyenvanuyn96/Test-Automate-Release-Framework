@@ -1,302 +1,303 @@
 name: "Auto Upgrade Podspec Version"
 
-on: 
-  
-  # create:
-  #   branches:
-  #     - release/*
-  #     - hotfix/*
-  push:
+on:  
+  create:
     branches:
-      - develop
+      - release/*
+      - hotfix/*
+  # push:
+  #   branches:
+  #     - develop
 
 jobs:
   upgrade_podspec:
     runs-on: ubuntu-latest
     steps:
 
-    # - name: 1. Checkout
-    #   uses: actions/checkout@master
+    - name: 1. Checkout
+      uses: actions/checkout@master
         
-    # - name: 2. Check if branch name is an `release/*` or `hotfix/*`
-    #   id: check-branch
-    #   run: |
-    #       input_branch=${{ github.ref }}
+    - name: 2. Check if branch name is an `release/*` or `hotfix/*`
+      id: check-branch
+      run: |
+          input_branch=${{ github.ref }}
 
-    #       branch=$(echo ${input_branch} | sed -e "s/refs\/heads\///g")
-    #       is_releasable_branch='NO'
-    #       releasable_prefix_branchname=''
-    #       releasable_prefix_branchname_v2=''
+          branch=$(echo ${input_branch} | sed -e "s/refs\/heads\///g")
+          is_releasable_branch='NO'
+          releasable_prefix_branchname=''
+          releasable_prefix_branchname_v2=''
 
-    #       # if contains release/
-    #       if [ $(echo ${input_branch} | sed -e "s/release\///g") != ${input_branch} ]; then
-    #           is_releasable_branch='YES'
-    #           releasable_prefix_branchname='release'
-    #           releasable_prefix_branchname_v2='released'
-    #       elif [ $(echo ${input_branch} | sed -e "s/hotfix\///g") != ${input_branch} ]; then
-    #           is_releasable_branch='YES'
-    #           releasable_prefix_branchname='hotfix'
-    #           releasable_prefix_branchname_v2='hotfixed'
-    #       fi;
+          # if contains release/
+          if [ $(echo ${input_branch} | sed -e "s/release\///g") != ${input_branch} ]; then
+              is_releasable_branch='YES'
+              releasable_prefix_branchname='release'
+              releasable_prefix_branchname_v2='released'
+          elif [ $(echo ${input_branch} | sed -e "s/hotfix\///g") != ${input_branch} ]; then
+              is_releasable_branch='YES'
+              releasable_prefix_branchname='hotfix'
+              releasable_prefix_branchname_v2='hotfixed'
+          fi;
 
-    #       echo "::set-output name=branch::${branch}"
-    #       echo "::set-output name=is_releasable_branch::${is_releasable_branch}" 
-    #       echo "::set-output name=releasable_prefix_branchname_lowercase::${releasable_prefix_branchname}"
-    #       echo "::set-output name=releasable_prefix_branchname_uppercase::${releasable_prefix_branchname^^}"
-    #       echo "::set-output name=releasable_prefix_branchname_capitalize::${releasable_prefix_branchname^}"
-    #       echo "::set-output name=releasable_prefix_branchname_v2_capitalize::${releasable_prefix_branchname_v2^}"
+          echo "::set-output name=branch::${branch}"
+          echo "::set-output name=is_releasable_branch::${is_releasable_branch}" 
+          echo "::set-output name=releasable_prefix_branchname_lowercase::${releasable_prefix_branchname}"
+          echo "::set-output name=releasable_prefix_branchname_uppercase::${releasable_prefix_branchname^^}"
+          echo "::set-output name=releasable_prefix_branchname_capitalize::${releasable_prefix_branchname^}"
+          echo "::set-output name=releasable_prefix_branchname_v2_capitalize::${releasable_prefix_branchname_v2^}"
 
-    # - name: 3. Get release version number only
-    #   if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
-    #   id: get-release-version
-    #   run: |
-    #       version=$(echo ${{ steps.check-branch.outputs.branch }} | sed -e "s/${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }}\///g")
-    #       echo "::set-output name=new_release_version::${version}"
-    #       echo "The detected release version = ${version}"
+    - name: 3. Get release version number only
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      id: get-release-version
+      run: |
+          version=$(echo ${{ steps.check-branch.outputs.branch }} | sed -e "s/${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }}\///g")
+          echo "::set-output name=new_release_version::${version}"
+          echo "The detected release version = ${version}"
 
-    # - name: 4. Create bot branch
-    #   if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
-    #   id: create_bot_branch
-    #   run: |
-    #       bot_branch="bot/${{ steps.check-branch.outputs.branch }}"
-    #       echo "::set-output name=bot_branch::${bot_branch}"
-    #       git checkout -b ${bot_branch}
+    - name: 4. Create bot branch
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      id: create_bot_branch
+      run: |
+          bot_branch="bot/${{ steps.check-branch.outputs.branch }}"
+          echo "::set-output name=bot_branch::${bot_branch}"
+          git checkout -b ${bot_branch}
     
-    # - name: 5. Find the current spec version string line
-    #   if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
-    #   id: find_podspec_string
-    #   uses: uynguyen-wonderlabs/str-replace@master
-    #   with:
-    #       find: "\\t*[s|spec].version\\s*=\\s*[\"|'][\\S]*[\"|']"
-    #       include: ".podspec"
+    - name: 5. Find the current spec version string line
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      id: find_podspec_string
+      uses: uynguyen-wonderlabs/str-replace@master
+      with:
+          find: "\\t*[s|spec].version\\s*=\\s*[\"|'][\\S]*[\"|']"
+          include: ".podspec"
 
-    # - name: 5.1. Debug logging info
-    #   if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
-    #   run: |
-    #       echo "fileFoundCount = ${{ steps.find_podspec_string.outputs.fileFoundCount }}"
-    #       echo "resultArray = ${{ steps.find_podspec_string.outputs.resultArray }}"
+    - name: 5.1. Debug logging info
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      run: |
+          echo "fileFoundCount = ${{ steps.find_podspec_string.outputs.fileFoundCount }}"
+          echo "resultArray = ${{ steps.find_podspec_string.outputs.resultArray }}"
     
-    # - name: 6. Prepare for update podspec version in file
-    #   if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
-    #   id: prepare_for_update
-    #   run: |
-    #       resultArray=${{steps.find_podspec_string.outputs.resultArray}}
-    #       truncatedFirstLastBracketString=$(echo "${resultArray:1:-1}")
-    #       echo "TEMP = ${truncatedFirstLastBracketString}"
+    - name: 6. Prepare for update podspec version in file
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      id: prepare_for_update
+      run: |
+          resultArray=${{steps.find_podspec_string.outputs.resultArray}}
+          truncatedFirstLastBracketString=$(echo "${resultArray:1:-1}")
+          echo "TEMP = ${truncatedFirstLastBracketString}"
 
-    #       firstString=${truncatedFirstLastBracketString}
-    #       secondString=${{steps.get-release-version.outputs.new_release_version}}
-    #       new_string="${firstString/[0-9]*[\.]*[0-9]/$secondString}"
+          firstString=${truncatedFirstLastBracketString}
+          secondString=${{steps.get-release-version.outputs.new_release_version}}
+          new_string="${firstString/[0-9]*[\.]*[0-9]/$secondString}"
 
-    #       echo "firstString = $firstString"
-    #       echo "secondString = ${secondString}"
-    #       echo "new_podspec_string = ${new_string}"
+          echo "firstString = $firstString"
+          echo "secondString = ${secondString}"
+          echo "new_podspec_string = ${new_string}"
 
-    #       echo "::set-output name=podspec_line_string::${new_string}"
+          echo "::set-output name=podspec_line_string::${new_string}"
 
-    # - name: 7. Find and replace the current spec version to new version
-    #   if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
-    #   id: find_and_replace
-    #   uses: shitiomatic/str-replace@master
-    #   with:
-    #       find: "\\t*[s|spec].version\\s*=\\s*[\"|'][\\S]*[\"|']"
-    #       replace: ${{ steps.prepare_for_update.outputs.podspec_line_string }}
-    #       include: ".podspec"
+    - name: 7. Find and replace the current spec version to new version
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      id: find_and_replace
+      uses: shitiomatic/str-replace@master
+      with:
+          find: "\\t*[s|spec].version\\s*=\\s*[\"|'][\\S]*[\"|']"
+          replace: ${{ steps.prepare_for_update.outputs.podspec_line_string }}
+          include: ".podspec"
     
-    # - name: 7.1. Check result of Find and replace
-    #   if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
-    #   run: |
-    #       echo "Number of files which have been modified = ${{ steps.find_and_replace.outputs.modifiedFiles}}"
+    - name: 7.1. Check result of Find and replace
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      run: |
+          echo "Number of files which have been modified = ${{ steps.find_and_replace.outputs.modifiedFiles}}"
           
-    # - name: 8. Get the current change log file name
-    #   if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
-    #   id: get_changelog_file
-    #   run: |
-    #       current_year=$(echo $(date +"%Y"))
-    #       change_log_file_name="CHANGE-LOG-$current_year.md"
-    #       echo "::set-output name=change_log_file_name::${change_log_file_name}"
+    - name: 8. Get the current change log file name
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
+      id: get_changelog_file
+      run: |
+          current_year=$(echo $(date +"%Y"))
+          change_log_file_name="CHANGE-LOG-$current_year.md"
+          echo "::set-output name=change_log_file_name::${change_log_file_name}"
  
-    # - name: 9. Find and replace the title `[Unreleased]` of CHANGE-LOG-YYYY.md file to `[Released] x.y.z` or `[Hotfixed] x.y.z`
-    #   if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
-    #   id: find_and_replace_changelog
-    #   uses: shitiomatic/str-replace@master
-    #   with:
-    #       find: "\\[Unreleased\\]"
-    #       replace: "[${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }}"
-    #       include: "${{steps.get_changelog_file.outputs.change_log_file_name}}"
+    - name: 9. Find and replace the title `[Unreleased]` of CHANGE-LOG-YYYY.md file to `[Released] x.y.z` or `[Hotfixed] x.y.z`
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      id: find_and_replace_changelog
+      uses: shitiomatic/str-replace@master
+      with:
+          find: "\\[Unreleased\\]"
+          replace: "[${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }}"
+          include: "${{steps.get_changelog_file.outputs.change_log_file_name}}"
 
-    # - name: 9.1. Check result of Find and replace
-    #   if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
-    #   run: |
-    #       echo "Number of files which have been modified = ${{ steps.find_and_replace_changelog.outputs.modifiedFiles }}"
-           
-    # - name: 9.2. Notify to `cp-pushing-ios` private slack channel
-    #   if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.find_and_replace_changelog.outputs.modifiedFiles }} >= 0
-    #   uses: actions-ecosystem/action-slack-notifier@v1
-    #   with:
-    #     slack_token: ${{ secrets.SLACK_BOT_TOKEN }}
-    #     channel: "G01D342CVQS" #This is the id of the private group `cp-pushing-ios`
-    #     username: "GitHub Actions"
-    #     color: "yellow" #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
-    #     verbose: true # optional
-    #     message: |
-    #           Can't found the `${{steps.get_changelog_file.outputs.change_log_file_name}}` file into `${{ steps.check-branch.outputs.branch }}` branch.
+    - name: 9.1. Check result of Find and replace
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      run: |
+          echo "Number of files which have been modified = ${{ steps.find_and_replace_changelog.outputs.modifiedFiles }}"
+   
+    - name: 9.2. Prepare slack message
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.find_and_replace_changelog.outputs.modifiedFiles }} >= 0
+      run: |
+        echo "SLACK_MESSAGE="1. [Warning] Can't found the \\\`${{steps.get_changelog_file.outputs.change_log_file_name}}\\\` file into \\\`${{ steps.check-branch.outputs.branch }}\\\` branch."" >> $GITHUB_ENV
+        echo "SLACK_COLOR=yellow" >> $GITHUB_ENV #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
 
-    # - name: 10. Commit and Push changes
-    #   if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
-    #   uses: dciborow/commit@master
-    #   with:
-    #       github-token: ${{ secrets.GITHUB_TOKEN }}
-    #       push-branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
-    #       commit-message: "Upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
-    #       force-add: 'true'
-    #       force-push: 'true'
-    #       name: "automate-bot"
-    #       email: "automate-bot@sph.com.sg"
+    - name: 10. Commit and Push changes
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      uses: dciborow/commit@master
+      with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          push-branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
+          commit-message: "Upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
+          force-add: 'true'
+          force-push: 'true'
+          name: "automate-bot"
+          email: "automate-bot@sph.com.sg"
 
-    # - name: 11. Create bot pull request
-    #   if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
-    #   id: create_pr
-    #   uses: thomaseizinger/create-pull-request@master
-    #   with:
-    #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #       head: ${{ steps.create_bot_branch.outputs.bot_branch }}
-    #       base: ${{ steps.check-branch.outputs.branch }}
-    #       title: "[Bot] Upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
+    - name: 11. Create bot pull request
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      id: create_pr
+      uses: thomaseizinger/create-pull-request@master
+      with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          head: ${{ steps.create_bot_branch.outputs.bot_branch }}
+          base: ${{ steps.check-branch.outputs.branch }}
+          title: "[Bot] Upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
 
-    # - name: 12. Auto approve `bot/release/*` or `bot/hotfix/*` branch
-    #   if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
-    #   uses: juliangruber/approve-pull-request-action@v1
-    #   with:
-    #       github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
-    #       number: "${{ steps.create_pr.outputs.number }}"
+    - name: 12. Auto approve `bot/release/*` or `bot/hotfix/*` branch
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      uses: juliangruber/approve-pull-request-action@v1
+      with:
+          github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+          number: "${{ steps.create_pr.outputs.number }}"
 
-    # - name: 13. Merge approved PR
-    #   if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
-    #   uses: sudo-bot/action-pull-request-merge@v1.1.1
-    #   with:
-    #       github-token: ${{ secrets.GITHUB_TOKEN }}
-    #       number: ${{ steps.create_pr.outputs.number }}
+    - name: 13. Merge approved PR
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      uses: sudo-bot/action-pull-request-merge@v1.1.1
+      with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ steps.create_pr.outputs.number }}
 
-    # - name: 14. Notify to `cp-pushing-ios` private slack channel
-    #   if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
-    #   uses: actions-ecosystem/action-slack-notifier@v1
-    #   with:
-    #     slack_token: ${{ secrets.SLACK_BOT_TOKEN }}
-    #     channel: "G01D342CVQS" #This is the id of the private group `cp-pushing-ios`
-    #     username: "GitHub Actions"
-    #     color: "green" #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
-    #     verbose: false # optional
-    #     message: |
-    #           Your `${{ steps.check-branch.outputs.branch }}` branch has been updated the podspec version and changelog. *Stay strong and go ahead!!!*
+    - name: 14. Prepare slack message
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
+      run: |
+        new_message="${{ env.SLACK_MESSAGE }}"
+        new_message+="%0A"
+        new_message+="2. Your \\\`${{ steps.check-branch.outputs.branch }}\\\` branch has been updated the podspec version and changelog. *Stay strong and go ahead!!!*"
 
-    # - name: 15. Create pull request for release branch into master
-    #   if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
-    #   id: create_release_pr
-    #   uses: thomaseizinger/create-pull-request@master
-    #   with:
-    #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #       head: ${{ steps.check-branch.outputs.branch }}
-    #       base: "master"
-    #       draft: "true"
-    #       title: "[DO NOT MERGE] ${{ steps.check-branch.outputs.releasable_prefix_branchname_capitalize }} ${{ steps.get-release-version.outputs.new_release_version }}"
-    #       body: |
-    #           # Description
-    #           <!--Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.-->
-    #           Merge for ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} version ${{ steps.get-release-version.outputs.new_release_version }}
+        echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
+
+        if [ -z "${{ env.SLACK_COLOR }}" ]; then
+            echo "SLACK_COLOR=green" >> $GITHUB_ENV
+        fi;
+
+    - name: 15. Create pull request for release branch into master
+      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      id: create_release_pr
+      uses: thomaseizinger/create-pull-request@master
+      with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          head: ${{ steps.check-branch.outputs.branch }}
+          base: "master"
+          draft: "true"
+          title: "[DO NOT MERGE] ${{ steps.check-branch.outputs.releasable_prefix_branchname_capitalize }} ${{ steps.get-release-version.outputs.new_release_version }}"
+          body: |
+              # Description
+              <!--Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.-->
+              Merge for ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} version ${{ steps.get-release-version.outputs.new_release_version }}
               
-    #           ## Jira tickets
-    #           <!--Please list your relevant jira tickets here.-->
+              ## Jira tickets
+              <!--Please list your relevant jira tickets here.-->
 
-    #           - NA
+              - NA
 
-    #           ## Checklist
-    #           <!--**Before submitting a pull request,** please make sure the following is done:-->
+              ## Checklist
+              <!--**Before submitting a pull request,** please make sure the following is done:-->
 
-    #           - [ ] Ensure the test passes 
-    #           - [ ] Rebase your branch on to `master` branch.
+              - [ ] Ensure the test passes 
+              - [ ] Rebase your branch on to `master` branch.
 
-    #           ## What type of PR is this?
-    #           <!--Please delete options that are not relevant.-->
+              ## What type of PR is this?
+              <!--Please delete options that are not relevant.-->
 
-    #           - [x] Bug fix (non-breaking change which fixes an issue)
-    #           - [x] New feature (non-breaking change which adds functionality)
-    #           - [x] Chore (Minor changes, refactor code, ...)
-    #           - [x] Documentation Update
+              - [x] Bug fix (non-breaking change which fixes an issue)
+              - [x] New feature (non-breaking change which adds functionality)
+              - [x] Chore (Minor changes, refactor code, ...)
+              - [x] Documentation Update
 
-    #           ## Related libraries
-    #           <!--Please list your related module PRs.-->
+              ## Related libraries
+              <!--Please list your related module PRs.-->
 
-    #           - NA
+              - NA
 
-    #           ## QA Instructions, Screenshots
-    #           <!--_Please replace this line with instructions on how to test your changes, as well as any relevant images for UI changes._-->
+              ## QA Instructions, Screenshots
+              <!--_Please replace this line with instructions on how to test your changes, as well as any relevant images for UI changes._-->
 
-    #           - NA
+              - NA
 
-    # - name: 16. Notify to slack channel
-    #   if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
-    #   uses: actions-ecosystem/action-slack-notifier@v1
-    #   with:
-    #     slack_token: ${{ secrets.SLACK_BOT_TOKEN }}
-    #     channel: "G01D342CVQS" #This is the id of the private group `cp-pushing-ios`
-    #     username: "GitHub Actions"
-    #     color: "green" #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
-    #     verbose: false # optional
-    #     message: |
-    #           Already create a PR for release the `${{ steps.check-branch.outputs.branch }}`. Click to open <https://github.com/${{github.repository}}/pull/${{ steps.create_release_pr.outputs.number }}|PR ${{ steps.create_release_pr.outputs.number }}>
-
-### TESTING ZONE ######################################################################################################################
-
-    - name: 1. Prepare slack message
+    - name: 16. Prepare slack message
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       run: |
-        echo "Step 1"
-        echo "SLACK_MESSAGE="Message prepare 1"" >> $GITHUB_ENV
-        echo "SLACK_CHANNEL=G01D342CVQS" >> $GITHUB_ENV  #This is the id of the private group `cp-pushing-ios`
-        echo "SLACK_USERNAME=GitHub Actions" >> $GITHUB_ENV
-        echo "SLACK_COLOR=green" >> $GITHUB_ENV #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
-        echo "SLACK_VERBOSE=true" >> $GITHUB_ENV # optional
-
-    - name: 2. Prepare slack message
-      run: |
-        echo "Step 2"
         new_message="${{ env.SLACK_MESSAGE }}"
         new_message+="%0A"
-        new_message+="Message prepare 2"
-        # new_message="${new_message//'%'/'%25'}"
-        # new_message="${new_message//$'\n'/'%0A'}"
-        # new_message="${new_message//$'\r'/'%0D'}"
+        new_message+="==> Already create a PR for release the \\\`${{ steps.check-branch.outputs.branch }}\\\`. Click to open <https://github.com/${{github.repository}}/pull/${{ steps.create_release_pr.outputs.number }}|PR ${{ steps.create_release_pr.outputs.number }}>"
 
         echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
 
-    - name: 3. Prepare slack message
-      run: |
-        echo "Step 3"
-        new_message="${{ env.SLACK_MESSAGE }}"
-        new_message+="%0A"
-        new_message+="Already create a PR for release the \\\`develop\\\`. Click here to open <https://github.com/nguyenvanuyn96/Test-Automate-Release-Framework/pull/171| PR 171>"
-        # new_message="${new_message//'%'/'%25'}"
-        # new_message="${new_message//$'\n'/'%0A'}"
-        # new_message="${new_message//$'\r'/'%0D'}"
-            
-        echo "new_message = $new_message"
-        echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
+        if [ -z "${{ env.SLACK_MESSAGE }}" ]; then
+            echo "SLACK_COLOR=green" >> $GITHUB_ENV
+        fi;
 
-    - name: 4. Prepare slack message
-      id: prepare_slack
-      run: |
-        echo "Step 1"
-        echo "::set-output name=message::${{ env.SLACK_MESSAGE }}"
-
-    - name: 4. Notify to slack channel
+    - name: 16.1. Notify to slack channel
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       uses: actions-ecosystem/action-slack-notifier@v1
       with:
         slack_token: ${{ secrets.SLACK_BOT_TOKEN }}
-        channel: ${{ env.SLACK_CHANNEL }} #This is the id of the private group `cp-pushing-ios`
-        username: ${{ env.SLACK_USERNAME }}
-        color: ${{ env.SLACK_COLOR }} #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
-        verbose: ${{ env.SLACK_VERBOSE }} # optional
-        message: "${{ steps.prepare_slack.outputs.message }}"
+        channel: "G01D342CVQS" #This is the id of the private group `cp-pushing-ios`
+        username: "GitHub Actions"
+        color: "${{ env.SLACK_COLOR }}"
+        verbose: true # optional
+        message: "${{ env.SLACK_MESSAGE }}"
+              
+
+### TESTING ZONE ######################################################################################################################
+
+    # - name: 1. Prepare slack message
+    #   run: |
+    #     echo "Step 1"
+    #     echo "SLACK_MESSAGE="Message prepare 1"" >> $GITHUB_ENV
+    #     echo "SLACK_CHANNEL=G01D342CVQS" >> $GITHUB_ENV  #This is the id of the private group `cp-pushing-ios`
+    #     echo "SLACK_USERNAME=GitHub Actions" >> $GITHUB_ENV
+    #     echo "SLACK_COLOR=green" >> $GITHUB_ENV #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
+    #     echo "SLACK_VERBOSE=true" >> $GITHUB_ENV # optional
+
+    # - name: 2. Prepare slack message
+    #   run: |
+    #     echo "Step 2"
+    #     new_message="${{ env.SLACK_MESSAGE }}"
+    #     new_message+="%0A"
+    #     new_message+="Message prepare 2"
+
+    #     echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
+
+    # - name: 3. Prepare slack message
+    #   run: |
+    #     echo "Step 3"
+    #     new_message="${{ env.SLACK_MESSAGE }}"
+    #     new_message+="%0A"
+    #     new_message+="Already create a PR for release the \\\`develop\\\`. Click here to open <https://github.com/nguyenvanuyn96/Test-Automate-Release-Framework/pull/171| PR 171>"
+            
+    #     echo "new_message = $new_message"
+    #     echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
+
+    # - name: 4. Prepare slack message
+    #   id: prepare_slack
+    #   run: |
+    #     echo "Step 1"
+    #     echo "::set-output name=message::${{ env.SLACK_MESSAGE }}"
+
+    # - name: 4. Notify to slack channel
+    #   uses: actions-ecosystem/action-slack-notifier@v1
+    #   with:
+    #     slack_token: ${{ secrets.SLACK_BOT_TOKEN }}
+    #     channel: ${{ env.SLACK_CHANNEL }} #This is the id of the private group `cp-pushing-ios`
+    #     username: ${{ env.SLACK_USERNAME }}
+    #     color: ${{ env.SLACK_COLOR }} #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
+    #     verbose: ${{ env.SLACK_VERBOSE }} # optional
+    #     message: "${{ steps.prepare_slack.outputs.message }}"
 
 
 
