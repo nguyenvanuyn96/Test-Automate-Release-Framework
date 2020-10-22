@@ -262,7 +262,7 @@ jobs:
         echo "Step 2"
         new_message="${{ env.SLACK_MESSAGE }}"
         # new_message+=$'\n'
-        new_message+="\nMessage prepare 2"
+        new_message+="\\\nMessage prepare 2"
         new_message="${new_message//'%'/'%25'}"
         new_message="${new_message//$'\n'/'%0A'}"
         new_message="${new_message//$'\r'/'%0D'}"
@@ -274,7 +274,7 @@ jobs:
         echo "Step 3"
         new_message="${{ env.SLACK_MESSAGE }}"
         # new_message+=$'\n'
-        new_message+="\nAlready create a PR for release the \\\`develop\\\`. Click here to open <https://github.com/nguyenvanuyn96/Test-Automate-Release-Framework/pull/171| PR 171>"
+        new_message+="\\\nAlready create a PR for release the \\\`develop\\\`. Click here to open <https://github.com/nguyenvanuyn96/Test-Automate-Release-Framework/pull/171| PR 171>"
         new_message="${new_message//'%'/'%25'}"
         new_message="${new_message//$'\n'/'%0A'}"
         new_message="${new_message//$'\r'/'%0D'}"
