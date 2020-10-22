@@ -160,7 +160,7 @@ jobs:
     - name: 8.1. Prepare slack message
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       run: |
-        echo "SLACK_MESSAGE="The framework version *${{ steps.get-release-version.outputs.new_release_version }}* has been created new tag. Click here <${{ steps.create_release.outputs.html_url }}|${{ steps.check-branch.outputs.releasable_prefix_branchname_capitalize }} ${{ steps.get-release-version.outputs.new_release_version }}>"" >> $GITHUB_ENV
+        echo "SLACK_MESSAGE="- The framework version \\\`${{ steps.get-release-version.outputs.new_release_version }}\\\` has been created new tag. Click here <${{ steps.create_release.outputs.html_url }}|${{ steps.check-branch.outputs.releasable_prefix_branchname_capitalize }} ${{ steps.get-release-version.outputs.new_release_version }}>"" >> $GITHUB_ENV
         echo "SLACK_COLOR=green" >> $GITHUB_ENV #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
 
     - name: 9. Checkout `develop` branch
@@ -402,8 +402,9 @@ jobs:
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       run: |
         new_message="${{ env.SLACK_MESSAGE }}"
+        new_message="${new_message//'`'/'\`'}"
         new_message+="%0A"
-        new_message+="Already create a PR for merging back *${{steps.pr_data.outputs.branch}}* into *develop*. Click to help review and merge it <https://github.com/${{github.repository}}/pull/${{ steps.create_pr.outputs.number }}|PR ${{ steps.create_pr.outputs.number }}>"
+        new_message+="- Already create a PR for merging back \\\`${{steps.pr_data.outputs.branch}}\\\` into \\\`develop\\\`. Click to help review and merge it <https://github.com/${{github.repository}}/pull/${{ steps.create_pr.outputs.number }}|PR ${{ steps.create_pr.outputs.number }}>"
 
         echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
 
@@ -411,13 +412,19 @@ jobs:
             echo "SLACK_COLOR=green" >> $GITHUB_ENV
         fi;
 
-    - name: 19.1. Notify to slack channel
+    - name: 19.1. Prepare slack message
+      id: prepare_slack
+      run: |
+        echo "::set-output name=message::${{ env.SLACK_MESSAGE }}"
+        echo "::set-output name=color::${{ env.SLACK_COLOR }}"
+
+    - name: 19.2. Notify to slack channel
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       uses: actions-ecosystem/action-slack-notifier@v1
       with:
         slack_token: ${{ secrets.SLACK_BOT_TOKEN }}
         channel: "G01D342CVQS" #This is the id of the private group `cp-pushing-ios`
         username: "GitHub Actions"
-        color: "${{ env.SLACK_COLOR }}"
+        color: "${{ steps.prepare_slack.outputs.color }}"
         verbose: true # optional
-        message: "${{ env.SLACK_MESSAGE }}"
+        message: "${{ steps.prepare_slack.outputs.message }}"
