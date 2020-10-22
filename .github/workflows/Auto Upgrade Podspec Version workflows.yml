@@ -130,12 +130,14 @@ jobs:
       run: |
           echo "Number of files which have been modified = ${{ steps.find_and_replace_changelog.outputs.modifiedFiles }}"
           temp=$(("${{ steps.find_and_replace_changelog.outputs.modifiedFiles }}" != "0"))
+          temp_1=$(("${{ steps.find_and_replace_changelog.outputs.modifiedFiles }}" == "0"))
           echo "temp modifiedFiles condition = $temp"
+          echo "temp_1 modifiedFiles condition = $temp_1"
    
     - name: 9.2. Prepare slack message
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && "${{ steps.find_and_replace_changelog.outputs.modifiedFiles }}" == "0"
       run: |
-        echo "SLACK_MESSAGE=:warning: [WARNING] Can not found the \\\`${{steps.get_changelog_file.outputs.change_log_file_name}}\\\` file into \\\`${{ steps.check-branch.outputs.branch }}\\\` branch." >> $GITHUB_ENV
+        echo "SLACK_MESSAGE=* :warning: [WARNING] Can not found the \\\`${{steps.get_changelog_file.outputs.change_log_file_name}}\\\` file into \\\`${{ steps.check-branch.outputs.branch }}\\\` branch." >> $GITHUB_ENV
         echo "SLACK_COLOR=yellow" >> $GITHUB_ENV #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
 
     - name: 10. Commit and Push changes
@@ -180,7 +182,7 @@ jobs:
         new_message="${{ env.SLACK_MESSAGE }}"
         new_message="${new_message//'`'/'\`'}"
         new_message+="%0A"
-        new_message+=":white_check_mark: Your \\\`${{ steps.check-branch.outputs.branch }}\\\` branch has been updated the podspec version and changelog :raised_hands::raised_hands::raised_hands:. *Stay strong and go ahead!!!*"
+        new_message+="* :white_check_mark: Your \\\`${{ steps.check-branch.outputs.branch }}\\\` branch has been updated the podspec version and changelog :raised_hands::raised_hands::raised_hands:. *Stay strong and go ahead!!!*"
 
         echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
 
