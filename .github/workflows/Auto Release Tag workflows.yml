@@ -16,11 +16,11 @@ jobs:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         pr-id: ${{ github.event.pull_request.number }}
         
-    - name: 2. Print branch name for debugging
+    - name: 1.1. Print branch name for debugging
       run: |
         echo "This is PR from branch ${{ steps.pr_data.outputs.branch }}"
     
-    - name: 3. Check if branch name is an `release/*` or `hotfix/*`
+    - name: 2. Check if branch name is an `release/*` or `hotfix/*`
       id: check-branch
       run: |
           input_branch="${{ steps.pr_data.outputs.branch }}"
@@ -48,11 +48,11 @@ jobs:
           echo "::set-output name=releasable_prefix_branchname_capitalize::${releasable_prefix_branchname^}"
           echo "::set-output name=releasable_prefix_branchname_v2_capitalize::${releasable_prefix_branchname_v2^}"
     
-    - name: 4. Checkout
+    - name: 3. Checkout
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       uses: actions/checkout@master
         
-    - name: 5. Find the current pod version line string from podspec file
+    - name: 4. Find and get the current pod version line string from podspec file
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: find_podspec_string
       uses: uynguyen-wonderlabs/str-replace@master
@@ -60,7 +60,7 @@ jobs:
           find: "\\t*[s|spec].version\\s*=\\s*[\"|'][\\S]*[\"|']"
           include: ".podspec"
 
-    - name: 6. Get the release version number from podspec file (step 5's result)
+    - name: 5. Get the release version number from podspec file (step 5's result)
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: get-release-version
       run: |
@@ -74,14 +74,14 @@ jobs:
         echo "::set-output name=new_release_version::${version}"
         echo "This is the version which is detected from release branch name: ${version}"
         
-    - name: 7. Print data for debugging
+    - name: 5.1. Print data for debugging
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       run: |
         echo "The branch ${{ steps.pr_data.outputs.branch }} is used for checking"
         echo "This branch has is_releasable_branch = ${{ steps.check-branch.outputs.is_releasable_branch }}"
         echo "This branch has release_version = ${{ steps.get-release-version.outputs.new_release_version }}"
 
-    - name: 8. Get the current change log file name
+    - name: 6. Get the current change log file name
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: get_changelog_file
       run: |
@@ -89,7 +89,7 @@ jobs:
           change_log_file_name="CHANGE-LOG-$current_year.md"
           echo "::set-output name=change_log_file_name::${change_log_file_name}"
 
-    - name: 9.1. Get unreleased change log from the CHANGE-LOG-XXX.md file
+    - name: 7. Get unreleased change log from the CHANGE-LOG-XXX.md file
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: get_changelog_manually
       run: |
@@ -138,12 +138,12 @@ jobs:
           echo "============================================================"
           echo $new_change_log
     
-    - name: 9.2. Print data for debugging
+    - name: 7.1. Print data for debugging
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       run: |
         echo "unreleased_change_log = ${{ steps.get_changelog_manually.outputs.unreleased_change_log }}"
 
-    - name: 10. Create Release tag
+    - name: 8. Create Release tag
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: create_release
       uses: actions/create-release@v1
@@ -157,13 +157,25 @@ jobs:
           draft: false
           prerelease: false
     
-    - name: 11.1. Checkout `develop` branch
+    - name: 8.1. Notify to `cp-pushing-ios` private slack channel
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
+      uses: actions-ecosystem/action-slack-notifier@v1
+      with:
+        slack_token: ${{ secrets.SLACK_BOT_TOKEN }}
+        channel: "G01D342CVQS" #This is the id of the private group `cp-pushing-ios`
+        username: "GitHub Actions"
+        color: "green" #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
+        verbose: true # optional
+        message: |
+              The framework version ${{ steps.get-release-version.outputs.new_release_version }} has been created new tag. Click here [${{ steps.check-branch.outputs.releasable_prefix_branchname_capitalize }} ${{ steps.get-release-version.outputs.new_release_version }}](${{ steps.create_release.outputs.html_url }})
+
+    - name: 9. Checkout `develop` branch
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       uses: actions/checkout@master
       with:
           ref: "develop"
 
-    - name: 11.2. Get `[Unreleased]` change log from `develop` branch
+    - name: 10. Get all `[Unreleased]` change logs from `develop` branch
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: get_develop_changelog
       run: |
@@ -198,13 +210,13 @@ jobs:
           echo "============================================================"
           echo "$new_change_log"
 
-    - name: 12. Checkout the `release/*` or `hotfix/*` branch 
+    - name: 11. Checkout the `release/*` or `hotfix/*` branch 
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       uses: actions/checkout@master
       with:
           ref: ${{ steps.check-branch.outputs.branch }}
 
-    - name: 13. Create bot branch
+    - name: 12. Create bot branch
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: create_bot_branch
       run: |
@@ -212,7 +224,7 @@ jobs:
           echo "::set-output name=bot_branch::${bot_branch}"
           git checkout -b ${bot_branch}
 
-    - name: 14. Get the new change logs
+    - name: 13. Process to get the new change logs
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: get_new_changelogs
       run: |
@@ -252,7 +264,7 @@ jobs:
           echo "::set-output name=final_changelog::${final_changelog}"
           echo ${final_changelog}
 
-    - name: 15. Update the content of CHANGE-LOG-XXX.md file to correct
+    - name: 14. Update the content of CHANGE-LOG-XXX.md file to correct
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: find_and_replace
       uses: shitiomatic/str-replace@master
@@ -261,12 +273,12 @@ jobs:
           replace: "${{ steps.get_new_changelogs.outputs.final_changelog }}"
           include: "${{ steps.get_changelog_file.outputs.change_log_file_name }}"
 
-    - name: 15.1. Check result of Find and replace
+    - name: 14.1. Check result of Find and replace
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       run: |
           echo "Number of files which have been modified = ${{ steps.find_and_replace.outputs.modifiedFiles}}"
            
-    - name: 16. Commit and Push changes
+    - name: 15. Commit and Push changes
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       uses: dciborow/commit@master
       with:
@@ -278,7 +290,7 @@ jobs:
           name: "automate-bot"
           email: "automate-bot@sph.com.sg"
 
-    - name: 17. Create pull request
+    - name: 16. Create pull request
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: create_pr
       uses: thomaseizinger/create-pull-request@master
@@ -321,14 +333,14 @@ jobs:
 
               - NA
 
-    - name: 18. Auto approve bot branch
+    - name: 17. Auto approve bot branch
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       uses: juliangruber/approve-pull-request-action@v1
       with:
           github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
           number: "${{ steps.create_pr.outputs.number }}"
 
-    - name: 19. Merge approved PR
+    - name: 18. Merge approved PR
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       uses: sudo-bot/action-pull-request-merge@v1.1.1
       with:
@@ -392,7 +404,18 @@ jobs:
     #       github-token: ${{ secrets.GITHUB_TOKEN }}
     #       number: ${{ steps.create_pr_develop.outputs.number }}
 
-    - name: 23. Notify to slack channel
+    - name: 19. Notify to slack channel
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
-      run: |
-        echo "TODO: Notify to slack channel"
+      uses: actions-ecosystem/action-slack-notifier@v1
+      with:
+        slack_token: ${{ secrets.SLACK_BOT_TOKEN }}
+        channel: "G01D342CVQS" #This is the id of the private group `cp-pushing-ios`
+        username: "GitHub Actions"
+        color: "green" #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
+        verbose: true # optional
+        message: |
+              Already create a PR for merging back `${{steps.pr_data.outputs.branch}}` into `develop`. Please help to review and merge it [here](https://github.com/${{github.repository}}/pull/${{ steps.create_pr.outputs.number }})
+    # - name: 23. Notify to slack channel
+    #   if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
+    #   run: |
+    #     echo "TODO: Notify to slack channel"
