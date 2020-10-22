@@ -161,7 +161,10 @@ jobs:
     - name: 8.1. Prepare slack message
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       run: |
-        echo "SLACK_MESSAGE=- :white_check_mark: The framework version \\\`${{ steps.get-release-version.outputs.new_release_version }}\\\` has been created new tag :tada::tada::tada:. Click to see the detail <${{ steps.create_release.outputs.html_url }}|${{ steps.check-branch.outputs.releasable_prefix_branchname_capitalize }} ${{ steps.get-release-version.outputs.new_release_version }}>" >> $GITHUB_ENV
+        repository=${{github.repository}}
+        owner=${{github.repository_owner}}
+        framework_name="${repository//'$owner/'/''}"
+        echo "SLACK_MESSAGE=- :white_check_mark: The *$framework_name* framework version \\\`${{ steps.get-release-version.outputs.new_release_version }}\\\` has been created new tag :tada::tada::tada:. Click to see the detail <${{ steps.create_release.outputs.html_url }}|${{ steps.check-branch.outputs.releasable_prefix_branchname_capitalize }} ${{ steps.get-release-version.outputs.new_release_version }}>" >> $GITHUB_ENV
         echo "SLACK_COLOR=green" >> $GITHUB_ENV #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
 
     - name: 9. Checkout `develop` branch
