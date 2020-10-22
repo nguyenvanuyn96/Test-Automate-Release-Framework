@@ -212,10 +212,10 @@ jobs:
       uses: actions-ecosystem/action-slack-notifier@v1
       with:
         slack_token: ${{ secrets.SLACK_BOT_TOKEN }}
-        channel: "G01D342CVQS"
-        # verbose: "false"
-        # username: rtCamp
-        color: "good" #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
+        channel: "G01D342CVQS" #This is the id of the private group `cp-pushing-ios`
+        username: "GitHub Actions"
+        color: "green" #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
+        verbose: true # optional
         custom_payload: |
             {
               "blocks": [
