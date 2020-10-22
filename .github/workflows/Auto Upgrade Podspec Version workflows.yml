@@ -259,14 +259,14 @@ jobs:
     - name: 1. Prepare slack message
       run: |
         echo "Step 1"
-        echo "SLACK_MESSAGE="1. [Warning] Can not found the \\\`${{steps.get_changelog_file.outputs.change_log_file_name}}\\\` file into \\\`${{ steps.check-branch.outputs.branch }}\\\` branch."" >> $GITHUB_ENV
+        echo "SLACK_MESSAGE="1. [Warning] Can not found the \\\`CHANGE-LOG-2020.md\\\` file into \\\`release/1.0.38\\\` branch."" >> $GITHUB_ENV
 
     - name: 2. Prepare slack message
       run: |
         echo "Step 2"
         new_message="${{ env.SLACK_MESSAGE }}"
         new_message+="%0A"
-        new_message+="2. Your \\\`${{ steps.check-branch.outputs.branch }}\\\` branch has been updated the podspec version and changelog. *Stay strong and go ahead!!!*"
+        new_message+="2. Your \\\`release/1.0.38\\\` branch has been updated the podspec version and changelog. *Stay strong and go ahead!!!*"
 
         echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
 
@@ -275,7 +275,7 @@ jobs:
         echo "Step 2"
         new_message="${{ env.SLACK_MESSAGE }}"
         new_message+="%0A"
-        new_message+=" ==> Already create a PR for release the \\\`${{ steps.check-branch.outputs.branch }}\\\`. Click to open <https://github.com/${{github.repository}}/pull/${{ steps.create_release_pr.outputs.number }}|PR ${{ steps.create_release_pr.outputs.number }}>"
+        new_message+=" ==> Already create a PR for release the \\\`release/1.0.38\\\`. Click to open <https://github.com/nguyenvanuyn96/Test-Automate-Release-Framework/pull/45|PR 45>"
 
         echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
 
