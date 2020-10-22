@@ -275,7 +275,7 @@ jobs:
       uses: actions-ecosystem/action-slack-notifier@v1
       with:
         slack_token: ${{ secrets.SLACK_BOT_TOKEN }}
-        channel: $SLACK_CHANNEL #This is the id of the private group `cp-pushing-ios`
+        channel: "${SLACK_CHANNEL}" #This is the id of the private group `cp-pushing-ios`
         username: $SLACK_USERNAME
         color: $SLACK_COLOR #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
         verbose: $SLACK_VERBOSE # optional
