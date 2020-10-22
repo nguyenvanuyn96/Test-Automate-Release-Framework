@@ -269,11 +269,15 @@ jobs:
         new_message=${SLACK_MESSAGE}
         new_message+=$'\n'
         new_message+="Message prepare 2"
-        new_message="${new_message//'%'/'%25'}"
-        new_message="${new_message//$'\n'/'%0A'}"
-        new_message="${new_message//$'\r'/'%0D'}"
+        # new_message="${new_message//'%'/'%25'}"
+        # new_message="${new_message//$'\n'/'%0A'}"
+        # new_message="${new_message//$'\r'/'%0D'}"
 
-        echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
+        echo 'SLACK_MESSAGE<<EOF' >> $GITHUB_ENV
+        ${new_message} >> $GITHUB_ENV
+        echo 'EOF' >> $GITHUB_ENV
+
+        # echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
 
     - name: 3. Prepare slack message
       run: |
@@ -284,8 +288,12 @@ jobs:
         # new_message="${new_message//'%'/'%25'}"
         # new_message="${new_message//$'\n'/'%0A'}"
         # new_message="${new_message//$'\r'/'%0D'}"
+
+        echo 'SLACK_MESSAGE<<EOF' >> $GITHUB_ENV
+        ${new_message} >> $GITHUB_ENV
+        echo 'EOF' >> $GITHUB_ENV
             
-        echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
+        # echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
 
     - name: 4. Notify to slack channel
       uses: actions-ecosystem/action-slack-notifier@v1
