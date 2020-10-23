@@ -1,15 +1,14 @@
 name: Check The Pull Request Is Invalid Or Not
-on: 
-  pull_request:
-    branches: 
-      - master
-      - hotfix/*
-      - release/*
-      - develop
+on: pull_request #:
+    # branches: 
+    #   - master
+    #   - hotfix/*
+    #   - release/*
+    #   - develop
 
-    types:
-      - opened
-      - reopened
+    # types:
+    #   - opened
+    #   - reopened
 
 jobs:
   build:
