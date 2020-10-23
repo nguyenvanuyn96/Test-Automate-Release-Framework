@@ -10,15 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    # - name: 1. Checkout
-    #   uses: actions/checkout@master
-        
-    - name: 2. Check prefix of commit message
+    - name: 1. Check prefix of commit message
       uses: gsactions/commit-message-checker@v1
       with:
           pattern: '\[CreatePR\] .+$'
           flags: 'gm'
-          error: 'Your first line has to contain a commit type like "[CreatePR]" to trigger auto create pr for merging feature/* into develop.'
+          error: 'Your commit message has to contain a prefix "[CreatePR]" to trigger auto create pr for merging feature/* into develop.'
           
     - name: 2. Get branch name
       id: get-branch-data
