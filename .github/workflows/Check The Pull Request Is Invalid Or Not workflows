@@ -7,9 +7,9 @@ on:
       - release/*
       - develop
 
-    types:
-      - opened
-      - reopened
+    # types:
+    #   - opened
+    #   - reopened
 
 jobs:
   build:
