@@ -61,6 +61,7 @@ jobs:
             elif [ $source_branch == "develop" ]; then
                 is_valid_pr=1
             fi;
-        elif  
+        fi;  
+
 
         exit $is_valid_pr
