@@ -1,14 +1,15 @@
 name: Check The Pull Request Is Invalid Or Not
-on: pull_request #:
-    # branches: 
-    #   - master
-    #   - hotfix/*
-    #   - release/*
-    #   - develop
+on: 
+  pull_request:
+    branches: 
+      - master
+      - hotfix/*
+      - release/*
+      - develop
 
-    # types:
-    #   - opened
-    #   - reopened
+    types:
+      - opened
+      - reopened
 
 jobs:
   build:
@@ -26,8 +27,6 @@ jobs:
       run: |
         echo "This is PR from branch ${{ steps.pr_data.outputs.branch }}"
         echo "This is PR into branch ${{ github.base_ref }}"
-    
-    - 
     
     # - name: 2. Check if branch name is an `release/*` or `hotfix/*`
     #   id: check-branch
