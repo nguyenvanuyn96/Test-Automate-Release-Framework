@@ -91,7 +91,7 @@ jobs:
         echo ${{github.actor.display_login}}
         echo 
 
-        echo "::set-output name=message:::shamrock::shamrock: *@${{github.actor}}* has just created a pull request for merging \\\`${{steps.get-branch-data.outputs.branch}}\\\` into \\\`develop\\\`. Click to help review it - <https://github.com/${{github.repository}}/pull/${{ steps.create_pr.outputs.number }}|The PR ${{ steps.create_pr.outputs.number }}>"
+        echo "::set-output name=message:::shamrock::shamrock: *@${{github.actor}}* has just created a pull request for merging `${{steps.get-branch-data.outputs.branch}}` into `develop`. Click to help review it - <https://github.com/${{github.repository}}/pull/${{ steps.create_pr.outputs.number }}|The PR ${{ steps.create_pr.outputs.number }}>"
         echo "::set-output name=color::$color"
 
     - name: 5. Notify to slack channel
