@@ -28,7 +28,7 @@ jobs:
           branch=$(echo ${input_branch} | sed -e "s/refs\/heads\///g")
           
           jira_ticket_id_regex='^feature\/\([A-Z]*-*[0-9]*\)_\S*$'
-          jira_ticket_id = $(echo "$branch" | sed -n "s/$jira_ticket_id_regex/\1/p")
+          jira_ticket_id=$(echo "$branch" | sed -n "s/$jira_ticket_id_regex/\1/p")
           jira_ticket_url="NA"
 
           if [ ! -z "$jira_ticket_id" ] ;then
