@@ -7,6 +7,7 @@ This is change log of TKProductDetails module in 2020.
 - Item 28
 - Fix bug 30
 - Fix bug 31
+- Fix bug 32
 
 ## [Hotfixed] 1.0.46
 - Fix bug 29
