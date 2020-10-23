@@ -41,7 +41,7 @@ jobs:
             elif [ $(echo ${source_branch} | sed -e "s/hotfix\///g") != ${source_branch} ]; then
                 is_valid_pr=1
             fi;
-        elif if [ $base_branch == "develop" ]; then
+        elif [ $base_branch == "develop" ]; then
             if [ $(echo ${source_branch} | sed -e "s/release\///g") != ${source_branch} ]; then
                 is_valid_pr=1
             elif [ $(echo ${source_branch} | sed -e "s/hotfix\///g") != ${source_branch} ]; then
@@ -51,11 +51,11 @@ jobs:
             elif [ $(echo ${source_branch} | sed -e "s/bugfix\///g") != ${source_branch} ]; then
                 is_valid_pr=1
             fi;
-        elif if [ -z "${base_branch##hotfix/*}" ]; then
+        elif [ -z "${base_branch##hotfix/*}" ]; then
             if [ $(echo ${source_branch} | sed -e "s/bugfix\///g") != ${source_branch} ]; then
                 is_valid_pr=1
             fi;
-        elif if [ -z "${base_branch##release/*}" ]; then
+        elif [ -z "${base_branch##release/*}" ]; then
             if [ $(echo ${source_branch} | sed -e "s/bugfix\///g") != ${source_branch} ]; then
                 is_valid_pr=1
             elif [ $source_branch == "develop" ]; then
@@ -63,10 +63,12 @@ jobs:
             fi;
         fi;  
 
+        echo "is_valid_pr = $is_valid_pr"
+        
         if [ $is_valid_pr == 0 ]; then
             echo "The PR is not valid"
             exit 1
+        else
+            echo "The PR is valid"
+            exit 0
         fi
-
-        echo "The PR is valid"
-        exit 0
