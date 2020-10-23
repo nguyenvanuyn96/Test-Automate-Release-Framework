@@ -79,6 +79,6 @@ jobs:
             echo "Reason: $error_message"
             exit 1
         else
-            echo ""Message: The PR is valid"
+            echo "Message: The PR is valid"
             exit 0
         fi
