@@ -10,8 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - name: 1. Checkout
-      uses: actions/checkout@master
+    # - name: 1. Checkout
+    #   uses: actions/checkout@master
         
     - name: 2. Check prefix of commit message
       uses: gsactions/commit-message-checker@v1
@@ -80,7 +80,7 @@ jobs:
 
               - NA
 
-    - name: 16.1. Prepare slack message
+    - name: 4. Prepare slack message
       id: prepare_slack
       run: |
         color="green"
@@ -91,8 +91,7 @@ jobs:
         echo "::set-output name=message::- :white_check_mark: Already create a PR for merging \\\`${{steps.get-branch-data.outputs.branch}}\\\` into \\\`develop\\\`. Click to help review it - <https://github.com/${{github.repository}}/pull/${{ steps.create_pr.outputs.number }}|The PR ${{ steps.create_pr.outputs.number }}>"
         echo "::set-output name=color::$color"
 
-    - name: 16.2. Notify to slack channel
-      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
+    - name: 5. Notify to slack channel
       uses: actions-ecosystem/action-slack-notifier@v1
       with:
         slack_token: ${{ secrets.SLACK_BOT_TOKEN }}
