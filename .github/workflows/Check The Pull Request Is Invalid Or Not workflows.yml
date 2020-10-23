@@ -76,6 +76,7 @@ jobs:
 
         if [ $is_valid_pr == 0 ]; then
             echo "The PR is not valid. $error_message"
+            echo "Reason: $error_message"
             exit 1
         else
             echo "The PR is valid"
