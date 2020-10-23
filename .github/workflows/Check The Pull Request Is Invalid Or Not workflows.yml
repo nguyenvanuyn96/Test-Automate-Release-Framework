@@ -34,12 +34,15 @@ jobs:
         base_branch=${{ github.base_ref }}
         source_branch=${{ steps.pr_data.outputs.branch }}
         is_valid_pr=0
+        error_message=""
 
         if [ $base_branch == "master" ]; then
             if [ $(echo ${source_branch} | sed -e "s/release\///g") != ${source_branch} ]; then
                 is_valid_pr=1
             elif [ $(echo ${source_branch} | sed -e "s/hotfix\///g") != ${source_branch} ]; then
                 is_valid_pr=1
+            else
+                error_message="The `master` branch only accept a pull request from the valid `release/*` or `hotfix/*` branch. Please double check the branch name and correct it from your side!!!"
             fi;
         elif [ $base_branch == "develop" ]; then
             if [ $(echo ${source_branch} | sed -e "s/release\///g") != ${source_branch} ]; then
@@ -50,23 +53,29 @@ jobs:
                 is_valid_pr=1
             elif [ $(echo ${source_branch} | sed -e "s/bugfix\///g") != ${source_branch} ]; then
                 is_valid_pr=1
+            else
+                error_message="The `develop` branch only accept a pull request from the valid `release/*` or `hotfix/*` or `feature/*` or `bugfix/*` branch. Please double check the branch name and correct it from your side!!!"
             fi;
         elif [ -z "${base_branch##hotfix/*}" ]; then
             if [ $(echo ${source_branch} | sed -e "s/bugfix\///g") != ${source_branch} ]; then
                 is_valid_pr=1
+            else
+                error_message="The `hotfix/*` branch only accept a pull request from the only valid `bugfix/*` branch. Please double check the branch name and correct it from your side!!!"
             fi;
         elif [ -z "${base_branch##release/*}" ]; then
             if [ $(echo ${source_branch} | sed -e "s/bugfix\///g") != ${source_branch} ]; then
                 is_valid_pr=1
             elif [ $source_branch == "develop" ]; then
                 is_valid_pr=1
+            else
+                error_message="The `release/*` branch only accept a pull request from the valid `develop` or `bugfix/*` branch. Please double check the branch name and correct it from your side!!!"
             fi;
         fi;  
 
         echo "is_valid_pr = $is_valid_pr"
-        
+
         if [ $is_valid_pr == 0 ]; then
-            echo "The PR is not valid"
+            echo "The PR is not valid. $error_message"
             exit 1
         else
             echo "The PR is valid"
