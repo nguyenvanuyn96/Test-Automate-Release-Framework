@@ -63,5 +63,10 @@ jobs:
             fi;
         fi;  
 
-
-        exit $is_valid_pr
+        if [ $is_valid_pr == 1 ]; then
+            echo "The PR is valid"
+            exit 0
+        else
+            echo "The PR is not valid"
+            exit 1
+        fi;
