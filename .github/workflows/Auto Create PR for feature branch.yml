@@ -1,0 +1,103 @@
+name: "Auto Create PR for feature/* branch"
+
+on: 
+  push:
+    branches:
+      - feature/*
+
+jobs:
+  upgrade_podspec:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: 1. Checkout
+      uses: actions/checkout@master
+        
+    - name: 2. Check prefix of commit message
+      uses: gsactions/commit-message-checker@v1
+      with:
+          pattern: '\[CreatePR\] .+$'
+          flags: 'gm'
+          error: 'Your first line has to contain a commit type like "[CreatePR]".'
+          
+    - name: 2. Get branch name
+      id: get-branch-data
+      run: |
+          input_branch=${{ github.ref }}
+
+          branch=$(echo ${input_branch} | sed -e "s/refs\/heads\///g")
+          
+          jira_ticket_id_regex='^feature\/\([A-Z]*-*[0-9]*\)_\S*$'
+          jira_ticket_id = $(echo "$branch" | sed -n "s/$jira_ticket_id_regex/\1/p")
+          jira_ticket_url="NA"
+
+          if [ ! -z "$jira_ticket_id" ] ;then
+              jira_ticket_url="https://sph.atlassian.net/browse/$jira_ticket_id"
+          fi
+
+          echo "::set-output name=name::${branch}"
+          echo "::set-output name=jira_ticket_url::${jira_ticket_url}"
+
+    - name: 3. Create pull request if needed
+      id: create_pr
+      uses: thomaseizinger/create-pull-request@master
+      with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          head: ${{ steps.get-branch.outputs.name }}
+          base: develop
+          title: "Merge the `${{ steps.get-branch-data.outputs.name }}` into `develop`"
+          draft: "false"
+          body: |
+              # Description
+              <!--Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.-->
+              Merge the `${{ steps.get-branch-data.outputs.name }}` into `develop`
+              
+              ## Jira tickets
+              <!--Please list your relevant jira tickets here.-->
+
+              - ${{ steps.get-branch-data.outputs.jira_ticket_url }}
+
+              ## Checklist
+              <!--**Before submitting a pull request,** please make sure the following is done:-->
+
+              - [ ] Ensure the test passes 
+              - [ ] Rebase your branch on to `develop` branch.
+
+              ## What type of PR is this?
+              <!--Please delete options that are not relevant.-->
+
+              - [x] New feature (non-breaking change which adds functionality)
+              - [ ] Chore (Minor changes, refactor code, ...)
+              - [ ] Documentation Update
+
+              ## Related libraries
+              <!--Please list your related module PRs.-->
+
+              - NA
+
+              ## QA Instructions, Screenshots
+              <!--_Please replace this line with instructions on how to test your changes, as well as any relevant images for UI changes._-->
+
+              - NA
+
+    - name: 16.1. Prepare slack message
+      id: prepare_slack
+      run: |
+        color="green"
+        if [ "${{ steps.get-branch-data.outputs.jira_ticket_url }}" == "NA" ]; then
+            color="yellow"
+        fi;
+
+        echo "::set-output name=message::- :white_check_mark: Already create a PR for merging \\\`${{steps.get-branch-data.outputs.branch}}\\\` into \\\`develop\\\`. Click to help review it - <https://github.com/${{github.repository}}/pull/${{ steps.create_pr.outputs.number }}|The PR ${{ steps.create_pr.outputs.number }}>"
+        echo "::set-output name=color::$color"
+
+    - name: 16.2. Notify to slack channel
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
+      uses: actions-ecosystem/action-slack-notifier@v1
+      with:
+        slack_token: ${{ secrets.SLACK_BOT_TOKEN }}
+        channel: "G01D342CVQS" #This is the id of the private group `cp-pushing-ios`
+        username: "GitHub Actions"
+        color: "${{ steps.prepare_slack.outputs.color }}"
+        verbose: true # optional
+        message: "${{ steps.prepare_slack.outputs.message }}"
