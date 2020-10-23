@@ -88,7 +88,10 @@ jobs:
             color="yellow"
         fi;
 
-        echo "::set-output name=message::- :shamrock::shamrock: @{{ github.actor.display_login }} has just created a pull request for merging \\\`${{steps.get-branch-data.outputs.branch}}\\\` into \`develop\`. Click to help review it - <https://github.com/${{github.repository}}/pull/${{ steps.create_pr.outputs.number }}|The PR ${{ steps.create_pr.outputs.number }}>"
+        echo ${{github.actor.display_login}}
+        echo ${{github.actor}}
+
+        echo "::set-output name=message::- :shamrock::shamrock: @{{ github.actor.display_login }} has just created a pull request for merging `${{steps.get-branch-data.outputs.branch}}` into \`develop\`. Click to help review it - <https://github.com/${{github.repository}}/pull/${{ steps.create_pr.outputs.number }}|The PR ${{ steps.create_pr.outputs.number }}>"
         echo "::set-output name=color::$color"
 
     - name: 5. Notify to slack channel
