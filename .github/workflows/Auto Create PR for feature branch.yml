@@ -50,7 +50,7 @@ jobs:
           body: |
               # Description
               <!--Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.-->
-              Merge the `${{ steps.get-branch-data.outputs.name }}` into `develop`
+              Merge the **${{ steps.get-branch-data.outputs.name }}** into **develop**
               
               ## Jira tickets
               <!--Please list your relevant jira tickets here.-->
@@ -88,7 +88,7 @@ jobs:
             color="yellow"
         fi;
 
-        echo "::set-output name=message::- :white_check_mark: Already create a PR for merging \\\`${{steps.get-branch-data.outputs.branch}}\\\` into \\\`develop\\\`. Click to help review it - <https://github.com/${{github.repository}}/pull/${{ steps.create_pr.outputs.number }}|The PR ${{ steps.create_pr.outputs.number }}>"
+        echo "::set-output name=message::- :white_check_mark: @{{ github.event.pusher.name }} has just created a pull request for merging \`${{steps.get-branch-data.outputs.branch}}\` into \`develop\`. Click to help review it - <https://github.com/${{github.repository}}/pull/${{ steps.create_pr.outputs.number }}|The PR ${{ steps.create_pr.outputs.number }}>"
         echo "::set-output name=color::$color"
 
     - name: 5. Notify to slack channel
