@@ -5,6 +5,7 @@ This is change log of TKProductDetails module in 2020.
 - Do somthing 2
 - Do somthing 3
 - Feature-1. test
+- CA-123 Test feature 2
 
 ## [Released] 1.0.47
 - Item 26
