@@ -65,7 +65,7 @@ jobs:
       id: create_pr
       uses: thomaseizinger/create-pull-request@master
       with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }} 
           head: ${{ steps.get-branch-data.outputs.name }}
           base: ${{ steps.check-commit-message.outputs.target_branch }}
           title: "Merge the `${{ steps.get-branch-data.outputs.name }}` into `${{ steps.check-commit-message.outputs.target_branch }}`"
@@ -102,6 +102,13 @@ jobs:
               <!--_Please replace this line with instructions on how to test your changes, as well as any relevant images for UI changes._-->
 
               - NA
+
+    - name: Invoke PR Eligibility Check workflow
+      uses: benc-uk/workflow-dispatch@v1
+      with:
+        workflow: PR Eligibility Check
+        token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+        inputs: '{ "base_branch": "${{ steps.check-commit-message.outputs.target_branch }}", "source_branch": "${{ steps.get-branch-data.outputs.name }}" }'
 
     - name: 5. Prepare slack message
       if: ${{ steps.check-commit-message.outputs.is_need_create_pr =='YES' }}
