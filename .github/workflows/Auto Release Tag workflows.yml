@@ -6,7 +6,7 @@ on:
     types:
       - closed
 jobs:
-  build:
+  auto_create_release_tag:
     if: ${{ github.event.pull_request.merged == true }}
     runs-on: ubuntu-latest
     steps:
