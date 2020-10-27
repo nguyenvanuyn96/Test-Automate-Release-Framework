@@ -53,7 +53,7 @@ jobs:
         base_branch=${{ github.base_ref }}
         source_branch=${{ steps.pr_data.outputs.branch }}
 
-        if [ -z "$base_branch" ] && [ -z "$source_branch" ]  then
+        if [ -z "$base_branch" ] && [ -z "$source_branch" ];  then
             base_branch=${{ github.event.inputs.base_branch }}
             source_branch=${{ github.event.inputs.source_branch }}
         fi;
