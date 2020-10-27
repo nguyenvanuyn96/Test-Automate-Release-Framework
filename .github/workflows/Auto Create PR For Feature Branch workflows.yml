@@ -23,15 +23,11 @@ jobs:
       id: check-commit-message
       run: |
           commit_message=$(git log -n 1 --pretty=format:%s ${{ github.rsa }})
-          echo "commit_message = $commit_message"
-
-          commit_message="${commit_message//'['/'\\\['}"
-          commit_message="${commit_message//']'/'\\\]'}"
+          echo "commit_message = \"$commit_message\""
 
           is_need_create_pr='NO'
-          pattern='\[CreatePR\] '
 
-          if [ $(echo ${commit_message} | sed -e "s/$pattern\///g") != ${commit_message} ]; then
+          if [ "$(echo ${commit_message} | sed -e "s/\[CreatePR\] //g")" != "${commit_message}" ]; then
               is_need_create_pr='YES'
           else
               echo "Your commit message has to contain a prefix \"[CreatePR] \" to trigger auto create pr for merging feature/* into develop."
