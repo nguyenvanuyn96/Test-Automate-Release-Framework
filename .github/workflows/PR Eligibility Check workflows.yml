@@ -1,16 +1,35 @@
 name: PR Eligibility Check
 on: 
-  pull_request:
-    branches: 
-      - master
-      - hotfix/*
-      - release/*
-      - develop
-    types:
-      - opened
-      - reopened
-      - edited
-      - synchronize
+#   workflow_dispatch:
+#     inputs:
+#       source_branch:
+#         description: 'The source branch. Ex: release/1.0.0'     
+#         required: true
+#       base_branch:
+#         description: 'The target branch. Ex: master'
+#         required: true
+    workflow_run:
+        workflows: ["Auto Create PR For feature/* or bugfix/* Branch"]
+        branches: 
+            - master
+            - hotfix/*
+            - release/*
+            - develop
+        types: 
+            - completed
+            - requested
+
+    pull_request:
+        branches: 
+            - master
+            - hotfix/*
+            - release/*
+            - develop
+        types:
+            - opened
+            - reopened
+            - edited
+            - synchronize
 jobs:
   pr_eligibility_check:
     if: ${{ github.event.pull_request.merged == false }}
@@ -33,6 +52,12 @@ jobs:
       run: |
         base_branch=${{ github.base_ref }}
         source_branch=${{ steps.pr_data.outputs.branch }}
+
+        # if [ -z "$base_branch" ] && [ -z "$source_branch" ]  then
+        #     base_branch=${{ github.base_ref }}
+        #     source_branch=${{ steps.pr_data.outputs.branch }}
+        # fi;
+
         is_valid_pr=0
         error_message=""
 
