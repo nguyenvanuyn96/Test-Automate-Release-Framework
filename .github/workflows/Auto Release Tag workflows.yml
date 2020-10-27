@@ -90,7 +90,7 @@ jobs:
           change_log_file_name="CHANGE-LOG-$current_year.md"
           echo "::set-output name=change_log_file_name::${change_log_file_name}"
 
-    - name: 7. Get change log for this release from the CHANGE-LOG-XXX.md file
+    - name: 7. Get change log for this release from the CHANGE-LOG-YYYY.md file
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: get_changelog_manually
       run: |
@@ -103,9 +103,11 @@ jobs:
               if [ "$line" == "## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }}" ]; then
                   can_appending="YES"
               elif [[ "$line" == *"## [Released] "* ]]; then
+                  new_change_log+=$'\n';
                   new_change_log+="## [Released]";
                   can_appending="NO"
               elif [[ "$line" == *"## [Hotfixed] "* ]]; then
+                  new_change_log+=$'\n';
                   new_change_log+="## [Hotfixed]";
                   can_appending="NO"
               fi;
@@ -120,8 +122,8 @@ jobs:
               fi;
           done < $filename
           new_change_log="$(echo "$new_change_log" | sed "1 d")"
-          unreleased_change_log_with_last_title=$new_change_log
 
+          unreleased_change_log_with_last_title=$new_change_log
           unreleased_change_log_with_last_title="${unreleased_change_log_with_last_title//'%'/'%25'}"
           unreleased_change_log_with_last_title="${unreleased_change_log_with_last_title//$'\n'/'%0A'}"
           unreleased_change_log_with_last_title="${unreleased_change_log_with_last_title//$'\r'/'%0D'}"
@@ -130,14 +132,12 @@ jobs:
 
           new_change_log_line=$(echo "$new_change_log" | wc -l)
           echo "new_change_log_line = $new_change_log_line"
-          new_change_log="$(echo "$new_change_log" | sed "$new_change_log_line d")"
+          new_change_log="$(echo "$new_change_log" | sed "$new_change_log_line d")" #Remove the last heading title
+          new_change_log="$(echo "$new_change_log" | sed "$($new_change_log_line-1) d")" #Remove the last empty line
           new_change_log="${new_change_log//'%'/'%25'}"
           new_change_log="${new_change_log//$'\n'/'%0A'}"
           new_change_log="${new_change_log//$'\r'/'%0D'}"
           echo "::set-output name=unreleased_change_log::${new_change_log}"
-          
-          echo "============================================================"
-          echo $new_change_log
     
     - name: 7.1. Print data for debugging
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
@@ -264,7 +264,7 @@ jobs:
           echo "::set-output name=final_changelog::${final_changelog}"
           echo ${final_changelog}
 
-    - name: 14. Update the content of CHANGE-LOG-XXX.md file to correct
+    - name: 14. Update the content of CHANGE-LOG-YYYY.md file to correct
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: find_and_replace
       uses: shitiomatic/str-replace@master
