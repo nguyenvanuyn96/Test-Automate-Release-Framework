@@ -10,16 +10,6 @@ on:
                 description: 'The target branch. Ex: master'
                 required: true
                 default: ''
-    # workflow_run:
-    #     workflows: ["Auto Create PR For feature/* or bugfix/* Branch"]
-    #     # branches: 
-    #     #     - master
-    #     #     - hotfix/*
-    #     #     - release/*
-    #     #     - develop
-    #     types: 
-    #         - completed
-    #         # - requested
 
     pull_request:
         branches: 
@@ -38,22 +28,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    # - name: 1. Try to get data from workflow_dispatch
-    #   id: workflow_dispatch_data
-    #   run: |
-    #         base_branch=${{ github.event.inputs.base_branch }}
-    #         source_branch=${{ github.event.inputs.source_branch }}
-
-    #         if [ ! -z "$base_branch" ] && [ ! -z "$source_branch" ];  then
-    #             echo "::set-output name=source_branch::${source_branch}"
-    #             echo "::set-output name=base_branch::${base_branch}"
-    #             echo "::set-output name=is_workflow_dispatch_event::YES"
-    #         else 
-    #             echo "::set-output name=is_workflow_dispatch_event::NO"
-    #         fi;
-
     - name: 1. Try to get branch name of PR
-      if: ${{ github.event.inputs.base_branch == '' }}
+      if: ${{ github.event.inputs.base_branch == '' }} # If this workflow is triggered by an event which is not a workflow_dispatch
       uses: andrevalentin/get-branch-name-by-pr@master
       id: pr_data
       with:
@@ -61,18 +37,17 @@ jobs:
         pr-id: ${{ github.event.pull_request.number }}
         
     - name: 1.1. Print branch name for debugging
-      if: ${{ github.event.inputs.base_branch == '' }}
+      if: ${{ github.event.inputs.base_branch == '' }} # If this workflow is triggered by an event which is not a workflow_dispatch
       run: |
         echo "This is PR from branch ${{ steps.pr_data.outputs.branch }}"
         echo "This is PR into branch ${{ github.base_ref }}"
       
     - name: 2. Check rule
-    #   if: ${{ always() }}
       run: |
         base_branch=${{ github.base_ref }}
         source_branch=${{ steps.pr_data.outputs.branch }}
 
-        if [ -z "$base_branch" ] && [ -z "$source_branch" ];  then
+        if [ -z "$base_branch" ] && [ -z "$source_branch" ];  then # If this workflow is triggered by a workflow_dispatch
             base_branch=${{ github.event.inputs.base_branch }}
             source_branch=${{ github.event.inputs.source_branch }}
         fi;
@@ -133,7 +108,7 @@ jobs:
             exit 0
         fi
 
-    - name: Run the action # You would run your tests before this using the output to set state/desc
+    - name: Set commit status if needed  # If this workflow is triggered by a workflow_dispatch event then we need to run set commit status because github action won't updating the commit status of a workflow_dispatch. Ref here: https://github.community/t/workflow-dispatch-does-not-update-commit-status/125981
       if: ${{ github.event.inputs.base_branch != '' }}
       uses: Sibz/github-status-action@v1
       with: 
@@ -141,4 +116,4 @@ jobs:
             context: 'pr_eligibility_check'
             description: "${{ job.status }}"
             state: "${{ job.status }}"
-            sha: ${{github.event.pull_request.head.sha || github.sha}}
+            sha: ${{ github.event.pull_request.head.sha || github.sha }}
