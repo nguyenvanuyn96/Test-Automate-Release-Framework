@@ -124,7 +124,7 @@ jobs:
 
     - name: 5. Set commit status if needed  # If this workflow is triggered by a workflow_dispatch event then we need to run set commit status because github action won't updating the commit status of a workflow_dispatch. Ref here: https://github.community/t/workflow-dispatch-does-not-update-commit-status/125981
       if: ${{ github.event.inputs.base_branch != '' }}
-      uses: Sibz/github-status-action@v1
+      uses: Sibz/github-status-action@v1.1.1
       with: 
             authToken: ${{secrets.GITHUB_TOKEN}}
             context: 'pr_eligibility_check'
