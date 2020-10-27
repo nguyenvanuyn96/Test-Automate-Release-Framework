@@ -12,30 +12,6 @@ jobs:
 
     - name: 1. Checkout
       uses: actions/checkout@master
-        
-    - name: 8. [Test] Get the current change log file name
-      id: get_changelog_file
-      run: |
-          current_year=$(echo $(date +"%Y"))
-          change_log_file_name="CHANGE-LOG-$current_year.md"
-          echo "::set-output name=change_log_file_name::${change_log_file_name}"
- 
-    - name: 9. Find and replace the title `[Unreleased]` of CHANGE-LOG-YYYY.md file to `[Released] x.y.z` or `[Hotfixed] x.y.z`
-      id: find_and_replace_changelog
-      uses: shitiomatic/str-replace@master
-      with:
-          find: "\\[Unreleased\\]"
-          replace: "[Unreleased] - 1"
-          include: "${{steps.get_changelog_file.outputs.change_log_file_name}}"
-
-    - name: 9.1. [Test] Check result of Find and replace
-      run: |
-          echo "Number of files which have been modified = ${{ steps.find_and_replace_changelog.outputs.modifiedFiles }}"
-          if [ "${{ steps.find_and_replace_changelog.outputs.modifiedFiles }}" == "0" ]; then
-              echo "Can not found the CHANGE-LOG-YYYY.md file"
-          else 
-              echo "Found the CHANGE-LOG-YYYY.md file"
-          fi;
    
     - name: 2. Check prefix of commit message
       id: check-commit-message
