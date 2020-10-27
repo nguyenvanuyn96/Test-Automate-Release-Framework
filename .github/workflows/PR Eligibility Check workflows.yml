@@ -36,7 +36,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - name: 1. Get branch name of PR
+    # - name: 1. Try to get data from workflow_dispatch
+    #   id: workflow_dispatch_data
+    #   run: |
+    #         base_branch=${{ github.event.inputs.base_branch }}
+    #         source_branch=${{ github.event.inputs.source_branch }}
+
+    #         if [ ! -z "$base_branch" ] && [ ! -z "$source_branch" ];  then
+    #             echo "::set-output name=source_branch::${source_branch}"
+    #             echo "::set-output name=base_branch::${base_branch}"
+    #             echo "::set-output name=is_workflow_dispatch_event::YES"
+    #         else 
+    #             echo "::set-output name=is_workflow_dispatch_event::NO"
+    #         fi;
+
+    - name: 1. Try to get branch name of PR
+      if: ${{ github.event.inputs.base_branch == "" }}
       uses: andrevalentin/get-branch-name-by-pr@master
       id: pr_data
       with:
@@ -44,12 +59,13 @@ jobs:
         pr-id: ${{ github.event.pull_request.number }}
         
     - name: 1.1. Print branch name for debugging
+      if: ${{ github.event.inputs.base_branch == "" }}
       run: |
         echo "This is PR from branch ${{ steps.pr_data.outputs.branch }}"
         echo "This is PR into branch ${{ github.base_ref }}"
       
     - name: 2. Check rule
-      if: ${{ always() }}
+    #   if: ${{ always() }}
       run: |
         base_branch=${{ github.base_ref }}
         source_branch=${{ steps.pr_data.outputs.branch }}
