@@ -115,7 +115,7 @@ jobs:
           ref: "${{ github.event.inputs.source_branch }}"
 
     - name: 4. Get latest commit hash of the source branch
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      if: ${{ github.event.inputs.base_branch != '' }}
       id: get_source_commit
       run: |
           commit_hash=$(git log --format="%H" -n 1)
