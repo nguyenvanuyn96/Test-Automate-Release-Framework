@@ -4,13 +4,12 @@ This is change log of TKProductDetails module in 2020.
 ## [Unreleased]
 - Trying the workflow_run_5
 - Trying the workflow_run_6
+- Fix bug
 
 ## [Released] 1.0.53
 - Trying the workflow_run_3
 - Trying the workflow_run_4
 - Fix bug can not get changelog for release tag
-- Trying the workflow_run_5
-- Trying the workflow_run_6
 
 ## [Released] 1.0.52
 - Trying the workflow_run_2
