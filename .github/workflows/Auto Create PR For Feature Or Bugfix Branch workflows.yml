@@ -5,7 +5,6 @@ on:
     branches:
       - feature/*
       - bugfix/*
-
 jobs:
   auto_create_feature_or_bugfix_branch_pull_request:
     runs-on: ubuntu-latest
@@ -26,22 +25,17 @@ jobs:
       uses: shitiomatic/str-replace@master
       with:
           find: "\\[Unreleased\\]"
-          replace: "[Unreleased]"
-          include: "[Unreleased] - 1" 
+          replace: "[Unreleased] - 1"
+          include: "${{steps.get_changelog_file.outputs.change_log_file_name}}"
 
     - name: 9.1. [Test] Check result of Find and replace
       run: |
           echo "Number of files which have been modified = ${{ steps.find_and_replace_changelog.outputs.modifiedFiles }}"
-          temp=$((${{ steps.find_and_replace_changelog.outputs.modifiedFiles }}" != "0"))
-          temp_1=$(("${{ steps.find_and_replace_changelog.outputs.modifiedFiles }}" == "0"))
           if [ "${{ steps.find_and_replace_changelog.outputs.modifiedFiles }}" == "0" ]; then
               echo "Can not found the CHANGE-LOG-YYYY.md file"
           else 
-              echo "temp_1 modifiedFiles condition = $temp_1"
+              echo "Found the CHANGE-LOG-YYYY.md file"
           fi;
-          echo "temp modifiedFiles condition = $temp"
-          echo "temp_1 modifiedFiles condition = $temp_1"
-          echo "temp_3 modifiedFiles condition = $temp_3"
    
     - name: 2. Check prefix of commit message
       id: check-commit-message
