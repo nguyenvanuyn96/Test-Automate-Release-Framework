@@ -1,16 +1,35 @@
 name: PR Eligibility Check
 on: 
-  pull_request:
-    branches: 
-      - master
-      - hotfix/*
-      - release/*
-      - develop
-    types:
-      - opened
-      - reopened
-      - edited
-      - synchronize
+#   workflow_dispatch:
+#     inputs:
+#       source_branch:
+#         description: 'The source branch. Ex: release/1.0.0'     
+#         required: true
+#       base_branch:
+#         description: 'The target branch. Ex: master'
+#         required: true
+    # workflow_run:
+    #     workflows: ["Run Tests"]
+    #     branches: 
+    #         - master
+    #         - hotfix/*
+    #         - release/*
+    #         - develop
+    #     types: 
+    #         - completed
+    #         - requested
+
+    pull_request:
+        branches: 
+            - master
+            - hotfix/*
+            - release/*
+            - develop
+        types:
+            - opened
+            - reopened
+            - edited
+            - synchronize
 jobs:
   pr_eligibility_check:
     if: ${{ github.event.pull_request.merged == false }}

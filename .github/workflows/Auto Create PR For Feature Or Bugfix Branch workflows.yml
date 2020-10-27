@@ -65,7 +65,7 @@ jobs:
       id: create_pr
       uses: thomaseizinger/create-pull-request@master
       with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }} # ${{ secrets.GITHUB_TOKEN }}
           head: ${{ steps.get-branch-data.outputs.name }}
           base: ${{ steps.check-commit-message.outputs.target_branch }}
           title: "Merge the `${{ steps.get-branch-data.outputs.name }}` into `${{ steps.check-commit-message.outputs.target_branch }}`"
@@ -125,3 +125,10 @@ jobs:
         color: "${{ steps.prepare_slack.outputs.color }}"
         verbose: true # optional
         message: "${{ steps.prepare_slack.outputs.message }}"
+
+    # - name: Invoke Auto PR workflow
+    #   uses: benc-uk/workflow-dispatch@v1
+    #   with:
+    #     workflow: PR Eligibility Check
+    #     token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+    #     inputs: '{ "release_branch": ${{ steps.get-branch.outputs.branch }}, "bot_release_branch": ${{ steps.create_bot_branch.outputs.bot_branch }} }'
