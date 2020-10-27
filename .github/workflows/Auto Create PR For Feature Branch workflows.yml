@@ -10,14 +10,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
+    # - name: 1. Check prefix of commit message
+    #   uses: gsactions/commit-message-checker@v1
+    #   with:
+    #       pattern: '\[CreatePR\] .+$'
+    #       flags: 'gm'
+    #       error: ''
+    
     - name: 1. Check prefix of commit message
-      uses: gsactions/commit-message-checker@v1
-      with:
-          pattern: '\[CreatePR\] .+$'
-          flags: 'gm'
-          error: 'Your commit message has to contain a prefix "[CreatePR]" to trigger auto create pr for merging feature/* into develop.'
+      id: check-commit-message
+      run: |
+          commit_message=$(git log -n 1 --pretty=format:%s ${{ github.rsa }})
+          is_need_create_pr='NO'
+          pattern='\[CreatePR\] .+$'
+
+          if [ $(echo ${commit_message} | sed -e "s/$pattern\///g") != ${commit_message} ]; then
+              is_need_create_pr='YES'
+          else
+              echo "Your commit message has to contain a prefix "[CreatePR]" to trigger auto create pr for merging feature/* into develop."
+          fi;
+
+          echo "::set-output name=is_need_create_pr::${is_need_create_pr}"
           
     - name: 2. Get branch name
+      if: ${{ steps.check-commit-message.outputs.is_need_create_pr =='YES' }}
       id: get-branch-data
       run: |
           input_branch=${{ github.ref }}
@@ -36,6 +52,7 @@ jobs:
           echo "::set-output name=jira_ticket_url::${jira_ticket_url}"
 
     - name: 3. Create pull request if needed
+      if: ${{ steps.check-commit-message.outputs.is_need_create_pr =='YES' }}
       id: create_pr
       uses: thomaseizinger/create-pull-request@master
       with:
@@ -78,6 +95,7 @@ jobs:
               - NA
 
     - name: 4. Prepare slack message
+      if: ${{ steps.check-commit-message.outputs.is_need_create_pr =='YES' }}
       id: prepare_slack
       run: |
         color="green"
@@ -89,6 +107,7 @@ jobs:
         echo "::set-output name=color::$color"
 
     - name: 5. Notify to slack channel
+      if: ${{ steps.check-commit-message.outputs.is_need_create_pr =='YES' }}
       uses: actions-ecosystem/action-slack-notifier@v1
       with:
         slack_token: ${{ secrets.SLACK_BOT_TOKEN }}
