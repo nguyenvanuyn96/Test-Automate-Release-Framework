@@ -10,14 +10,14 @@ on:
 #         required: true
     workflow_run:
         workflows: ["Auto Create PR For feature/* or bugfix/* Branch"]
-        branches: 
-            - master
-            - hotfix/*
-            - release/*
-            - develop
+        # branches: 
+        #     - master
+        #     - hotfix/*
+        #     - release/*
+        #     - develop
         types: 
             - completed
-            - requested
+            # - requested
 
     pull_request:
         branches: 
