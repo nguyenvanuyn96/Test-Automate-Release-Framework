@@ -1,4 +1,4 @@
-name: Check The Pull Request Is Invalid Or Not
+name: PR Status Check
 on: 
   pull_request:
     branches: 
@@ -77,8 +77,18 @@ jobs:
         if [ $is_valid_pr == 0 ]; then
             echo "Message: [Error] The PR is not valid!"
             echo "Reason: $error_message"
-            exit 1
+            curl \
+                -X POST \
+                -H "Accept: application/vnd.github.v3+json" \
+                https://api.github.com/repos/${{github.repository}}/statuses/${{ github.rsa }} \
+                -d '{"state":"error", "description":"$error_message"}'
+            exit 0
         else
             echo "Message: The PR is valid"
+            curl \
+                -X POST \
+                -H "Accept: application/vnd.github.v3+json" \
+                https://api.github.com/repos/${{github.repository}}/statuses/${{ github.rsa }} \
+                -d '{"state":"success", "description":"Message: The PR is valid"}'
             exit 0
         fi
