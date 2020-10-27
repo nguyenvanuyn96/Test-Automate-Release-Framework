@@ -2,7 +2,10 @@
 This is change log of TKProductDetails module in 2020.
 
 ## [Unreleased]
-- Fix logic check condition of string in workflow
+
+
+## [Released] 1.0.50
+- Fix logic check condition of string in workflows
 
 ## [Released] 1.0.49
 - Do somthing 2
