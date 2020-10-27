@@ -82,7 +82,7 @@ jobs:
                 -H "Accept: application/vnd.github.v3+json" \
                 https://api.github.com/repos/${{github.repository}}/statuses/${{ github.rsa }} \
                 -d '{"state":"error", "description":"$error_message"}'
-            exit 0
+            exit 1
         else
             echo "Message: The PR is valid"
             curl \
