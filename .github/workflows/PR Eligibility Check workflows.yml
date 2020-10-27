@@ -1,4 +1,4 @@
-name: PR Status Check
+name: PR Eligibility Check
 on: 
   pull_request:
     branches: 
@@ -14,7 +14,7 @@ on:
       - synchronize
 
 jobs:
-  build:
+  pr_eligibility_check:
     if: ${{ github.event.pull_request.merged == false }}
     runs-on: ubuntu-latest
     steps:
@@ -77,18 +77,8 @@ jobs:
         if [ $is_valid_pr == 0 ]; then
             echo "Message: [Error] The PR is not valid!"
             echo "Reason: $error_message"
-            curl \
-                -X POST \
-                -H "Accept: application/vnd.github.v3+json" \
-                https://api.github.com/repos/${{github.repository}}/statuses/${{ github.rsa }} \
-                -d '{"state":"error", "description":"$error_message"}'
             exit 1
         else
             echo "Message: The PR is valid"
-            curl \
-                -X POST \
-                -H "Accept: application/vnd.github.v3+json" \
-                https://api.github.com/repos/${{github.repository}}/statuses/${{ github.rsa }} \
-                -d '{"state":"success", "description":"Message: The PR is valid"}'
             exit 0
         fi
