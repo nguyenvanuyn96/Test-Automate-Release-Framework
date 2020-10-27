@@ -1,7 +1,7 @@
 # Change logs
 This is change log of TKProductDetails module in 2020.
 
-## [Unreleased]
+## [Released] bugfix/fix_check_condition_logic
 - Fix logic check condition of string in workflow
 
 ## [Released] 1.0.49
