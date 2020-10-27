@@ -5,9 +5,11 @@ on:
             source_branch:
                 description: 'The source branch. Ex: release/1.0.0'     
                 required: true
+                default: ''
             base_branch:
                 description: 'The target branch. Ex: master'
                 required: true
+                default: ''
     # workflow_run:
     #     workflows: ["Auto Create PR For feature/* or bugfix/* Branch"]
     #     # branches: 
@@ -51,7 +53,7 @@ jobs:
     #         fi;
 
     - name: 1. Try to get branch name of PR
-      if: ${{ github.event.inputs.base_branch == "" }}
+      if: ${{ github.event.inputs.base_branch == '' }}
       uses: andrevalentin/get-branch-name-by-pr@master
       id: pr_data
       with:
@@ -59,13 +61,13 @@ jobs:
         pr-id: ${{ github.event.pull_request.number }}
         
     - name: 1.1. Print branch name for debugging
-      if: ${{ github.event.inputs.base_branch == "" }}
+      if: ${{ github.event.inputs.base_branch == '' }}
       run: |
         echo "This is PR from branch ${{ steps.pr_data.outputs.branch }}"
         echo "This is PR into branch ${{ github.base_ref }}"
       
     - name: 2. Check rule
-    #   if: ${{ always() }}
+      if: ${{ always() }}
       run: |
         base_branch=${{ github.base_ref }}
         source_branch=${{ steps.pr_data.outputs.branch }}
