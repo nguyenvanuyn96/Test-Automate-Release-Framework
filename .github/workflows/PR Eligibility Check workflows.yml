@@ -6,13 +6,11 @@ on:
       - hotfix/*
       - release/*
       - develop
-
     types:
       - opened
       - reopened
       - edited
       - synchronize
-
 jobs:
   pr_eligibility_check:
     if: ${{ github.event.pull_request.merged == false }}

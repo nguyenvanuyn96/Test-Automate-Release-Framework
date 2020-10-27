@@ -32,11 +32,11 @@ jobs:
           releasable_prefix_branchname_v2=''
 
           # if contains release/
-          if [ $(echo ${branch} | sed -e "s/^release\///g") != ${input_branch} ]; then
+          if [ $(echo ${branch} | sed -e "s/^release\///g") != ${branch} ]; then
               is_releasable_branch='YES'
               releasable_prefix_branchname='release'
               releasable_prefix_branchname_v2='released'
-          elif [ $(echo ${branch} | sed -e "s/^hotfix\///g") != ${input_branch} ]; then
+          elif [ $(echo ${branch} | sed -e "s/^hotfix\///g") != ${branch} ]; then
               is_releasable_branch='YES'
               releasable_prefix_branchname='hotfix'
               releasable_prefix_branchname_v2='hotfixed'
@@ -90,7 +90,7 @@ jobs:
           change_log_file_name="CHANGE-LOG-$current_year.md"
           echo "::set-output name=change_log_file_name::${change_log_file_name}"
 
-    - name: 7. Get unreleased change log from the CHANGE-LOG-XXX.md file
+    - name: 7. Get change log for this release from the CHANGE-LOG-XXX.md file
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: get_changelog_manually
       run: |
@@ -143,6 +143,8 @@ jobs:
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       run: |
         echo "unreleased_change_log = ${{ steps.get_changelog_manually.outputs.unreleased_change_log }}"
+        echo "============================================================"
+        echo "unreleased_change_log_with_last_title = ${{ steps.get_changelog_manually.outputs.unreleased_change_log_with_last_title }}"
 
     - name: 8. Create Release tag
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
@@ -173,7 +175,7 @@ jobs:
       with:
           ref: "develop"
 
-    - name: 10. Get all `[Unreleased]` change logs from `develop` branch
+    - name: 10. Get all changlog into the `[Unreleased]` heading from `develop` branch
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: get_develop_changelog
       run: |
@@ -206,7 +208,7 @@ jobs:
           new_change_log="${new_change_log//$'\r'/'%0D'}"
           echo "::set-output name=unreleased_change_log::${new_change_log}"
           echo "============================================================"
-          echo "$new_change_log"
+          echo "new_change_log from develop branch = $new_change_log"
 
     - name: 11. Checkout the `release/*` or `hotfix/*` branch 
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
@@ -267,7 +269,7 @@ jobs:
       id: find_and_replace
       uses: shitiomatic/str-replace@master
       with:
-          find: "((?:\\#\\# \\[Released\\]|\\#\\# \\[Hotfixed\\]) ${{ steps.get-release-version.outputs.new_release_version }}[\\s\\S]*?)\\#\\# \\[Released\\]|\\#\\# \\[Hotfixed\\]"
+          find: "((?:\\#\\# \\[Released\\]|\\#\\# \\[Hotfixed\\]) ${{ steps.get-release-version.outputs.new_release_version }}[\\s\\S]*?)(\\#\\# \\[Released\\]|\\#\\# \\[Hotfixed\\])"
           replace: "${{ steps.get_new_changelogs.outputs.final_changelog }}"
           include: "${{ steps.get_changelog_file.outputs.change_log_file_name }}"
 
@@ -275,6 +277,8 @@ jobs:
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       run: |
           echo "Number of files which have been modified = ${{ steps.find_and_replace.outputs.modifiedFiles}}"
+          echo "================== ALL NEW CONTENT FROM CHANGE-LOG-YYYY.md FILE =========================="
+          cat ${{ steps.get_changelog_file.outputs.change_log_file_name }}
            
     - name: 15. Commit and Push changes
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}

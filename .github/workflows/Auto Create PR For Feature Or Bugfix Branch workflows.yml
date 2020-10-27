@@ -5,7 +5,6 @@ on:
     branches:
       - feature/*
       - bugfix/*
-
 jobs:
   auto_create_feature_or_bugfix_branch_pull_request:
     runs-on: ubuntu-latest
@@ -13,7 +12,7 @@ jobs:
 
     - name: 1. Checkout
       uses: actions/checkout@master
-    
+   
     - name: 2. Check prefix of commit message
       id: check-commit-message
       run: |
@@ -36,7 +35,7 @@ jobs:
                   target_branch=$get_target_branch
               fi;
           else
-              echo "Your commit message has to contain a prefix \"[CreatePR] \" or \"[CreatePR into {branch_name}]\" to trigger auto create pr for merging feature/* or bugfix/* into ${target_branch}."
+              echo "Your commit message has to contain a prefix \"[CreatePR] \" or \"[CreatePR into {branch_name}] \" to trigger auto create pr for merging feature/* or bugfix/* into ${target_branch}."
           fi;
 
           echo "::set-output name=is_need_create_pr::${is_need_create_pr}"
