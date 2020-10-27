@@ -104,7 +104,7 @@ jobs:
               - NA
 
     - name: Invoke PR Eligibility Check workflow
-      uses: benc-uk/workflow-dispatch@v1
+      uses: benc-uk/workflow-dispatch@v1.1
       with:
         workflow: PR Eligibility Check
         token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
