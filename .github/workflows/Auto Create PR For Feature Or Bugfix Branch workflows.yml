@@ -1,12 +1,13 @@
-name: "Auto Create PR For feature/* Branch"
+name: "Auto Create PR For feature/* or bugfix/* Branch"
 
 on: 
   push:
     branches:
       - feature/*
+      - bugfix/*
 
 jobs:
-  auto_create_feature_branch_pull_request:
+  auto_create_feature_or_bugfix_branch_pull_request:
     runs-on: ubuntu-latest
     steps:
 
@@ -20,14 +21,26 @@ jobs:
           echo "commit_message = \"$commit_message\""
 
           is_need_create_pr='NO'
+          target_branch='develop'
+          create_pr_regex='^\[\(CreatePR\( \(in\)\{0,1\}to \(\S*\)\)*\)\]\s.*$'
 
-          if [ "$(echo ${commit_message} | sed -e "s/\[CreatePR\] //g")" != "${commit_message}" ]; then
+          matched_message=$(echo ${commit_message} | sed -e "s/$create_pr_regex//g")
+          echo "get_target_branch = \"$get_target_branch\""
+          echo "matched_message = \"$matched_message\""
+
+          if [ "$matched_message" != "${commit_message}" ]; then
               is_need_create_pr='YES'
+
+              get_target_branch=$(echo ${commit_message} | sed -n "s/$create_pr_regex/\4/p")
+              if [ ! -z "$get_target_branch" ]; then 
+                  target_branch=$get_target_branch
+              fi;
           else
-              echo "Your commit message has to contain a prefix \"[CreatePR] \" to trigger auto create pr for merging feature/* into develop."
+              echo "Your commit message has to contain a prefix \"[CreatePR] \" or \"[CreatePR into {branch_name}]\" to trigger auto create pr for merging feature/* or bugfix/* into ${target_branch}."
           fi;
 
           echo "::set-output name=is_need_create_pr::${is_need_create_pr}"
+          echo "::set-output name=target_branch::${target_branch}"
           
     - name: 3. Get branch data
       if: ${{ steps.check-commit-message.outputs.is_need_create_pr =='YES' }}
@@ -35,7 +48,7 @@ jobs:
       run: |
           input_branch=${{ github.ref }}
 
-          branch=$(echo ${input_branch} | sed -e "s/refs\/heads\///g")
+          branch=$(echo ${input_branch} | sed -e "s/^refs\/heads\///g")
           
           jira_ticket_id_regex='^feature\/\([A-Z]*-*[0-9]*\)_\S*$'
           jira_ticket_id=$(echo "$branch" | sed -n "s/$jira_ticket_id_regex/\1/p")
@@ -55,13 +68,13 @@ jobs:
       with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           head: ${{ steps.get-branch-data.outputs.name }}
-          base: develop
-          title: "Merge the `${{ steps.get-branch-data.outputs.name }}` into `develop`"
+          base: ${{ steps.check-commit-message.outputs.target_branch }}
+          title: "Merge the `${{ steps.get-branch-data.outputs.name }}` into `${{ steps.check-commit-message.outputs.target_branch }}`"
           draft: "false"
           body: |
               # Description
               <!--Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.-->
-              Merge the **${{ steps.get-branch-data.outputs.name }}** into **develop**
+              Merge the **${{ steps.get-branch-data.outputs.name }}** into **${{ steps.check-commit-message.outputs.target_branch }}**
               
               ## Jira tickets
               <!--Please list your relevant jira tickets here.-->
@@ -72,7 +85,7 @@ jobs:
               <!--**Before submitting a pull request,** please make sure the following is done:-->
 
               - [ ] Ensure the test passes 
-              - [ ] Rebase your branch on to `develop` branch.
+              - [ ] Rebase your branch on to `${{ steps.check-commit-message.outputs.target_branch }}` branch.
 
               ## What type of PR is this?
               <!--Please delete options that are not relevant.-->
@@ -100,7 +113,7 @@ jobs:
             color="yellow"
         fi;
 
-        echo "::set-output name=message:::shamrock::shamrock: *@${{github.actor}}* has just created a pull request for merging \`${{steps.get-branch-data.outputs.name}}\` into \`develop\`. Click to help review <https://github.com/${{github.repository}}/pull/${{ steps.create_pr.outputs.number }}|The PR ${{ steps.create_pr.outputs.number }}>"
+        echo "::set-output name=message:::shamrock::shamrock: *@${{github.actor}}* has just created a pull request for merging \`${{steps.get-branch-data.outputs.name}}\` into \`${{ steps.check-commit-message.outputs.target_branch }}\`. Click to help review <https://github.com/${{github.repository}}/pull/${{ steps.create_pr.outputs.number }}|The PR ${{ steps.create_pr.outputs.number }}>"
         echo "::set-output name=color::$color"
 
     - name: 6. Notify to slack channel

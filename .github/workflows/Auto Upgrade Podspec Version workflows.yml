@@ -19,17 +19,17 @@ jobs:
       run: |
           input_branch=${{ github.ref }}
 
-          branch=$(echo ${input_branch} | sed -e "s/refs\/heads\///g")
+          branch=$(echo ${input_branch} | sed -e "s/^refs\/heads\///g")
           is_releasable_branch='NO'
           releasable_prefix_branchname=''
           releasable_prefix_branchname_v2=''
 
           # if contains release/
-          if [ $(echo ${input_branch} | sed -e "s/release\///g") != ${input_branch} ]; then
+          if [ $(echo ${branch} | sed -e "s/^release\///g") != ${input_branch} ]; then
               is_releasable_branch='YES'
               releasable_prefix_branchname='release'
               releasable_prefix_branchname_v2='released'
-          elif [ $(echo ${input_branch} | sed -e "s/hotfix\///g") != ${input_branch} ]; then
+          elif [ $(echo ${branch} | sed -e "s/^hotfix\///g") != ${input_branch} ]; then
               is_releasable_branch='YES'
               releasable_prefix_branchname='hotfix'
               releasable_prefix_branchname_v2='hotfixed'
@@ -46,7 +46,7 @@ jobs:
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       id: get-release-version
       run: |
-          version=$(echo ${{ steps.check-branch.outputs.branch }} | sed -e "s/${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }}\///g")
+          version=$(echo ${{ steps.check-branch.outputs.branch }} | sed -e "s/^${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }}\///g")
           echo "::set-output name=new_release_version::${version}"
           echo "The detected release version = ${version}"
 
