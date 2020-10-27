@@ -335,14 +335,14 @@ jobs:
 
               - NA
 
-    - name: Invoke PR Eligibility Check workflow
+    - name: 17. Invoke PR Eligibility Check workflow
       uses: benc-uk/workflow-dispatch@v1
       with:
         workflow: PR Eligibility Check
         token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
-        inputs: '{ "base_branch": "develop", "source_branch": "{{ steps.create_bot_branch.outputs.bot_branch }}" }'
+        inputs: '{ "base_branch": "develop", "source_branch": "${{ steps.create_bot_branch.outputs.bot_branch }}" }'
 
-    - name: 17. Prepare slack message
+    - name: 18. Prepare slack message
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       run: |
         new_message="${{ env.SLACK_MESSAGE }}"
@@ -356,14 +356,14 @@ jobs:
             echo "SLACK_COLOR=green" >> $GITHUB_ENV
         fi;
 
-    - name: 17.1. Prepare slack message
+    - name: 18.1. Prepare slack message
       if: ${{ always() }}
       id: prepare_slack
       run: |
         echo "::set-output name=message::${{ env.SLACK_MESSAGE }}"
         echo "::set-output name=color::${{ env.SLACK_COLOR }}"
 
-    - name: 17.2. Notify to slack channel
+    - name: 18.2. Notify to slack channel
       if: ${{ always() }} && ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       uses: actions-ecosystem/action-slack-notifier@v1
       with:
