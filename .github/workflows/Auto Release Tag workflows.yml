@@ -277,7 +277,7 @@ jobs:
       if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
       run: |
           echo "Number of files which have been modified = ${{ steps.find_and_replace.outputs.modifiedFiles}}"
-          echo "==================ALL NEW CONTENT FROM CHANGE-LOG-YYYY.md FILE=========================="
+          echo "================== ALL NEW CONTENT FROM CHANGE-LOG-YYYY.md FILE =========================="
           cat ${{ steps.get_changelog_file.outputs.change_log_file_name }}
            
     - name: 15. Commit and Push changes
