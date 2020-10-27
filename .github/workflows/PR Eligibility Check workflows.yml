@@ -49,6 +49,7 @@ jobs:
         echo "This is PR into branch ${{ github.base_ref }}"
       
     - name: 2. Check rule
+      if: ${{ always() }}
       run: |
         base_branch=${{ github.base_ref }}
         source_branch=${{ steps.pr_data.outputs.branch }}
