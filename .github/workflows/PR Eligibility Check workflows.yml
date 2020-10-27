@@ -1,4 +1,4 @@
-name: Check The Pull Request Is Invalid Or Not
+name: PR Eligibility Check
 on: 
   pull_request:
     branches: 
@@ -14,7 +14,7 @@ on:
       - synchronize
 
 jobs:
-  build:
+  pr_eligibility_check:
     if: ${{ github.event.pull_request.merged == false }}
     runs-on: ubuntu-latest
     steps:
