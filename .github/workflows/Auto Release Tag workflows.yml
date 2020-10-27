@@ -133,7 +133,7 @@ jobs:
           new_change_log_line=$(echo "$new_change_log" | wc -l)
           echo "new_change_log_line = $new_change_log_line"
           new_change_log="$(echo "$new_change_log" | sed "$new_change_log_line d")" #Remove the last heading title
-          new_change_log="$(echo "$new_change_log" | sed "$($new_change_log_line-1) d")" #Remove the last empty line
+          # new_change_log="$(echo "$new_change_log" | sed "$($new_change_log_line-1) d")" #Remove the last empty line        
           new_change_log="${new_change_log//'%'/'%25'}"
           new_change_log="${new_change_log//$'\n'/'%0A'}"
           new_change_log="${new_change_log//$'\r'/'%0D'}"
@@ -335,14 +335,14 @@ jobs:
 
               - NA
 
-    - name: Invoke PR Eligibility Check workflow
+    - name: 17. Invoke PR Eligibility Check workflow
       uses: benc-uk/workflow-dispatch@v1
       with:
         workflow: PR Eligibility Check
         token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
-        inputs: '{ "base_branch": "develop", "source_branch": "{{ steps.create_bot_branch.outputs.bot_branch }}" }'
+        inputs: '{ "base_branch": "develop", "source_branch": "${{ steps.create_bot_branch.outputs.bot_branch }}" }'
 
-    - name: 17. Prepare slack message
+    - name: 18. Prepare slack message
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       run: |
         new_message="${{ env.SLACK_MESSAGE }}"
@@ -356,14 +356,14 @@ jobs:
             echo "SLACK_COLOR=green" >> $GITHUB_ENV
         fi;
 
-    - name: 17.1. Prepare slack message
+    - name: 18.1. Prepare slack message
       if: ${{ always() }}
       id: prepare_slack
       run: |
         echo "::set-output name=message::${{ env.SLACK_MESSAGE }}"
         echo "::set-output name=color::${{ env.SLACK_COLOR }}"
 
-    - name: 17.2. Notify to slack channel
+    - name: 18.2. Notify to slack channel
       if: ${{ always() }} && ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       uses: actions-ecosystem/action-slack-notifier@v1
       with:
