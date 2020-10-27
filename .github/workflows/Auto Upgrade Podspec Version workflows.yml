@@ -24,11 +24,11 @@ jobs:
           releasable_prefix_branchname_v2=''
 
           # if contains release/
-          if [ $(echo ${branch} | sed -e "s/^release\///g") != ${input_branch} ]; then
+          if [ $(echo ${branch} | sed -e "s/^release\///g") != ${branch} ]; then
               is_releasable_branch='YES'
               releasable_prefix_branchname='release'
               releasable_prefix_branchname_v2='released'
-          elif [ $(echo ${branch} | sed -e "s/^hotfix\///g") != ${input_branch} ]; then
+          elif [ $(echo ${branch} | sed -e "s/^hotfix\///g") != ${branch} ]; then
               is_releasable_branch='YES'
               releasable_prefix_branchname='hotfix'
               releasable_prefix_branchname_v2='hotfixed'
