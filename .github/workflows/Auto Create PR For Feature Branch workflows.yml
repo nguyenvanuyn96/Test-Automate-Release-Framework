@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
+    - name: 1. Checkout
+      uses: actions/checkout@master
     # - name: 1. Check prefix of commit message
     #   uses: gsactions/commit-message-checker@v1
     #   with:
