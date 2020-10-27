@@ -12,14 +12,8 @@ jobs:
 
     - name: 1. Checkout
       uses: actions/checkout@master
-    # - name: 1. Check prefix of commit message
-    #   uses: gsactions/commit-message-checker@v1
-    #   with:
-    #       pattern: '\[CreatePR\] .+$'
-    #       flags: 'gm'
-    #       error: ''
     
-    - name: 1. Check prefix of commit message
+    - name: 2. Check prefix of commit message
       id: check-commit-message
       run: |
           commit_message=$(git log -n 1 --pretty=format:%s ${{ github.rsa }})
@@ -35,7 +29,7 @@ jobs:
 
           echo "::set-output name=is_need_create_pr::${is_need_create_pr}"
           
-    - name: 2. Get branch name
+    - name: 3. Get branch data
       if: ${{ steps.check-commit-message.outputs.is_need_create_pr =='YES' }}
       id: get-branch-data
       run: |
@@ -54,7 +48,7 @@ jobs:
           echo "::set-output name=name::${branch}"
           echo "::set-output name=jira_ticket_url::${jira_ticket_url}"
 
-    - name: 3. Create pull request if needed
+    - name: 4. Create pull request if needed
       if: ${{ steps.check-commit-message.outputs.is_need_create_pr =='YES' }}
       id: create_pr
       uses: thomaseizinger/create-pull-request@master
@@ -97,7 +91,7 @@ jobs:
 
               - NA
 
-    - name: 4. Prepare slack message
+    - name: 5. Prepare slack message
       if: ${{ steps.check-commit-message.outputs.is_need_create_pr =='YES' }}
       id: prepare_slack
       run: |
@@ -109,7 +103,7 @@ jobs:
         echo "::set-output name=message:::shamrock::shamrock: *@${{github.actor}}* has just created a pull request for merging \`${{steps.get-branch-data.outputs.name}}\` into \`develop\`. Click to help review <https://github.com/${{github.repository}}/pull/${{ steps.create_pr.outputs.number }}|The PR ${{ steps.create_pr.outputs.number }}>"
         echo "::set-output name=color::$color"
 
-    - name: 5. Notify to slack channel
+    - name: 6. Notify to slack channel
       if: ${{ steps.check-commit-message.outputs.is_need_create_pr =='YES' }}
       uses: actions-ecosystem/action-slack-notifier@v1
       with:
