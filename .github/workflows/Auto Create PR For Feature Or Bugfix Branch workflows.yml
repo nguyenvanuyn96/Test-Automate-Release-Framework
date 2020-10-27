@@ -103,6 +103,13 @@ jobs:
 
               - NA
 
+    - name: Invoke PR Eligibility Check workflow
+      uses: benc-uk/workflow-dispatch@v1
+      with:
+        workflow: PR Eligibility Check
+        token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+        inputs: '{ "base_branch": ${{ steps.check-commit-message.outputs.target_branch }}, "source_branch": ${{ steps.get-branch-data.outputs.name }} }'
+
     - name: 5. Prepare slack message
       if: ${{ steps.check-commit-message.outputs.is_need_create_pr =='YES' }}
       id: prepare_slack
@@ -125,10 +132,3 @@ jobs:
         color: "${{ steps.prepare_slack.outputs.color }}"
         verbose: true # optional
         message: "${{ steps.prepare_slack.outputs.message }}"
-
-    # - name: Invoke Auto PR workflow
-    #   uses: benc-uk/workflow-dispatch@v1
-    #   with:
-    #     workflow: PR Eligibility Check
-    #     token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
-    #     inputs: '{ "release_branch": ${{ steps.get-branch.outputs.branch }}, "bot_release_branch": ${{ steps.create_bot_branch.outputs.bot_branch }} }'
