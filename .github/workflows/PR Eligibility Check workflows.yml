@@ -67,7 +67,7 @@ jobs:
         echo "This is PR into branch ${{ github.base_ref }}"
       
     - name: 2. Check rule
-      if: ${{ always() }}
+    #   if: ${{ always() }}
       run: |
         base_branch=${{ github.base_ref }}
         source_branch=${{ steps.pr_data.outputs.branch }}
@@ -132,3 +132,13 @@ jobs:
             echo "Message: The PR is valid"
             exit 0
         fi
+
+    - name: Run the action # You would run your tests before this using the output to set state/desc
+      if: ${{ github.event.inputs.base_branch != '' }}
+      uses: Sibz/github-status-action@v1
+      with: 
+            authToken: ${{secrets.GITHUB_TOKEN}}
+            context: 'Test run'
+            description: "${{ job.status }}"
+            state: "${{ job.status }}"
+            sha: ${{github.event.pull_request.head.sha || github.sha}}
