@@ -29,12 +29,12 @@ jobs:
           commit_message="${commit_message//']'/'\\\]'}"
 
           is_need_create_pr='NO'
-          pattern='\\\[CreatePR\\\] '
+          pattern='\[CreatePR\] '
 
           if [ $(echo ${commit_message} | sed -e "s/$pattern\///g") != ${commit_message} ]; then
               is_need_create_pr='YES'
           else
-              echo "Your commit message has to contain a prefix "[CreatePR] " to trigger auto create pr for merging feature/* into develop."
+              echo "Your commit message has to contain a prefix \"[CreatePR] \" to trigger auto create pr for merging feature/* into develop."
           fi;
 
           echo "::set-output name=is_need_create_pr::${is_need_create_pr}"
