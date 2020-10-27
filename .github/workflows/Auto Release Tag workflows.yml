@@ -335,6 +335,13 @@ jobs:
 
               - NA
 
+    - name: Invoke PR Eligibility Check workflow
+      uses: benc-uk/workflow-dispatch@v1
+      with:
+        workflow: PR Eligibility Check
+        token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+        inputs: '{ "base_branch": "develop", "source_branch": "{{ steps.create_bot_branch.outputs.bot_branch }}" }'
+
     - name: 17. Prepare slack message
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       run: |
