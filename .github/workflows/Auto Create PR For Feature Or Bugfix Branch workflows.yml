@@ -35,7 +35,7 @@ jobs:
                   target_branch=$get_target_branch
               fi;
           else
-              echo "Your commit message has to contain a prefix \"[CreatePR] \" or \"[CreatePR into {branch_name}]\" to trigger auto create pr for merging feature/* or bugfix/* into ${target_branch}."
+              echo "Your commit message has to contain a prefix \"[CreatePR] \" or \"[CreatePR into {branch_name}] \" to trigger auto create pr for merging feature/* or bugfix/* into ${target_branch}."
           fi;
 
           echo "::set-output name=is_need_create_pr::${is_need_create_pr}"
