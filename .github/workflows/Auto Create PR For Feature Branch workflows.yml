@@ -17,7 +17,7 @@ jobs:
     #   with:
     #       pattern: '\[CreatePR\] .+$'
     #       flags: 'gm'
-    #       error: ''
+    #       error: ''  
     
     - name: 1. Check prefix of commit message
       id: check-commit-message
