@@ -133,7 +133,7 @@ jobs:
           new_change_log_line=$(echo "$new_change_log" | wc -l)
           echo "new_change_log_line = $new_change_log_line"
           new_change_log="$(echo "$new_change_log" | sed "$new_change_log_line d")" #Remove the last heading title
-          new_change_log="$(echo "$new_change_log" | sed "$($new_change_log_line-1) d")" #Remove the last empty line
+          # new_change_log="$(echo "$new_change_log" | sed "$($new_change_log_line-1) d")" #Remove the last empty line        
           new_change_log="${new_change_log//'%'/'%25'}"
           new_change_log="${new_change_log//$'\n'/'%0A'}"
           new_change_log="${new_change_log//$'\r'/'%0D'}"
