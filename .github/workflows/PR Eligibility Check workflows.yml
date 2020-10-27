@@ -6,13 +6,11 @@ on:
       - hotfix/*
       - release/*
       - develop
-
     types:
       - opened
       - reopened
       - edited
       - synchronize
-
 jobs:
   pr_eligibility_check:
     if: ${{ github.event.pull_request.merged == false }}
@@ -55,17 +53,25 @@ jobs:
                 is_valid_pr=1
             elif [ $(echo ${source_branch} | sed -e "s/^bugfix\///g") != ${source_branch} ]; then
                 is_valid_pr=1
+            elif [ -z "$(echo ${source_branch} | sed -e "s/^bot\/release\/[0-9]*\.[0-9]*\.[0-9]*\/develop//g")" ]; then
+                is_valid_pr=1
+            elif [ -z "$(echo ${source_branch} | sed -e "s/^bot\/hotfix\/[0-9]*\.[0-9]*\.[0-9]*\/develop//g")" ]; then
+                is_valid_pr=1
             else
                 error_message="The \`develop\` branch only accept a pull request from the valid \`release/*\` or \`hotfix/*\` or \`feature/*\` or \`bugfix/*\` branch. Please double check the branch name and correct it from your side!!!"
             fi;
         elif [ -z "${base_branch##hotfix/*}" ]; then
             if [ $(echo ${source_branch} | sed -e "s/^bugfix\///g") != ${source_branch} ]; then
                 is_valid_pr=1
+            elif [ -z "$(echo ${source_branch} | sed -e "s/^bot\/hotfix\/[0-9]*\.[0-9]*\.[0-9]*//g")" ]; then
+                is_valid_pr=1
             else
                 error_message="The \`hotfix/*\` branch only accept a pull request from the only valid \`bugfix/*\` branch. Please double check the branch name and correct it from your side!!!"
             fi;
         elif [ -z "${base_branch##release/*}" ]; then
             if [ $(echo ${source_branch} | sed -e "s/^bugfix\///g") != ${source_branch} ]; then
+                is_valid_pr=1
+            elif [ - z "$(echo ${source_branch} | sed -e "s/^bot\/release\/[0-9]*\.[0-9]*\.[0-9]*//g")" ]; then
                 is_valid_pr=1
             else
                 error_message="The \`release/*\` branch only accept a pull request from the only valid \`bugfix/*\` branch. Please double check the branch name and correct it from your side!!!"
