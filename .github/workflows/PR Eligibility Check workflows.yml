@@ -138,7 +138,7 @@ jobs:
       uses: Sibz/github-status-action@v1
       with: 
             authToken: ${{secrets.GITHUB_TOKEN}}
-            context: 'Test run'
+            context: 'pr_eligibility_check'
             description: "${{ job.status }}"
             state: "${{ job.status }}"
             sha: ${{github.event.pull_request.head.sha || github.sha}}
