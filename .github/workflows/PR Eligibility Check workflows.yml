@@ -108,7 +108,21 @@ jobs:
             exit 0
         fi
 
-    - name: Set commit status if needed  # If this workflow is triggered by a workflow_dispatch event then we need to run set commit status because github action won't updating the commit status of a workflow_dispatch. Ref here: https://github.community/t/workflow-dispatch-does-not-update-commit-status/125981
+    - name: 3. Checkout `develop` branch
+      if: ${{ github.event.inputs.base_branch != '' }}
+      uses: actions/checkout@master
+      with:
+          ref: "${{ github.event.inputs.source_branch }}"
+
+    - name: 4. Get latest commit hash of the source branch
+      if: ${{ github.event.inputs.base_branch != '' }}
+      id: get_source_commit
+      run: |
+          commit_hash=$(git log --format="%H" -n 1)
+
+          echo "::set-output name=commit_hash::${commit_hash}"
+
+    - name: 5. Set commit status if needed  # If this workflow is triggered by a workflow_dispatch event then we need to run set commit status because github action won't updating the commit status of a workflow_dispatch. Ref here: https://github.community/t/workflow-dispatch-does-not-update-commit-status/125981
       if: ${{ github.event.inputs.base_branch != '' }}
       uses: Sibz/github-status-action@v1
       with: 
@@ -116,4 +130,4 @@ jobs:
             context: 'pr_eligibility_check'
             description: "${{ job.status }}"
             state: "${{ job.status }}"
-            sha: ${{ github.event.pull_request.head.sha || github.sha }}
+            sha: ${{ steps.get_source_commit.outputs.commit_hash }}
