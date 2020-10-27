@@ -1,7 +1,7 @@
 # Change logs
 This is change log of TKProductDetails module in 2020.
 
-## [Released] bugfix/update_workflow
+## [Unreleased]
 - Update workflow logic to fix the auto resolve conflict of CHANGE-LOG-YYYY.md file
 
 ## [Released] 1.0.50
