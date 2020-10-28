@@ -1,10 +1,7 @@
 name: "Auto Upgrade Podspec Version"
 
-on:  
-  create:
-    branches:
-      - release/*
-      - hotfix/*
+on: create
+
 jobs:
   auto_upgrade_podspec_version:
     runs-on: ubuntu-latest
@@ -42,7 +39,7 @@ jobs:
           echo "::set-output name=releasable_prefix_branchname_v2_capitalize::${releasable_prefix_branchname_v2^}"
 
     - name: 3. Get release version number only
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: get-release-version
       run: |
           version=$(echo ${{ steps.check-branch.outputs.branch }} | sed -e "s/^${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }}\///g")
@@ -50,7 +47,7 @@ jobs:
           echo "The detected release version = ${version}"
 
     - name: 4. Create bot branch
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: create_bot_branch
       run: |
           bot_branch="bot/${{ steps.check-branch.outputs.branch }}"
@@ -58,7 +55,7 @@ jobs:
           git checkout -b ${bot_branch}
     
     - name: 5. Find the current spec version string line
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: find_podspec_string
       uses: uynguyen-wonderlabs/str-replace@master
       with:
@@ -66,13 +63,13 @@ jobs:
           include: ".podspec"
 
     - name: 5.1. Debug logging info
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       run: |
           echo "fileFoundCount = ${{ steps.find_podspec_string.outputs.fileFoundCount }}"
           echo "resultArray = ${{ steps.find_podspec_string.outputs.resultArray }}"
     
     - name: 6. Prepare for update podspec version in file
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: prepare_for_update
       run: |
           resultArray=${{steps.find_podspec_string.outputs.resultArray}}
@@ -90,7 +87,7 @@ jobs:
           echo "::set-output name=podspec_line_string::${new_string}"
 
     - name: 7. Find and replace the current spec version to new version
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: find_and_replace
       uses: shitiomatic/str-replace@master
       with:
@@ -99,7 +96,7 @@ jobs:
           include: ".podspec"
     
     - name: 7.1. Check result of Find and replace
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       run: |
           echo "Number of files which have been modified = ${{ steps.find_and_replace.outputs.modifiedFiles}}"
           
@@ -112,7 +109,7 @@ jobs:
           echo "::set-output name=change_log_file_name::${change_log_file_name}"
  
     - name: 9. Find and replace the title `[Unreleased]` of CHANGE-LOG-YYYY.md file to `[Released] x.y.z` or `[Hotfixed] x.y.z`
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: find_and_replace_changelog
       uses: shitiomatic/str-replace@master
       with:
@@ -121,7 +118,7 @@ jobs:
           include: "${{steps.get_changelog_file.outputs.change_log_file_name}}"
 
     - name: 9.1. Check result of Find and replace
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       run: |
           echo "Number of files which have been modified = ${{ steps.find_and_replace_changelog.outputs.modifiedFiles }}"
    
@@ -136,7 +133,7 @@ jobs:
           fi;
 
     - name: 10. Commit and Push changes
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       uses: dciborow/commit@master
       with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -148,7 +145,7 @@ jobs:
           email: "automate-bot@sph.com.sg"
 
     - name: 11. Create bot pull request
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: create_pr
       uses: thomaseizinger/create-pull-request@master
       with:
@@ -158,14 +155,14 @@ jobs:
           title: "[Bot] Upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
 
     - name: 12. Auto approve `bot/release/*` or `bot/hotfix/*` branch
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       uses: juliangruber/approve-pull-request-action@v1
       with:
           github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
           number: "${{ steps.create_pr.outputs.number }}"
 
     - name: 13. Get latest commit hash of the bot branch
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: get_bot_commit
       run: |
           commit_hash=$(git log --format="%H" -n 1)
@@ -173,7 +170,7 @@ jobs:
           echo "::set-output name=commit_hash::${commit_hash}"
 
     - name: 14. Set commit status to success  # Need to set commit status to `success` because the release/* or hotfix/* is require a status check of `pr_eligibility_check` workflow
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       uses: Sibz/github-status-action@v1
       with: 
           authToken: ${{secrets.GITHUB_TOKEN}}
@@ -183,7 +180,7 @@ jobs:
           sha: ${{ steps.get_bot_commit.outputs.commit_hash }}
 
     - name: 15. Merge approved PR
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       uses: sudo-bot/action-pull-request-merge@v1.1.1
       with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -204,7 +201,7 @@ jobs:
         fi;
 
     - name: 17. Create pull request for release branch into master
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: create_release_pr
       uses: thomaseizinger/create-pull-request@master
       with:
@@ -247,7 +244,15 @@ jobs:
 
               - NA
 
-    - name: 18. Prepare slack message
+    - name: 18. Invoke PR Eligibility Check workflow
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
+      uses: benc-uk/workflow-dispatch@v1
+      with:
+        workflow: PR Eligibility Check
+        token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+        inputs: '{ "base_branch": "master", "source_branch": "${{ steps.check-branch.outputs.branch }}" }'
+
+    - name: 19. Prepare slack message
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       run: |
         new_message="${{ env.SLACK_MESSAGE }}"
@@ -261,13 +266,14 @@ jobs:
             echo "SLACK_COLOR=green" >> $GITHUB_ENV
         fi;
 
-    - name: 18.1. Prepare slack message
+    - name: 19.1. Prepare slack message
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: prepare_slack
       run: |
         echo "::set-output name=message::${{ env.SLACK_MESSAGE }}"
         echo "::set-output name=color::${{ env.SLACK_COLOR }}"
 
-    - name: 18.2. Notify to slack channel
+    - name: 19.2. Notify to slack channel
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       uses: actions-ecosystem/action-slack-notifier@v1
       with:

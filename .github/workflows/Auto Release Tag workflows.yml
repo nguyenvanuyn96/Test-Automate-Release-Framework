@@ -17,10 +17,6 @@ jobs:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         pr-id: ${{ github.event.pull_request.number }}
         
-    - name: 1.1. Print branch name for debugging
-      run: |
-        echo "This is PR from branch ${{ steps.pr_data.outputs.branch }}"
-    
     - name: 2. Check if branch name is an `release/*` or `hotfix/*`
       id: check-branch
       run: |
@@ -50,11 +46,11 @@ jobs:
           echo "::set-output name=releasable_prefix_branchname_v2_capitalize::${releasable_prefix_branchname_v2^}"
     
     - name: 3. Checkout
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       uses: actions/checkout@master
         
     - name: 4. Find and get the current pod version line string from podspec file
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: find_podspec_string
       uses: uynguyen-wonderlabs/str-replace@master
       with:
@@ -132,8 +128,7 @@ jobs:
 
           new_change_log_line=$(echo "$new_change_log" | wc -l)
           echo "new_change_log_line = $new_change_log_line"
-          new_change_log="$(echo "$new_change_log" | sed "$new_change_log_line d")" #Remove the last heading title
-          # new_change_log="$(echo "$new_change_log" | sed "$($new_change_log_line-1) d")" #Remove the last empty line        
+          new_change_log="$(echo "$new_change_log" | sed "$new_change_log_line d")" #Remove the last heading title     
           new_change_log="${new_change_log//'%'/'%25'}"
           new_change_log="${new_change_log//$'\n'/'%0A'}"
           new_change_log="${new_change_log//$'\r'/'%0D'}"
@@ -170,13 +165,13 @@ jobs:
         echo "SLACK_COLOR=green" >> $GITHUB_ENV #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
 
     - name: 9. Checkout `develop` branch
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       uses: actions/checkout@master
       with:
           ref: "develop"
 
     - name: 10. Get all changlog into the `[Unreleased]` heading from `develop` branch
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: get_develop_changelog
       run: |
           filename=${{steps.get_changelog_file.outputs.change_log_file_name}}
@@ -211,13 +206,13 @@ jobs:
           echo "new_change_log from develop branch = $new_change_log"
 
     - name: 11. Checkout the `release/*` or `hotfix/*` branch 
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       uses: actions/checkout@master
       with:
           ref: ${{ steps.check-branch.outputs.branch }}
 
     - name: 12. Create bot branch
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: create_bot_branch
       run: |
           bot_branch="bot/${{ steps.check-branch.outputs.branch }}/develop"
@@ -225,7 +220,7 @@ jobs:
           git checkout -b ${bot_branch}
 
     - name: 13. Process to get the new change logs
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: get_new_changelogs
       run: |
           new_change_log="${{ steps.get_develop_changelog.outputs.unreleased_change_log }}"
@@ -265,7 +260,7 @@ jobs:
           echo ${final_changelog}
 
     - name: 14. Update the content of CHANGE-LOG-YYYY.md file to correct
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: find_and_replace
       uses: shitiomatic/str-replace@master
       with:
@@ -274,14 +269,14 @@ jobs:
           include: "${{ steps.get_changelog_file.outputs.change_log_file_name }}"
 
     - name: 14.1. Check result of Find and replace
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       run: |
           echo "Number of files which have been modified = ${{ steps.find_and_replace.outputs.modifiedFiles}}"
           echo "================== ALL NEW CONTENT FROM CHANGE-LOG-YYYY.md FILE =========================="
           cat ${{ steps.get_changelog_file.outputs.change_log_file_name }}
            
     - name: 15. Commit and Push changes
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       uses: dciborow/commit@master
       with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -293,7 +288,7 @@ jobs:
           email: "automate-bot@sph.com.sg"
 
     - name: 16. Create pull request
-      if: ${{ steps.check-branch.outputs.is_releasable_branch =='YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: create_pr
       uses: thomaseizinger/create-pull-request@master
       with:
@@ -336,6 +331,7 @@ jobs:
               - NA
 
     - name: 17. Invoke PR Eligibility Check workflow
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       uses: benc-uk/workflow-dispatch@v1
       with:
         workflow: PR Eligibility Check
@@ -357,7 +353,7 @@ jobs:
         fi;
 
     - name: 18.1. Prepare slack message
-      if: ${{ always() }}
+      if: ${{ always() }} && ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: prepare_slack
       run: |
         echo "::set-output name=message::${{ env.SLACK_MESSAGE }}"

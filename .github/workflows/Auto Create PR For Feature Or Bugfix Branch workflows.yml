@@ -103,14 +103,15 @@ jobs:
 
               - NA
 
-    - name: Invoke PR Eligibility Check workflow
+    - name: 5. Invoke PR Eligibility Check workflow
+      if: ${{ steps.check-commit-message.outputs.is_need_create_pr =='YES' }}
       uses: benc-uk/workflow-dispatch@v1
       with:
         workflow: PR Eligibility Check
         token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
         inputs: '{ "base_branch": "${{ steps.check-commit-message.outputs.target_branch }}", "source_branch": "${{ steps.get-branch-data.outputs.name }}" }'
 
-    - name: 5. Prepare slack message
+    - name: 6. Prepare slack message
       if: ${{ steps.check-commit-message.outputs.is_need_create_pr =='YES' }}
       id: prepare_slack
       run: |
@@ -122,7 +123,7 @@ jobs:
         echo "::set-output name=message:::shamrock::shamrock: *@${{github.actor}}* has just created a pull request for merging \`${{steps.get-branch-data.outputs.name}}\` into \`${{ steps.check-commit-message.outputs.target_branch }}\`. Click to help review <https://github.com/${{github.repository}}/pull/${{ steps.create_pr.outputs.number }}|The PR ${{ steps.create_pr.outputs.number }}>"
         echo "::set-output name=color::$color"
 
-    - name: 6. Notify to slack channel
+    - name: 7. Notify to slack channel
       if: ${{ steps.check-commit-message.outputs.is_need_create_pr =='YES' }}
       uses: actions-ecosystem/action-slack-notifier@v1
       with:
