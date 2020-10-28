@@ -3,6 +3,7 @@ This is change log of TKProductDetails module in 2020.
 
 ## [Unreleased]
 - Trying the workflow_run_7
+- Cleanup workflow
 
 ## [Released] 1.0.54
 - Trying the workflow_run_5
