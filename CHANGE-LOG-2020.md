@@ -6,6 +6,7 @@ This is change log of TKProductDetails module in 2020.
 - Cleanup workflow
 - Update auto release tag workflow to append the current datetime after the heading 2 title when release
 - Fix bug can not run auto create release tag workflow
+- Fix bug can not run auto create release tag workflow by step 26
 
 ## [Released] 1.0.54
 - Trying the workflow_run_5
