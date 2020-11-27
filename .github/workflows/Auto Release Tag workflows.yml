@@ -184,7 +184,7 @@ jobs:
           number: ${{ steps.create_bot_release_pr.outputs.number }}
 
     - name: SCENARINO 1.17. Checkout
-      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated == 'YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated == 'NO' }}
       uses: actions/checkout@master
       with:
           ref: "${{ steps.check-branch.outputs.branch }}"
