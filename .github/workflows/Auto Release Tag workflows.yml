@@ -182,7 +182,7 @@ jobs:
 ###### SCENARINO 1: NEED TO UPDATE THE CHANGELOG-YYYY.md first ##########################################################################
 
     - name: SCENARINO 1.11. Commit and Push changes
-      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated == 'NO' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated != 'YES' }}
       uses: dciborow/commit@master
       with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -194,7 +194,7 @@ jobs:
           email: "automate-bot@sph.com.sg"
 
     - name: SCENARINO 1.12. Create bot pull request
-      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated == 'NO' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated != 'YES' }}
       id: create_bot_release_pr
       uses: thomaseizinger/create-pull-request@master
       with:
@@ -204,14 +204,14 @@ jobs:
           title: "[Bot] Update changelog heading title to [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }} (${{ steps.get_current_datetime.outputs.current_datetime }})"
 
     - name: SCENARINO 1.13. Auto approve `bot/release/*` or `bot/hotfix/*` branch
-      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated == 'NO' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated != 'YES' }}
       uses: juliangruber/approve-pull-request-action@v1
       with:
           github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
           number: "${{ steps.create_bot_release_pr.outputs.number }}"
 
     - name: SCENARINO 1.14. Get latest commit hash of the bot branch
-      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated == 'NO' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated != 'YES' }}
       id: get_bot_release_commit
       run: |
           commit_hash=$(git log --format="%H" -n 1)
@@ -219,7 +219,7 @@ jobs:
           echo "::set-output name=commit_hash::${commit_hash}"
 
     - name: SCENARINO 1.15. Set commit status to success  # Need to set commit status to `success` because the release/* or hotfix/* is require a status check of `pr_eligibility_check` workflow
-      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated == 'NO' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated != 'YES' }}
       uses: Sibz/github-status-action@v1
       with: 
           authToken: ${{secrets.GITHUB_TOKEN}}
@@ -229,20 +229,20 @@ jobs:
           sha: ${{ steps.get_bot_release_commit.outputs.commit_hash }}
 
     - name: SCENARINO 1.16. Merge approved PR
-      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated == 'NO' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated != 'YES' }}
       uses: sudo-bot/action-pull-request-merge@v1.1.1
       with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           number: ${{ steps.create_bot_release_pr.outputs.number }}
 
     - name: SCENARINO 1.17. Checkout
-      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated == 'NO' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated != 'YES' }}
       uses: actions/checkout@master
       with:
           ref: "${{ steps.check-branch.outputs.branch }}"
 
     - name: SCENARINO 1.18. Create pull request
-      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated == 'NO' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated != 'YES' }}
       id: create_updated_release_pr
       uses: thomaseizinger/create-pull-request@master
       with:
@@ -285,14 +285,14 @@ jobs:
               - NA
 
     - name: SCENARINO 1.19. Auto approve the updated `release/*` or `hotfix/*` branch
-      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated == 'NO' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated != 'YES' }}
       uses: juliangruber/approve-pull-request-action@v1
       with:
           github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
           number: "${{ steps.create_updated_release_pr.outputs.number }}"
 
     - name: SCENARINO 1.10. Get latest commit hash of the updated `release/*` or `hotfix/*` branch
-      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated == 'NO' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated != 'YES' }}
       id: get_updated_release_commit
       run: |
           commit_hash=$(git log --format="%H" -n 1)
@@ -300,7 +300,7 @@ jobs:
           echo "::set-output name=commit_hash::${commit_hash}"
 
     - name: SCENARINO 1.21. Set commit status to success  # Need to set commit status to `success` because the release/* or hotfix/* is require a status check of `pr_eligibility_check` workflow
-      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated == 'NO' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated != 'YES' }}
       uses: Sibz/github-status-action@v1
       with: 
           authToken: ${{secrets.GITHUB_TOKEN}}
@@ -310,14 +310,14 @@ jobs:
           sha: ${{ steps.get_updated_release_commit.outputs.commit_hash }}
 
     - name: SCENARINO 1.22. Merge approved PR
-      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated == 'NO' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated != 'YES' }}
       uses: sudo-bot/action-pull-request-merge@v1.1.1
       with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           number: ${{ steps.create_updated_release_pr.outputs.number }}
 
     - name: SCENARINO 1.23. Invoke Auto Release Tag workflow to process the create release tag
-      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated == 'NO' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated != 'YES' }}
       uses: benc-uk/workflow-dispatch@v1
       with:
         workflow: Auto Release Tag
@@ -325,7 +325,7 @@ jobs:
         inputs: '{ "base_branch": "master", "source_branch": "${{ steps.check-branch.outputs.branch }}" }'
 
     - name: SCENARINO 2.23. Invoke PR Eligibility Check workflow
-      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated == 'YES' }}
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }} && ${{ steps.check_changelog_file.outputs.is_updated != 'YES' }}
       uses: benc-uk/workflow-dispatch@v1
       with:
         workflow: PR Eligibility Check
