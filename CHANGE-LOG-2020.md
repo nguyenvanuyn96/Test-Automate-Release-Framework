@@ -2,7 +2,7 @@
 This is change log of TKProductDetails module in 2020.
 
 ## [Unreleased]
-
+- Update logic auto create release tag workflow
 
 ## [Released] 1.0.55
 - Trying the workflow_run_7
