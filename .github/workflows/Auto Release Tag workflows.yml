@@ -133,7 +133,7 @@ jobs:
 
     - name: 11. Create bot pull request
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
-      id: create_pr
+      id: create_bot_release_pr
       uses: thomaseizinger/create-pull-request@master
       with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -146,7 +146,7 @@ jobs:
       uses: juliangruber/approve-pull-request-action@v1
       with:
           github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
-          number: "${{ steps.create_pr.outputs.number }}"
+          number: "${{ steps.create_bot_release_pr.outputs.number }}"
 
     - name: 13. Get latest commit hash of the bot branch
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
@@ -171,7 +171,7 @@ jobs:
       uses: sudo-bot/action-pull-request-merge@v1.1.1
       with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          number: ${{ steps.create_pr.outputs.number }}
+          number: ${{ steps.create_bot_release_pr.outputs.number }}
 
     - name: 16. Checkout
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
