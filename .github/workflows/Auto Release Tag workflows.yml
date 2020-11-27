@@ -32,12 +32,12 @@ jobs:
           if [ $(echo ${branch} | sed -e "s/^release\///g") != ${branch} ]; then
               is_releasable_branch='YES'
               releasable_prefix_branchname='release'
-              releasable_prefix_branchname_verb_ing='releasing'
+              releasable_prefix_branchname_verb_ing='in releasing'
               releasable_prefix_branchname_v2='released'
           elif [ $(echo ${branch} | sed -e "s/^hotfix\///g") != ${branch} ]; then
               is_releasable_branch='YES'
               releasable_prefix_branchname='hotfix'
-              releasable_prefix_branchname_verb_ing='hotfixing'
+              releasable_prefix_branchname_verb_ing='in hotfixing'
               releasable_prefix_branchname_v2='hotfixed'
           fi;
 
@@ -84,7 +84,7 @@ jobs:
 
     - name: 6. Create bot branch
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
-      id: create_bot_branch
+      id: create_bot_release_branch
       run: |
           bot_branch="bot/${{ steps.check-branch.outputs.branch }}"
           echo "::set-output name=bot_branch::${bot_branch}"
@@ -124,7 +124,7 @@ jobs:
       uses: dciborow/commit@master
       with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          push-branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
+          push-branch: ${{ steps.create_bot_release_branch.outputs.bot_branch }}
           commit-message: "Upgrade changelog title '[${{ steps.check-branch.outputs.releasable_prefix_branchname_verb_ing_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }}' to [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }} (${{ steps.get_current_datetime.outputs.current_datetime }})"
           force-add: 'true'
           force-push: 'true'
@@ -133,11 +133,11 @@ jobs:
 
     - name: 11. Create bot pull request
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
-      id: create_pr
+      id: create_bot_release_pr
       uses: thomaseizinger/create-pull-request@master
       with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          head: ${{ steps.create_bot_branch.outputs.bot_branch }}
+          head: ${{ steps.create_bot_release_branch.outputs.bot_branch }}
           base: ${{ steps.check-branch.outputs.branch }}
           title: "[Bot] Upgrade changelog heading title to [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }} (${{ steps.get_current_datetime.outputs.current_datetime }})"
 
@@ -146,7 +146,7 @@ jobs:
       uses: juliangruber/approve-pull-request-action@v1
       with:
           github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
-          number: "${{ steps.create_pr.outputs.number }}"
+          number: "${{ steps.create_bot_release_pr.outputs.number }}"
 
     - name: 13. Get latest commit hash of the bot branch
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
@@ -171,7 +171,7 @@ jobs:
       uses: sudo-bot/action-pull-request-merge@v1.1.1
       with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          number: ${{ steps.create_pr.outputs.number }}
+          number: ${{ steps.create_bot_release_pr.outputs.number }}
 
     - name: 16. Checkout
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}

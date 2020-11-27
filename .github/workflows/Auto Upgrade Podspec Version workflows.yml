@@ -24,11 +24,11 @@ jobs:
           if [ $(echo ${branch} | sed -e "s/^release\///g") != ${branch} ]; then
               is_releasable_branch='YES'
               releasable_prefix_branchname='release'
-              releasable_prefix_branchname_verb_ing='releasing'
+              releasable_prefix_branchname_verb_ing='in releasing'
           elif [ $(echo ${branch} | sed -e "s/^hotfix\///g") != ${branch} ]; then
               is_releasable_branch='YES'
               releasable_prefix_branchname='hotfix'
-              releasable_prefix_branchname_verb_ing='hotfixing'
+              releasable_prefix_branchname_verb_ing='in hotfixing'
           fi;
 
           echo "::set-output name=branch::${branch}"
