@@ -1,6 +1,11 @@
 # Change logs
 This is change log of TKProductDetails module in 2020.
 
+## [Releasing] 1.0.55
+- Trying the workflow_run_7
+- Cleanup workflow
+- Update auto release tag workflow to append the current datetime after the heading 2 title when release
+
 ## [Released] 1.0.54
 - Trying the workflow_run_5
 - Trying the workflow_run_6

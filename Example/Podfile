@@ -8,4 +8,13 @@ target 'Test-Automate-Release-Framework_Example' do
 
     
   end
+
+end
+
+pre_install do |installer|
+  exec 'git config core.hooksPath .githooks'
+  exec 'chmod +x ../.githooks/prepare-commit-msg'
+  exec 'chmod +x ../.githooks/pre-push'
+  exec 'chmod +x ../.githooks/pre-commit'
+  exec 'chmod +x ../.githooks/commit-msg'
 end
