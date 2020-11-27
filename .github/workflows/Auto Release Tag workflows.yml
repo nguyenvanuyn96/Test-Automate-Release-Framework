@@ -187,7 +187,7 @@ jobs:
       with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           push-branch: ${{ steps.create_bot_release_branch.outputs.bot_branch }}
-          commit-message: "Update changelog title '[${{ steps.check-branch.outputs.releasable_prefix_branchname_verb_ing_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }}' to [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }} (${{ steps.get_current_datetime.outputs.current_datetime }})"
+          commit-message: "Update changelog title '[${{ steps.check-branch.outputs.releasable_prefix_branchname_verb_ing_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }}' to '[${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }} (${{ steps.get_current_datetime.outputs.current_datetime }})''"
           force-add: 'true'
           force-push: 'true'
           name: "automate-bot"
