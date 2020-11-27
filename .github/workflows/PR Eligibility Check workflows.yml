@@ -109,13 +109,13 @@ jobs:
         fi
 
     - name: 3. Checkout source_branch
-      if: ${{ always() }} && ${{ github.event.inputs.base_branch != '' }}  # If this workflow is triggered by a workflow_dispatch event
+      if: ${{ always() && github.event.inputs.base_branch != '' }}  # If this workflow is triggered by a workflow_dispatch event
       uses: actions/checkout@master
       with:
           ref: "${{ github.event.inputs.source_branch }}"
 
     - name: 4. Get latest commit hash of the source branch
-      if: ${{ always() }} && ${{ github.event.inputs.base_branch != '' }} # If this workflow is triggered by a workflow_dispatch event
+      if: ${{ always() && github.event.inputs.base_branch != '' }} # If this workflow is triggered by a workflow_dispatch event
       id: get_source_commit
       run: |
           commit_hash=$(git log --format="%H" -n 1)
@@ -123,7 +123,7 @@ jobs:
           echo "::set-output name=commit_hash::${commit_hash}"
 
     - name: 5. Set commit status if needed  # If this workflow is triggered by a workflow_dispatch event then we need to run set commit status because github action won't updating the commit status of a workflow_dispatch. Ref here: https://github.community/t/workflow-dispatch-does-not-update-commit-status/125981
-      if: ${{ always() }} && ${{ github.event.inputs.base_branch != '' }}
+      if: ${{ always() && github.event.inputs.base_branch != '' }}
       uses: Sibz/github-status-action@v1
       with: 
           authToken: ${{secrets.GITHUB_TOKEN}}
