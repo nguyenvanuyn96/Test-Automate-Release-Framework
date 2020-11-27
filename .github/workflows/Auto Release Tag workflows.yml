@@ -18,7 +18,7 @@ on:
       - closed
 jobs:
   auto_create_release_tag:
-    if: ${{ github.event.pull_request.merged == true }} || ${{ github.event.inputs.pr_number != '' }} || ${{ github.event.inputs.source_branch != '' }}
+    if: ${{ github.event.pull_request.merged == true || github.event.inputs.pr_number != '' || github.event.inputs.source_branch != '' }}
     runs-on: ubuntu-latest
     steps:
     - name: 1. Try to get pr number if have
