@@ -1,7 +1,7 @@
 # Change logs
 This is change log of TKProductDetails module in 2020.
 
-## [In hotfixing] 1.0.58
+## [Hotfixed] 1.0.58 (30-11-2020)
 - Try to update workfkow 2
 - Try to update workfkow 3
 - Fix bug wrong changelog when create PR to merging back develop branch 
