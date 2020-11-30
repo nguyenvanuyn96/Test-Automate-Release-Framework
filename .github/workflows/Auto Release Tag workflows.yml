@@ -46,15 +46,15 @@ jobs:
       run: |
         echo "This is PR from branch ${{ steps.get_pr_info.outputs.branch }}"
         
-    - name: 3.1. Print branch name for debugging
+    - name: 3.2. Print branch name for debugging
       if: ${{ github.event.pull_request.number != '' }}
       run: |
         echo "This is PR into branch ${{ github.base_ref }}"
       
-    - name: 3.1. Print branch name for debugging
+    - name: 3.3. Print branch name for debugging
       if: ${{ github.event.inputs.source_branch != '' }}
       run: |
-        echo "This is PR from branch ${{ github.event.inputs.source_branch }}
+        echo "This is PR from branch ${{ github.event.inputs.source_branch }}"
         echo "This is PR into branch master"
         
     - name: 4. Check if branch name is an `release/*` or `hotfix/*`
@@ -322,15 +322,7 @@ jobs:
       with:
         workflow: Auto Release Tag
         token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
-        inputs: '{ "base_branch": "master", "source_branch": "${{ steps.check-branch.outputs.branch }}" }'
-
-    - name: SCENARINO 2.23. Invoke PR Eligibility Check workflow
-      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
-      uses: benc-uk/workflow-dispatch@v1
-      with:
-        workflow: PR Eligibility Check
-        token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
-        inputs: '{ "base_branch": "develop", "source_branch": "${{ steps.create_bot_branch.outputs.bot_branch }}" }'
+        inputs: '{ "pr_number": "${{ steps.create_updated_release_pr.outputs.number }}" }'
 
 
 ###### SCENARINO 2: Go to create release tag ##########################################################################
