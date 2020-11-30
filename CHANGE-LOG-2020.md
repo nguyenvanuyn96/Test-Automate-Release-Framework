@@ -4,6 +4,8 @@ This is change log of TKProductDetails module in 2020.
 ## [Unreleased]
 - Try to update workfkow 2
 - Try to update workfkow 3
+- TEST 1
+- FIX BUG 2
 
 ## [Released] 1.0.57 (30-11-2020)
 - Fix logic check workflow job condition
