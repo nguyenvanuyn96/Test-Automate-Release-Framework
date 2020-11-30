@@ -324,7 +324,6 @@ jobs:
         token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
         inputs: '{ "pr_number": "${{ steps.create_updated_release_pr.outputs.number }}" }'
 
-
 ###### SCENARINO 2: Go to create release tag ##########################################################################
 
     - name: SCENARINO 2.11. Checkout
@@ -417,7 +416,7 @@ jobs:
       with:
           ref: "develop"
 
-    - name: SCENARINO 2.16. Get all changlog into the `[Unreleased]` heading from `develop` branch
+    - name: SCENARINO 2.16. Get all changlog items under the `[Unreleased]` heading from `develop` branch
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
       id: get_develop_changelog
       run: |
@@ -496,7 +495,7 @@ jobs:
           final_changelog+="${new_change_log}"
           final_changelog+=$'\n';
           final_changelog+=$'\n';
-          final_changelog+="## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }}"
+          final_changelog+="## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }} (${{ steps.get_current_datetime.outputs.current_datetime }})"
           final_changelog+=$'\n';
           final_changelog+="$released_change_log"
           final_changelog="${final_changelog//'%'/'%25'}"
