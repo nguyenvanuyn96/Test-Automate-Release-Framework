@@ -45,11 +45,11 @@ jobs:
           fi;
 
           platform_have_spacing="${platform} "
-
+          platform_lowercase=$platform
           echo "::set-output name=branch::${branch}"
           echo "::set-output name=is_releasable_branch::${is_releasable_branch}" 
           echo "::set-output name=platform::${platform_have_spacing}" 
-          echo "::set-output name=platform_lowercase::${platform,,}" 
+          echo "::set-output name=platform_lowercase::${platform_lowercase,,}" 
           echo "::set-output name=releasable_prefix_branchname_lowercase::${releasable_prefix_branchname}"
           echo "::set-output name=releasable_prefix_branchname_uppercase::${releasable_prefix_branchname^^}"
           echo "::set-output name=releasable_prefix_branchname_capitalize::${releasable_prefix_branchname^}"
@@ -169,7 +169,8 @@ jobs:
               fi;
           done < $filename
 
-          # echo "lineNumber = $lineNumber"
+          echo "lineNumber = $lineNumber"
+
 
     - name: 5. Get the current change log file name
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
