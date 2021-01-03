@@ -127,9 +127,9 @@ jobs:
                           newMarketingVersion="${{ steps.get-release-version.outputs.new_release_version }}"
                           newLine=${line/[0-9]*[\.]*[0-9]/$newMarketingVersion}
 
-                          # echo "line = $line"
-                          # echo "newLine = $newLine"
-                          # echo "lineNumber = $lineNumber"
+                          echo "line = $line"
+                          echo "newLine = $newLine"
+                          echo "lineNumber = $lineNumber"
                           
                           command="sed -i '.bak' '$lineNumber s/$line/$newLine;/' $filename"
                           # echo "command = $command"
@@ -141,9 +141,9 @@ jobs:
                           newCurrentProjectVersion="1;"
                           newLine=${line/[0-9]*/$newCurrentProjectVersion}
 
-                          # echo "line = $line"
-                          # echo "newLine = $newLine"
-                          # echo "lineNumber = $lineNumber"
+                          echo "line = $line"
+                          echo "newLine = $newLine"
+                          echo "lineNumber = $lineNumber"
 
                           command="sed -i '.bak' '$lineNumber s/$line/$newLine;/' $filename"
                           # echo "command = $command"
@@ -151,15 +151,15 @@ jobs:
                           eval $command
                           
                       elif [ "$line" == "};" ]; then
-                          # echo "in_section_check = $in_section_check"
-                          # echo "in_reference_check = $in_reference_check"
-                          # echo "in_buildsetting_check = $in_buildsetting_check"
+                          echo "in_section_check = $in_section_check"
+                          echo "in_reference_check = $in_reference_check"
+                          echo "in_buildsetting_check = $in_buildsetting_check"
 
                           in_reference_check="NO"
                           in_buildsetting_check="NO"
 
-                          # echo "==> Exit build setting/reference"
-                          # echo "==> "
+                          echo "==> Exit build setting/reference"
+                          echo "==> "
                       fi;
                   fi;
 
@@ -170,6 +170,7 @@ jobs:
           done < $filename
 
           echo "lineNumber = $lineNumber"
+          git add $filename
 
 
     - name: 5. Get the current change log file name
