@@ -130,8 +130,8 @@ jobs:
                           echo "newLine = $newLine"
                           echo "lineNumber = $lineNumber"
                           
-                          command="sed -i '.bak' '$lineNumber s/$line/$newLine;/' $filename"
-                          # echo "command = $command"
+                          command="sed -i '.bak' '$lineNumber s/$line/$newLine/' $filename"
+                          echo "command = $command"
                           # do the change marketing version
                           eval $command
 
@@ -144,8 +144,8 @@ jobs:
                           echo "newLine = $newLine"
                           echo "lineNumber = $lineNumber"
 
-                          command="sed -i '.bak' '$lineNumber s/$line/$newLine;/' $filename"
-                          # echo "command = $command"
+                          command="sed -i '.bak' '$lineNumber s/$line/$newLine/' $filename"
+                          echo "command = $command"
                           # do the change marketing version
                           eval $command
                           
