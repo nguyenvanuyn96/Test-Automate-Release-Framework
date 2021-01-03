@@ -1,0 +1,709 @@
+name: Auto Release App Tag
+on: 
+  workflow_dispatch:
+      inputs:
+          pr_number:
+              description: 'The pr number that merged into master branch. Ex: 14'
+              required: false
+              default: ''
+          source_branch:
+              description: 'The releasing branch which was merged into master branch for release. Ex: release/1.0.5'
+              required: false
+              default: ''
+
+  pull_request:
+    branches: 
+      - master
+    types:
+      - closed
+jobs:
+  auto_create_release_app_tag:
+    if: ${{ github.event.pull_request.merged == true || github.event.inputs.pr_number != '' || github.event.inputs.source_branch != '' }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: 1. Try to get pr number if have
+      if: ${{ github.event.inputs.source_branch == '' }} 
+      id: get-pr-number
+      run: |
+          pr_number=${{ github.event.pull_request.number }}
+
+          if [ -z "$pr_number" ]; then # If this workflow is triggered by a workflow_dispatch
+              pr_number=${{ github.event.inputs.pr_number }}
+          fi;
+
+          echo "::set-output name=pr_number::${pr_number}"
+
+    - name: 2. Try to get branch name of PR if have
+      if: ${{ steps.get-pr-number.outputs.pr_number != '' }} 
+      uses: andrevalentin/get-branch-name-by-pr@master
+      id: get_pr_info
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        pr-id: ${{ steps.get-pr-number.outputs.pr_number }}
+        
+    - name: 3.1. Print branch name for debugging
+      if: ${{ steps.get_pr_info.outputs.branch != '' }} 
+      run: |
+        echo "This is PR from branch ${{ steps.get_pr_info.outputs.branch }}"
+        
+    - name: 3.2. Print branch name for debugging
+      if: ${{ github.event.pull_request.number != '' }}
+      run: |
+        echo "This is PR into branch ${{ github.base_ref }}"
+      
+    - name: 3.3. Print branch name for debugging
+      if: ${{ github.event.inputs.source_branch != '' }}
+      run: |
+        echo "This is PR from branch ${{ github.event.inputs.source_branch }}"
+        echo "This is PR into branch master"
+        
+    - name: 4. Check if branch name is an `release/*` or `hotfix/*`
+      id: check-branch
+      run: |
+          input_branch=${{ steps.get_pr_info.outputs.branch }}
+
+          if [ -z "$input_branch" ]; then
+              input_branch="${{ github.event.inputs.source_branch }}"
+          fi;
+
+          branch=$(echo ${input_branch} | sed -e "s/^refs\/heads\///g")
+          is_releasable_branch='NO'
+          releasable_prefix_branchname=''
+          releasable_prefix_branchname_verb_ing=''
+          releasable_prefix_branchname_v2=''
+          platform='' # Empty means the next release is the universal app (both iPhone and iPad platform)
+
+          # if contains release/
+          if [ $(echo ${branch} | sed -e "s/^release\///g") != ${branch} ]; then
+              is_releasable_branch='YES'
+              releasable_prefix_branchname='release'
+              releasable_prefix_branchname_verb_ing='in releasing'
+              releasable_prefix_branchname_v2='released'
+
+              if [ $(echo ${branch} | sed -e "s/^release\/iphone\///g") != ${branch} ]; then
+                  platform='iphone'
+              elif  [ $(echo ${branch} | sed -e "s/^release\/ipad\///g") != ${branch} ]; then
+                  platform='ipad'
+              fi;
+          elif [ $(echo ${branch} | sed -e "s/^hotfix\///g") != ${branch} ]; then
+              is_releasable_branch='YES'
+              releasable_prefix_branchname='hotfix'
+              releasable_prefix_branchname_verb_ing='in hotfixing'
+              releasable_prefix_branchname_v2='hotfixed'
+
+              if [ $(echo ${branch} | sed -e "s/^hotfix\/iphone\///g") != ${branch} ]; then
+                  platform='iPhone'
+              elif  [ $(echo ${branch} | sed -e "s/^hotfix\/ipad\///g") != ${branch} ]; then
+                  platform='iPad'
+              fi;
+          fi;
+
+          platform_have_spacing="${platform} "
+
+          echo "::set-output name=branch::${branch}"
+          echo "::set-output name=is_releasable_branch::${is_releasable_branch}"
+          echo "::set-output name=platform::${platform_have_spacing}" 
+          echo "::set-output name=platform_lowercase::${platform,,}"
+          echo "::set-output name=releasable_prefix_branchname_lowercase::${releasable_prefix_branchname}"
+          echo "::set-output name=releasable_prefix_branchname_uppercase::${releasable_prefix_branchname^^}"
+          echo "::set-output name=releasable_prefix_branchname_capitalize::${releasable_prefix_branchname^}"
+          echo "::set-output name=releasable_prefix_branchname_verb_ing_capitalize::${releasable_prefix_branchname_verb_ing^}"
+          echo "::set-output name=releasable_prefix_branchname_v2_capitalize::${releasable_prefix_branchname_v2^}"
+    
+    - name: 5. Checkout
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
+      uses: actions/checkout@master
+      with:
+          ref: "master"
+
+    - name: 6. Find and get the current app version line string from project.pbxproj file
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
+      id: find_pbxproj_string
+      run: |
+          filename="ZaobaoUniversalApp.xcodeproj/project.pbxproj"
+          branchName="${{ steps.check-branch.outputs.branch }}"
+
+          iPhoneBranchNamePattern="release/iphone/.*"
+          iPadBranchNamePattern="release/ipad/.*"
+
+          iPhoneSectionPattern="\t*baseConfigurationReference = ((?!iPad).)*\.xcconfig.*"
+          iPadSectionPattern="\t*baseConfigurationReference = .*iPad.*\.xcconfig.*"
+          universalSectionPattern="\t*baseConfigurationReference = .*\.xcconfig.*"
+
+          sectionPattern=$universalSectionPattern
+
+          if [[ $branchName =~ $iPadBranchNamePattern ]]; then
+              sectionPattern=$iPadSectionPattern
+          elif [[ $branchName =~ $iPhoneBranchNamePattern ]]; then
+              sectionPattern=$iPhoneSectionPattern
+          fi;
+
+          echo "sectionPattern = $sectionPattern"
+
+          lineNumber=0
+          in_section_check="NO"
+          in_reference_check="NO"
+          in_buildsetting_check="NO"
+
+          currentProjectVersionPattern="\t*CURRENT_PROJECT_VERSION = .*"
+          marketingVersionPattern="\t*MARKETING_VERSION = .*"
+
+          currentProjectVersionLine=""
+          marketingVersionLine=""
+
+          while read line; do
+              # reading each line
+              let "lineNumber += 1"
+              
+              if [ "$in_section_check" == "YES" ] || [ "$line" == "/* Begin XCBuildConfiguration section */" ]; then
+                  in_section_check="YES"
+
+                  if [ "$in_reference_check" == "NO" ]; then
+                      if [[ "$line" =~ $sectionPattern ]]; then
+                          in_reference_check="YES"
+
+                          # echo "in_reference_check = $line"
+                      fi;
+                  elif [ "$line" == "buildSettings = {" ]; then
+                      in_buildsetting_check="YES"
+                  elif [ "$in_buildsetting_check" == "YES" ]; then
+                      if [[ "$line" =~ $marketingVersionPattern ]]; then
+                          marketingVersionLine=$line
+                      elif [[ "$line" =~ $currentProjectVersionPattern ]]; then
+                          currentProjectVersionLine=$line
+                      elif [ "$line" == "};" ]; then
+                          in_reference_check="NO"
+                          in_buildsetting_check="NO"
+                      fi;
+                  fi;
+
+                  if [ ! -z "$currentProjectVersionLine" ] && [ ! -z "$marketingVersionLine" ]; then
+                      break;
+                  elif [ "$line" == "/* End XCBuildConfiguration section */" ]; then
+                      break;
+                  fi;
+              fi;
+          done < $filename
+
+          echo "::set-output name=currentProjectVersionLine::${currentProjectVersionLine}"
+          echo "::set-output name=marketingVersionLine::${marketingVersionLine}"
+
+    - name: 7. Get the release version number from project.pbxproj file (step 6's result)
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
+      id: get-release-version
+      run: |
+        marketingVersionLine=${{steps.find_pbxproj_string.outputs.marketingVersionLine}}
+        version=$(echo ${marketingVersionLine} | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
+
+        currentProjectVersionLine=${{steps.find_pbxproj_string.outputs.currentProjectVersionLine}}
+        build_number=$(echo ${currentProjectVersionLine} | grep -Eo '[0-9]+')
+
+        echo "::set-output name=new_release_version::${version}"
+        echo "::set-output name=new_release_build_number::${build_number}"
+        
+        echo "This is the version which is detected from release branch name: ${version}"
+        echo "This is the bundle number which is detected from release branch name: ${build_number:}"
+        
+    - name: 7.1. Print data for debugging
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
+      run: |
+        echo "The branch ${{ steps.check-branch.outputs.branch }} is used for checking"
+        echo "This branch has is_releasable_branch = ${{ steps.check-branch.outputs.is_releasable_branch }}"
+        echo "This branch has release_version = ${{ steps.get-release-version.outputs.new_release_version }}"
+        echo "This branch has release_build_number = ${{ steps.get-release-version.outputs.new_release_build_number }}"
+
+    - name: 8. Checkout
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
+      uses: actions/checkout@master
+      with:
+          ref: "${{ steps.check-branch.outputs.branch }}"
+
+    - name: 9. Create bot branch
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
+      id: create_bot_release_branch
+      run: |
+          bot_branch="bot/${{ steps.check-branch.outputs.branch }}"
+          echo "::set-output name=bot_branch::${bot_branch}"
+          git checkout -b ${bot_branch}
+    
+    - name: 10. Get the current change log file name
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
+      id: get_changelog_file
+      run: |
+          current_year=$(echo $(date +"%Y"))
+          change_log_file_name="CHANGE-LOG-$current_year.md"
+          echo "::set-output name=change_log_file_name::${change_log_file_name}"
+    
+    - name: 11. Get the current datetime for update changelog heading 2 title
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
+      id: get_current_datetime
+      run: |
+          current_datetime=$(echo $(date '+%d-%m-%Y'))
+          echo "::set-output name=current_datetime::${current_datetime}"
+
+    - name: 12. Find and replace the title `[Releasing] x.y.z` or `[Hotfixing] x.y.z` of CHANGE-LOG-YYYY.md file to `[Released] x.y.z (dd-mm-YYYY)` or `[Hotfixed] x.y.z (dd-mm-YYYY)`
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
+      id: find_and_replace_changelog
+      uses: shitiomatic/str-replace@master
+      with:
+          find: "\\[${{ steps.check-branch.outputs.releasable_prefix_branchname_verb_ing_capitalize }}\\] ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }}"
+          replace: "[${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }} (${{ steps.get_current_datetime.outputs.current_datetime }})"
+          include: "${{ steps.get_changelog_file.outputs.change_log_file_name }}"
+
+    - name: 13. Check result of Find and replace
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
+      id: check_changelog_file
+      run: |
+          echo "Number of files which have been modified = ${{ steps.find_and_replace_changelog.outputs.modifiedFiles }}"
+          
+          is_updated='NO'
+          if [ ${{ steps.find_and_replace_changelog.outputs.modifiedFiles }} == 0 ]; then
+              is_updated='YES'
+          fi;
+          echo "is_updated = $is_updated"
+          echo "::set-output name=is_updated::${is_updated}"
+   
+###### SCENARINO 1: NEED TO UPDATE THE CHANGELOG-YYYY.md first ##########################################################################
+
+    - name: SCENARINO 1.11. Commit and Push changes
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
+      uses: dciborow/commit@master
+      with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          push-branch: ${{ steps.create_bot_release_branch.outputs.bot_branch }}
+          commit-message: "Update changelog title '[${{ steps.check-branch.outputs.releasable_prefix_branchname_verb_ing_capitalize }}] ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }}' to '[${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }} (${{ steps.get_current_datetime.outputs.current_datetime }})''"
+          force-add: 'true'
+          force-push: 'true'
+          name: "automate-bot"
+          email: "automate-bot@sph.com.sg"
+
+    - name: SCENARINO 1.12. Create bot pull request
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
+      id: create_bot_release_pr
+      uses: thomaseizinger/create-pull-request@master
+      with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          head: ${{ steps.create_bot_release_branch.outputs.bot_branch }}
+          base: ${{ steps.check-branch.outputs.branch }}
+          title: "[Bot] Update changelog heading title to [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }} (${{ steps.get_current_datetime.outputs.current_datetime }})"
+
+    - name: SCENARINO 1.13. Auto approve `bot/release/*` or `bot/hotfix/*` branch
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
+      uses: juliangruber/approve-pull-request-action@v1
+      with:
+          github-token: ${{ secrets.AUTO_APPROVE_WORKFLOW_SECRET }}
+          number: "${{ steps.create_bot_release_pr.outputs.number }}"
+
+    - name: SCENARINO 1.14. Get latest commit hash of the bot branch
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
+      id: get_bot_release_commit
+      run: |
+          commit_hash=$(git log --format="%H" -n 1)
+
+          echo "::set-output name=commit_hash::${commit_hash}"
+
+    - name: SCENARINO 1.15. Set commit status to success # Need to set commit status to `success` because the release/* or hotfix/* is require a status check of `pr_eligibility_check` workflow
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
+      uses: Sibz/github-status-action@v1
+      with: 
+          authToken: ${{secrets.GITHUB_TOKEN}}
+          context: 'pr_eligibility_check'
+          description: "Passed"
+          state: "success"
+          sha: ${{ steps.get_bot_release_commit.outputs.commit_hash }}
+
+    - name: SCENARINO 1.16. Merge approved PR
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
+      uses: sudo-bot/action-pull-request-merge@v1.1.1
+      with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ steps.create_bot_release_pr.outputs.number }}
+
+    - name: SCENARINO 1.17. Checkout
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
+      uses: actions/checkout@master
+      with:
+          ref: "${{ steps.check-branch.outputs.branch }}"
+
+    - name: SCENARINO 1.18. Create pull request
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
+      id: create_updated_release_pr
+      uses: thomaseizinger/create-pull-request@master
+      with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          head: ${{ steps.check-branch.outputs.branch }}
+          base: master
+          title: "[Bot] Merge updated [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }} (${{ steps.get_current_datetime.outputs.current_datetime }}) into master for releasing"
+          body: |
+              # Description
+              <!--Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.-->
+              Merge updated [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }} (${{ steps.get_current_datetime.outputs.current_datetime }}) into master for releasing
+              
+              ## Jira tickets
+              <!--Please list your relevant jira tickets here.-->
+
+              - NA
+
+              ## Checklist
+              <!--**Before submitting a pull request,** please make sure the following is done:-->
+
+              - [ ] Ensure the test passes 
+              - [ ] Rebase your branch on to `master` branch.
+
+              ## What type of PR is this?
+              <!--Please delete options that are not relevant.-->
+
+              - [x] Bug fix (non-breaking change which fixes an issue)
+              - [x] New feature (non-breaking change which adds functionality)
+              - [x] Chore (Minor changes, refactor code, ...)
+              - [x] Documentation Update
+
+              ## Related libraries
+              <!--Please list your related module PRs.-->
+
+              - NA
+
+              ## QA Instructions, Screenshots
+              <!--_Please replace this line with instructions on how to test your changes, as well as any relevant images for UI changes._-->
+
+              - NA
+
+    - name: SCENARINO 1.19. Auto approve the updated `release/*` or `hotfix/*` branch
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
+      uses: juliangruber/approve-pull-request-action@v1
+      with:
+          github-token: ${{ secrets.AUTO_APPROVE_WORKFLOW_SECRET }}
+          number: "${{ steps.create_updated_release_pr.outputs.number }}"
+
+    - name: SCENARINO 1.10. Get latest commit hash of the updated `release/*` or `hotfix/*` branch
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
+      id: get_updated_release_commit
+      run: |
+          commit_hash=$(git log --format="%H" -n 1)
+
+          echo "::set-output name=commit_hash::${commit_hash}"
+
+    - name: SCENARINO 1.21. Set commit status to success # Need to set commit status to `success` because the release/* or hotfix/* is require a status check of `pr_eligibility_check` workflow
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
+      uses: Sibz/github-status-action@v1
+      with: 
+          authToken: ${{secrets.GITHUB_TOKEN}}
+          context: 'pr_eligibility_check'
+          description: "Passed"
+          state: "success"
+          sha: ${{ steps.get_updated_release_commit.outputs.commit_hash }}
+
+    - name: SCENARINO 1.22. Merge approved PR
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
+      uses: sudo-bot/action-pull-request-merge@v1.1.1
+      with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ steps.create_updated_release_pr.outputs.number }}
+
+    - name: SCENARINO 1.23. Invoke Auto Release Tag workflow to process the create release tag
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
+      uses: benc-uk/workflow-dispatch@v1
+      with:
+        workflow: Auto Release Tag
+        token: ${{ secrets.AUTO_APPROVE_WORKFLOW_SECRET }}
+        inputs: '{ "pr_number": "${{ steps.create_updated_release_pr.outputs.number }}" }'
+
+###### SCENARINO 2: Go to create release tag ##########################################################################
+
+    - name: SCENARINO 2.11. Checkout
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
+      uses: actions/checkout@master
+      with:
+          ref: "${{ steps.check-branch.outputs.branch }}"
+
+    - name: SCENARINO 2.12. Get change log for this release from the CHANGE-LOG-YYYY.md file
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
+      id: get_changelog_manually
+      run: |
+          filename=${{steps.get_changelog_file.outputs.change_log_file_name}}
+          n=0
+          new_change_log=""
+          can_appending="NO"
+          while read line; do
+              # reading each line
+              if [ "$line" == "## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }} (${{ steps.get_current_datetime.outputs.current_datetime }})" ]; then
+                  can_appending="YES"
+              elif [[ "$line" == *"## [Released] "* ]]; then
+                  new_change_log+=$'\n';
+                  new_change_log+="## [Released]";
+                  can_appending="NO"
+              elif [[ "$line" == *"## [Hotfixed] "* ]]; then
+                  new_change_log+=$'\n';
+                  new_change_log+="## [Hotfixed]";
+                  can_appending="NO"
+              fi;
+
+              if [ "$can_appending" == "YES" ] && [ ! -z "$line" ]; then 
+                  new_change_log+="$line";
+                  new_change_log+=$'\n';
+              fi;
+
+              if [ "$can_appending" == "NO" ] && [ ! -z "$new_change_log" ]; then 
+                  break;
+              fi;
+          done < $filename
+          new_change_log="$(echo "$new_change_log" | sed "1 d")"
+
+          unreleased_change_log_with_last_title=$new_change_log
+          unreleased_change_log_with_last_title="${unreleased_change_log_with_last_title//'%'/'%25'}"
+          unreleased_change_log_with_last_title="${unreleased_change_log_with_last_title//$'\n'/'%0A'}"
+          unreleased_change_log_with_last_title="${unreleased_change_log_with_last_title//$'\r'/'%0D'}"
+
+          echo "::set-output name=unreleased_change_log_with_last_title::${unreleased_change_log_with_last_title}"
+
+          new_change_log_line=$(echo "$new_change_log" | wc -l)
+          echo "new_change_log_line = $new_change_log_line"
+          new_change_log="$(echo "$new_change_log" | sed "$new_change_log_line d")" #Remove the last heading title
+          new_change_log="${new_change_log//'%'/'%25'}"
+          new_change_log="${new_change_log//$'\n'/'%0A'}"
+          new_change_log="${new_change_log//$'\r'/'%0D'}"
+          echo "::set-output name=unreleased_change_log::${new_change_log}"
+    
+    - name: SCENARINO 2.12.1. Print data for debugging
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
+      run: |
+        echo "unreleased_change_log = ${{ steps.get_changelog_manually.outputs.unreleased_change_log }}"
+        echo "============================================================"
+        echo "unreleased_change_log_with_last_title = ${{ steps.get_changelog_manually.outputs.unreleased_change_log_with_last_title }}"
+
+    - name: SCENARINO 2.13. Create Release tag
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      with:
+          tag_name: ${{ steps.get-release-version.outputs.new_release_version }}
+          release_name: "${{ steps.check-branch.outputs.releasable_prefix_branchname_capitalize }} ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }}"
+          commitish: master
+          body: "${{ steps.get_changelog_manually.outputs.unreleased_change_log }}"
+          draft: false
+          prerelease: false
+    
+    - name: SCENARINO 2.14.1. Prepare slack message
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
+      run: |
+        repository=${{github.repository}}
+        owner="${{github.repository_owner}}/"
+        application_name="${repository//$owner/''}"
+        echo "SLACK_MESSAGE=- :white_check_mark: The *$application_name* version \\\`${{ steps.get-release-version.outputs.new_release_version }}\\\` has been created new tag :tada::tada::tada:. Click to see the detail <${{ steps.create_release.outputs.html_url }}|${{ steps.check-branch.outputs.releasable_prefix_branchname_capitalize }} ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }}>" >> $GITHUB_ENV
+        echo "SLACK_COLOR=green" >> $GITHUB_ENV # Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
+
+    - name: SCENARINO 2.15. Checkout `develop` branch
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
+      uses: actions/checkout@master
+      with:
+          ref: "develop"
+
+    - name: SCENARINO 2.16. Get all changlog items under the `[Unreleased]` heading from `develop` branch
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
+      id: get_develop_changelog
+      run: |
+          filename=${{steps.get_changelog_file.outputs.change_log_file_name}}
+          n=0
+          new_change_log=""
+          find_and_replace_regex=""
+          can_appending="NO"
+          while read line; do
+              # reading each line
+              if [ "$line" == "## [Unreleased]" ]; then
+                  can_appending="YES"
+              elif [[ "$line" == *"## [Released] "* ]]; then
+                  can_appending="NO"
+              elif [[ "$line" == *"## [Hotfixed] "* ]]; then
+                  can_appending="NO"
+              fi;
+
+              if [ "$can_appending" == "YES" ] && [ ! -z "$line" ]; then 
+                  new_change_log+="$line";
+                  new_change_log+=$'\n';
+              fi;
+
+              if [ "$can_appending" == "NO" ] && [ ! -z "$new_change_log" ]; then 
+                  find_and_replace_regex="((?:\\#\\# \\[Released\\]|\\#\\# \\[Hotfixed\\]) ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }}[\\s\\S]*?)(\\#\\# \\[Released\\]|\\#\\# \\[Hotfixed\\])"
+                  break;
+              fi;
+          done < $filename
+          new_change_log="$(echo "$new_change_log" | sed "1 d")"
+          new_change_log="${new_change_log//'%'/'%25'}"
+          new_change_log="${new_change_log//$'\n'/'%0A'}"
+          new_change_log="${new_change_log//$'\r'/'%0D'}"
+
+          if [ -z "$find_and_replace_regex" ]; then 
+              find_and_replace_regex="((?:\\#\\# \\[Released\\]|\\#\\# \\[Hotfixed\\]) ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }}[\\s\\S]*?)"
+          fi;
+
+          echo "::set-output name=unreleased_change_log::${new_change_log}"
+          echo "::set-output name=find_and_replace_regex::${find_and_replace_regex}"
+          echo "============================================================"
+          echo "new_change_log from develop branch = $new_change_log"
+
+    - name: SCENARINO 2.17. Checkout the `release/*` or `hotfix/*` branch 
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
+      uses: actions/checkout@master
+      with:
+          ref: ${{ steps.check-branch.outputs.branch }}
+
+    - name: SCENARINO 2.18. Create bot branch
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
+      id: create_bot_branch
+      run: |
+          bot_branch="bot/${{ steps.check-branch.outputs.branch }}/develop"
+          echo "::set-output name=bot_branch::${bot_branch}"
+          git checkout -b ${bot_branch}
+
+    - name: SCENARINO 2.19. Process to get the new change logs
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
+      id: get_new_changelogs
+      run: |
+          new_change_log="${{ steps.get_develop_changelog.outputs.unreleased_change_log }}"
+          released_change_log="${{ steps.get_changelog_manually.outputs.unreleased_change_log_with_last_title }}"
+          
+          while read -r released_line
+          do
+              # reading each line
+              unreleased_n=0
+
+              while read -r unreleased_line
+              do
+                  # reading each line
+                  unreleased_n=$((unreleased_n+1))
+
+                  if [ "$unreleased_line" == "$released_line" ] && [[ $unreleased_line != "### "* ]]; then
+                      new_change_log="$(echo "$new_change_log" | sed "$unreleased_n d")"
+                      unreleased_n=$((unreleased_n-1))
+                      break;
+                  fi;
+              done < <(printf '%s\n' "$new_change_log")
+          done < <(printf '%s\n' "$released_change_log")
+
+          final_changelog="## [Unreleased]"
+          final_changelog+=$'\n';
+          final_changelog+="${new_change_log}"
+          final_changelog+=$'\n';
+          final_changelog+=$'\n';
+          final_changelog+="## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }} (${{ steps.get_current_datetime.outputs.current_datetime }})"
+          final_changelog+=$'\n';
+          final_changelog+="$released_change_log"
+          final_changelog="${final_changelog//'%'/'%25'}"
+          final_changelog="${final_changelog//$'\n'/'%0A'}"
+          final_changelog="${final_changelog//$'\r'/'%0D'}"
+
+          echo "::set-output name=final_changelog::${final_changelog}"
+          echo ${final_changelog}
+
+    - name: SCENARINO 2.20. Update the content of CHANGE-LOG-YYYY.md file to correct
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
+      id: find_and_replace
+      uses: shitiomatic/str-replace@master
+      with:
+          find: "${{ steps.get_new_changelogs.outputs.find_and_replace_regex }}"
+          replace: "${{ steps.get_new_changelogs.outputs.final_changelog }}"
+          include: "${{ steps.get_changelog_file.outputs.change_log_file_name }}"
+
+    - name: SCENARINO 2.20.1. Check result of Find and replace
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
+      run: |
+          echo "Number of files which have been modified = ${{ steps.find_and_replace.outputs.modifiedFiles}}"
+          echo "================== ALL NEW CONTENT FROM CHANGE-LOG-YYYY.md FILE =========================="
+          cat ${{ steps.get_changelog_file.outputs.change_log_file_name }}
+           
+    - name: SCENARINO 2.21. Commit and Push changes
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
+      uses: dciborow/commit@master
+      with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          push-branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
+          commit-message: "Update ${{steps.get_changelog_file.outputs.change_log_file_name}}"
+          force-add: 'true'
+          force-push: 'true'
+          name: "automate-bot"
+          email: "automate-bot@sph.com.sg"
+
+    - name: SCENARINO 2.22. Create pull request
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
+      id: create_pr
+      uses: thomaseizinger/create-pull-request@master
+      with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          head: ${{ steps.create_bot_branch.outputs.bot_branch }}
+          base: develop
+          title: "[Bot] Merge back ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }} into develop"
+          body: |
+              # Description
+              <!--Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.-->
+              Merge ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }} into develop
+              
+              ## Jira tickets
+              <!--Please list your relevant jira tickets here.-->
+
+              - NA
+
+              ## Checklist
+              <!--**Before submitting a pull request,** please make sure the following is done:-->
+
+              - [ ] Ensure the test passes 
+              - [ ] Rebase your branch on to `develop` branch.
+
+              ## What type of PR is this?
+              <!--Please delete options that are not relevant.-->
+
+              - [ ] Bug fix (non-breaking change which fixes an issue)
+              - [ ] New feature (non-breaking change which adds functionality)
+              - [ ] Chore (Minor changes, refactor code, ...)
+              - [ ] Documentation Update
+
+              ## Related libraries
+              <!--Please list your related module PRs.-->
+
+              - NA
+
+              ## QA Instructions, Screenshots
+              <!--_Please replace this line with instructions on how to test your changes, as well as any relevant images for UI changes._-->
+
+              - NA
+
+    - name: SCENARINO 2.23. Invoke PR Eligibility Check workflow
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
+      uses: benc-uk/workflow-dispatch@v1
+      with:
+        workflow: PR Eligibility Check
+        token: ${{ secrets.AUTO_APPROVE_WORKFLOW_SECRET }}
+        inputs: '{ "base_branch": "develop", "source_branch": "${{ steps.create_bot_branch.outputs.bot_branch }}" }'
+
+    - name: SCENARINO 2.24. Prepare slack message
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
+      run: |
+        new_message="${{ env.SLACK_MESSAGE }}"
+        new_message="${new_message//'`'/'\`'}"
+        new_message+="%0A"
+        new_message+="- :white_check_mark: Already created a PR for merging back \\\`${{steps.check-branch.outputs.branch}}\\\` into \\\`develop\\\`. Click to help review and merge it - <https://github.com/${{github.repository}}/pull/${{ steps.create_pr.outputs.number }}|The PR ${{ steps.create_pr.outputs.number }}>"
+
+        echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
+
+        if [ -z "${{ env.SLACK_MESSAGE }}" ]; then
+            echo "SLACK_COLOR=green" >> $GITHUB_ENV
+        fi;
+
+    - name: SCENARINO 2.24.1. Prepare slack message
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
+      id: prepare_slack
+      run: |
+        echo "::set-output name=message::${{ env.SLACK_MESSAGE }}"
+        echo "::set-output name=color::${{ env.SLACK_COLOR }}"
+
+    - name: SCENARINO 2.24.2. Notify to slack channel
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
+      uses: actions-ecosystem/action-slack-notifier@v1
+      with:
+        slack_token: ${{ secrets.SLACK_BOT_TOKEN }}
+        channel: "G01D342CVQS" #This is the id of the private group `cp-pushing-ios`
+        username: "GitHub Actions"
+        color: "${{ steps.prepare_slack.outputs.color }}"
+        verbose: true # optional
+        message: "${{ steps.prepare_slack.outputs.message }}"

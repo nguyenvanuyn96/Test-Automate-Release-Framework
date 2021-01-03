@@ -1,9 +1,9 @@
-name: Auto Release Tag
+name: Auto Release Framework Tag
 on: 
   workflow_dispatch:
       inputs:
           pr_number:
-              description: 'The pr number that merged into master branch. Ex: 14'     
+              description: 'The pr number that merged into master branch. Ex: 14'
               required: false
               default: ''
           source_branch:
@@ -17,7 +17,7 @@ on:
     types:
       - closed
 jobs:
-  auto_create_release_tag:
+  auto_create_release_framework_tag:
     if: ${{ github.event.pull_request.merged == true || github.event.inputs.pr_number != '' || github.event.inputs.source_branch != '' }}
     runs-on: ubuntu-latest
     steps:
@@ -27,7 +27,7 @@ jobs:
       run: |
           pr_number=${{ github.event.pull_request.number }}
 
-          if [ -z "$pr_number" ];  then # If this workflow is triggered by a workflow_dispatch
+          if [ -z "$pr_number" ]; then # If this workflow is triggered by a workflow_dispatch
               pr_number=${{ github.event.inputs.pr_number }}
           fi;
 
@@ -62,7 +62,7 @@ jobs:
       run: |
           input_branch=${{ steps.get_pr_info.outputs.branch }}
 
-          if [ -z "$input_branch" ];  then
+          if [ -z "$input_branch" ]; then
               input_branch="${{ github.event.inputs.source_branch }}"
           fi;
 
@@ -85,8 +85,9 @@ jobs:
               releasable_prefix_branchname_v2='hotfixed'
           fi;
 
+
           echo "::set-output name=branch::${branch}"
-          echo "::set-output name=is_releasable_branch::${is_releasable_branch}" 
+          echo "::set-output name=is_releasable_branch::${is_releasable_branch}"
           echo "::set-output name=releasable_prefix_branchname_lowercase::${releasable_prefix_branchname}"
           echo "::set-output name=releasable_prefix_branchname_uppercase::${releasable_prefix_branchname^^}"
           echo "::set-output name=releasable_prefix_branchname_capitalize::${releasable_prefix_branchname^}"
@@ -107,19 +108,19 @@ jobs:
           find: "\\t*[s|spec].version\\s*=\\s*[\"|'][\\S]*[\"|']"
           include: ".podspec"
 
-    - name: 7. Get the release version number from podspec file (step 4's result)
+    - name: 7. Get the release version number from podspec file (step 6's result)
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: get-release-version
       run: |
-        resultArray=${{steps.find_podspec_string.outputs.resultArray}}
-        truncatedFirstLastBracketString=$(echo "${resultArray:1:-1}")
-        echo "truncatedFirstLastBracketString = ${truncatedFirstLastBracketString}"
+          resultArray=${{steps.find_podspec_string.outputs.resultArray}}
+          truncatedFirstLastBracketString=$(echo "${resultArray:1:-1}")
+          echo "truncatedFirstLastBracketString = ${truncatedFirstLastBracketString}"
 
-        firstString=$truncatedFirstLastBracketString
-        version=$(echo ${firstString} | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
+          firstString=$truncatedFirstLastBracketString
+          version=$(echo ${firstString} | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
 
-        echo "::set-output name=new_release_version::${version}"
-        echo "This is the version which is detected from release branch name: ${version}"
+          echo "::set-output name=new_release_version::${version}"
+          echo "This is the version which is detected from release branch name: ${version}"
         
     - name: 7.1. Print data for debugging
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
@@ -207,7 +208,7 @@ jobs:
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
       uses: juliangruber/approve-pull-request-action@v1
       with:
-          github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+          github-token: ${{ secrets.AUTO_APPROVE_WORKFLOW_SECRET }}
           number: "${{ steps.create_bot_release_pr.outputs.number }}"
 
     - name: SCENARINO 1.14. Get latest commit hash of the bot branch
@@ -218,7 +219,7 @@ jobs:
 
           echo "::set-output name=commit_hash::${commit_hash}"
 
-    - name: SCENARINO 1.15. Set commit status to success  # Need to set commit status to `success` because the release/* or hotfix/* is require a status check of `pr_eligibility_check` workflow
+    - name: SCENARINO 1.15. Set commit status to success # Need to set commit status to `success` because the release/* or hotfix/* is require a status check of `pr_eligibility_check` workflow
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
       uses: Sibz/github-status-action@v1
       with: 
@@ -264,7 +265,7 @@ jobs:
               <!--**Before submitting a pull request,** please make sure the following is done:-->
 
               - [ ] Ensure the test passes 
-              - [ ] Rebase your branch on to `develop` branch.
+              - [ ] Rebase your branch on to `master` branch.
 
               ## What type of PR is this?
               <!--Please delete options that are not relevant.-->
@@ -288,7 +289,7 @@ jobs:
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
       uses: juliangruber/approve-pull-request-action@v1
       with:
-          github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+          github-token: ${{ secrets.AUTO_APPROVE_WORKFLOW_SECRET }}
           number: "${{ steps.create_updated_release_pr.outputs.number }}"
 
     - name: SCENARINO 1.10. Get latest commit hash of the updated `release/*` or `hotfix/*` branch
@@ -299,7 +300,7 @@ jobs:
 
           echo "::set-output name=commit_hash::${commit_hash}"
 
-    - name: SCENARINO 1.21. Set commit status to success  # Need to set commit status to `success` because the release/* or hotfix/* is require a status check of `pr_eligibility_check` workflow
+    - name: SCENARINO 1.21. Set commit status to success # Need to set commit status to `success` because the release/* or hotfix/* is require a status check of `pr_eligibility_check` workflow
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
       uses: Sibz/github-status-action@v1
       with: 
@@ -321,7 +322,7 @@ jobs:
       uses: benc-uk/workflow-dispatch@v1
       with:
         workflow: Auto Release Tag
-        token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+        token: ${{ secrets.AUTO_APPROVE_WORKFLOW_SECRET }}
         inputs: '{ "pr_number": "${{ steps.create_updated_release_pr.outputs.number }}" }'
 
 ###### SCENARINO 2: Go to create release tag ##########################################################################
@@ -374,7 +375,7 @@ jobs:
 
           new_change_log_line=$(echo "$new_change_log" | wc -l)
           echo "new_change_log_line = $new_change_log_line"
-          new_change_log="$(echo "$new_change_log" | sed "$new_change_log_line d")" #Remove the last heading title     
+          new_change_log="$(echo "$new_change_log" | sed "$new_change_log_line d")" # Remove the last heading title
           new_change_log="${new_change_log//'%'/'%25'}"
           new_change_log="${new_change_log//$'\n'/'%0A'}"
           new_change_log="${new_change_log//$'\r'/'%0D'}"
@@ -423,6 +424,7 @@ jobs:
           filename=${{steps.get_changelog_file.outputs.change_log_file_name}}
           n=0
           new_change_log=""
+          find_and_replace_regex=""
           can_appending="NO"
           while read line; do
               # reading each line
@@ -440,6 +442,7 @@ jobs:
               fi;
 
               if [ "$can_appending" == "NO" ] && [ ! -z "$new_change_log" ]; then 
+                  find_and_replace_regex="((?:\\#\\# \\[Released\\]|\\#\\# \\[Hotfixed\\]) ${{ steps.get-release-version.outputs.new_release_version }}[\\s\\S]*?)(\\#\\# \\[Released\\]|\\#\\# \\[Hotfixed\\])"
                   break;
               fi;
           done < $filename
@@ -447,7 +450,13 @@ jobs:
           new_change_log="${new_change_log//'%'/'%25'}"
           new_change_log="${new_change_log//$'\n'/'%0A'}"
           new_change_log="${new_change_log//$'\r'/'%0D'}"
+          
+          if [ -z "$find_and_replace_regex" ]; then 
+              find_and_replace_regex="((?:\\#\\# \\[Released\\]|\\#\\# \\[Hotfixed\\]) ${{ steps.get-release-version.outputs.new_release_version }}[\\s\\S]*?)"
+          fi;
+
           echo "::set-output name=unreleased_change_log::${new_change_log}"
+          echo "::set-output name=find_and_replace_regex::${find_and_replace_regex}"
           echo "============================================================"
           echo "new_change_log from develop branch = $new_change_log"
 
@@ -510,7 +519,7 @@ jobs:
       id: find_and_replace
       uses: shitiomatic/str-replace@master
       with:
-          find: "((?:\\#\\# \\[Released\\]|\\#\\# \\[Hotfixed\\]) ${{ steps.get-release-version.outputs.new_release_version }}[\\s\\S]*?)(\\#\\# \\[Released\\]|\\#\\# \\[Hotfixed\\])"
+          find: "${{ steps.get_new_changelogs.outputs.find_and_replace_regex }}"
           replace: "${{ steps.get_new_changelogs.outputs.final_changelog }}"
           include: "${{ steps.get_changelog_file.outputs.change_log_file_name }}"
 
@@ -541,7 +550,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           head: ${{ steps.create_bot_branch.outputs.bot_branch }}
           base: develop
-          title: "[Bot] Merge ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} ${{ steps.get-release-version.outputs.new_release_version }} into develop"
+          title: "[Bot] Merge back ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} ${{ steps.get-release-version.outputs.new_release_version }} into develop"
           body: |
               # Description
               <!--Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.-->
@@ -561,10 +570,10 @@ jobs:
               ## What type of PR is this?
               <!--Please delete options that are not relevant.-->
 
-              - [x] Bug fix (non-breaking change which fixes an issue)
-              - [x] New feature (non-breaking change which adds functionality)
-              - [x] Chore (Minor changes, refactor code, ...)
-              - [x] Documentation Update
+              - [ ] Bug fix (non-breaking change which fixes an issue)
+              - [ ] New feature (non-breaking change which adds functionality)
+              - [ ] Chore (Minor changes, refactor code, ...)
+              - [ ] Documentation Update
 
               ## Related libraries
               <!--Please list your related module PRs.-->
@@ -581,7 +590,7 @@ jobs:
       uses: benc-uk/workflow-dispatch@v1
       with:
         workflow: PR Eligibility Check
-        token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+        token: ${{ secrets.AUTO_APPROVE_WORKFLOW_SECRET }}
         inputs: '{ "base_branch": "develop", "source_branch": "${{ steps.create_bot_branch.outputs.bot_branch }}" }'
 
     - name: SCENARINO 2.24. Prepare slack message
@@ -590,7 +599,7 @@ jobs:
         new_message="${{ env.SLACK_MESSAGE }}"
         new_message="${new_message//'`'/'\`'}"
         new_message+="%0A"
-        new_message+="- :white_check_mark: Already create a PR for merging back \\\`${{steps.check-branch.outputs.branch}}\\\` into \\\`develop\\\`. Click to help review and merge it - <https://github.com/${{github.repository}}/pull/${{ steps.create_pr.outputs.number }}|The PR ${{ steps.create_pr.outputs.number }}>"
+        new_message+="- :white_check_mark: Already created a PR for merging back \\\`${{steps.check-branch.outputs.branch}}\\\` into \\\`develop\\\`. Click to help review and merge it - <https://github.com/${{github.repository}}/pull/${{ steps.create_pr.outputs.number }}|The PR ${{ steps.create_pr.outputs.number }}>"
 
         echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
 
