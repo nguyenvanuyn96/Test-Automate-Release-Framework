@@ -20,6 +20,7 @@ jobs:
           releasable_prefix_branchname=''
           releasable_prefix_branchname_verb_ing=''
           platform='' # Empty means the next release is the universal app (both iPhone and iPad platform)
+          platform_lowercase=''
 
           # if contains release/
           if [ $(echo ${branch} | sed -e "s/^release\///g") != ${branch} ]; then
@@ -39,17 +40,18 @@ jobs:
 
               if [ $(echo ${branch} | sed -e "s/^hotfix\/iphone\///g") != ${branch} ]; then
                   platform='iPhone'
+                  platform_lowercase='iphone'
               elif [ $(echo ${branch} | sed -e "s/^hotfix\/ipad\///g") != ${branch} ]; then
                   platform='iPad'
+                  platform_lowercase='ipad'
               fi;
           fi;
 
           platform_have_spacing="${platform} "
-          platform_lowercase=$platform
           echo "::set-output name=branch::${branch}"
           echo "::set-output name=is_releasable_branch::${is_releasable_branch}" 
           echo "::set-output name=platform::${platform_have_spacing}" 
-          echo "::set-output name=platform_lowercase::${platform_lowercase,,}" 
+          echo "::set-output name=platform_lowercase::${platform_lowercase}" 
           echo "::set-output name=releasable_prefix_branchname_lowercase::${releasable_prefix_branchname}"
           echo "::set-output name=releasable_prefix_branchname_uppercase::${releasable_prefix_branchname^^}"
           echo "::set-output name=releasable_prefix_branchname_capitalize::${releasable_prefix_branchname^}"
@@ -97,7 +99,7 @@ jobs:
               sectionPattern=$iPhoneSectionPattern
           fi;
 
-          # echo "sectionPattern = $sectionPattern"
+          echo "sectionPattern = $sectionPattern"
 
           lineNumber=0
           in_section_check="NO"
@@ -118,7 +120,7 @@ jobs:
                       if [[ "$line" =~ $sectionPattern ]]; then
                           in_reference_check="YES"
 
-                          # echo "in_reference_check = $line"
+                          echo "in_reference_check = $line"
                       fi;
                   elif [ "$line" == "buildSettings = {" ]; then
                       in_buildsetting_check="YES"
