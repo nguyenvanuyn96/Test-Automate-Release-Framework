@@ -26,9 +26,21 @@ if [ $is_need_check_branch_name == "YES" ]; then
     if [ -z "$(echo ${current_branch} | sed -e "s/^release\/[0-9]*\.[0-9]*\.[0-9]*//g")" ]; then
         is_release_branch="YES"
         current_version=$(echo $current_branch | sed -e "s/^release\///g")
+    elif [ -z "$(echo ${current_branch} | sed -e "s/^release\/iphone\/[0-9]*\.[0-9]*\.[0-9]*//g")" ]; then
+        is_release_branch="YES"
+        current_version=$(echo $current_branch | sed -e "s/^release\/iphone\///g")
+    elif [ -z "$(echo ${current_branch} | sed -e "s/^release\/ipad\/[0-9]*\.[0-9]*\.[0-9]*//g")" ]; then
+        is_release_branch="YES"
+        current_version=$(echo $current_branch | sed -e "s/^release\/ipad\///g")
     elif [ -z "$(echo ${current_branch} | sed -e "s/^hotfix\/[0-9]*\.[0-9]*\.[0-9]*//g")" ]; then
         is_release_branch="YES"
         current_version=$(echo $current_branch | sed -e "s/^hotfix\///g")
+    elif [ -z "$(echo ${current_branch} | sed -e "s/^hotfix\/iphone\/[0-9]*\.[0-9]*\.[0-9]*//g")" ]; then
+        is_release_branch="YES"
+        current_version=$(echo $current_branch | sed -e "s/^hotfix\/iphone\///g")
+    elif [ -z "$(echo ${current_branch} | sed -e "s/^hotfix\/ipad\/[0-9]*\.[0-9]*\.[0-9]*//g")" ]; then
+        is_release_branch="YES"
+        current_version=$(echo $current_branch | sed -e "s/^hotfix\/ipad\///g")
     fi;
 
     is_accept_branch=!is_release_branch
@@ -154,7 +166,7 @@ if [ $is_need_check_branch_name == "YES" ]; then
     elif [ "develop" == "$current_branch" ]; then # if contains develop
         echo "==> $current_branch MATCHED the branch name develop"
     else
-        echo "==> Your branch name does NOT match any rules: develop|master|feature/*|bugfix/*|hotfix/*|release/*"
+        echo "==> Your branch name does NOT match any rules: develop|master|feature/*|bugfix/*|hotfix/*|release/*|hotfix/ipad/*|release/ipad/*|hotfix/iphone/*|release/iphone/*"
 	    exit 1
     fi;
 fi;
