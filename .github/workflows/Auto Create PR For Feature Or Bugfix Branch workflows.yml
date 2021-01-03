@@ -6,7 +6,7 @@ on:
       - feature/*
       - bugfix/*
 jobs:
-  auto_create_feature_or_bugfix_branch_pull_request:
+  auto_create_feature_or_bugfix_pull_request:
     runs-on: ubuntu-latest
     steps:
 
@@ -65,7 +65,7 @@ jobs:
       id: create_pr
       uses: thomaseizinger/create-pull-request@master
       with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }} 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
           head: ${{ steps.get-branch-data.outputs.name }}
           base: ${{ steps.check-commit-message.outputs.target_branch }}
           title: "Merge the `${{ steps.get-branch-data.outputs.name }}` into `${{ steps.check-commit-message.outputs.target_branch }}`"
@@ -89,7 +89,7 @@ jobs:
               ## What type of PR is this?
               <!--Please delete options that are not relevant.-->
 
-              - [x] New feature (non-breaking change which adds functionality)
+              - [ ] New feature (non-breaking change which adds functionality)
               - [ ] Chore (Minor changes, refactor code, ...)
               - [ ] Documentation Update
 
@@ -108,7 +108,7 @@ jobs:
       uses: benc-uk/workflow-dispatch@v1
       with:
         workflow: PR Eligibility Check
-        token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+        token: ${{ secrets.AUTO_APPROVE_WORKFLOW_SECRET }}
         inputs: '{ "base_branch": "${{ steps.check-commit-message.outputs.target_branch }}", "source_branch": "${{ steps.get-branch-data.outputs.name }}" }'
 
     - name: 6. Prepare slack message

@@ -47,7 +47,7 @@ jobs:
         base_branch=${{ github.base_ref }}
         source_branch=${{ steps.pr_data.outputs.branch }}
 
-        if [ -z "$base_branch" ] && [ -z "$source_branch" ];  then # If this workflow is triggered by a workflow_dispatch
+        if [ -z "$base_branch" ] && [ -z "$source_branch" ]; then # If this workflow is triggered by a workflow_dispatch
             base_branch=${{ github.event.inputs.base_branch }}
             source_branch=${{ github.event.inputs.source_branch }}
         fi;
@@ -56,17 +56,33 @@ jobs:
         error_message=""
 
         if [ $base_branch == "master" ]; then
-            if [ $(echo ${source_branch} | sed -e "s/^release\///g") != ${source_branch} ]; then
+            if [ $(echo ${source_branch} | sed -e "s/^release\/[0-9]*\.[0-9]*\.[0-9]*//g") != ${source_branch} ]; then
                 is_valid_pr=1
-            elif [ $(echo ${source_branch} | sed -e "s/^hotfix\///g") != ${source_branch} ]; then
+            elif [ $(echo ${source_branch} | sed -e "s/^release\/iphone\/[0-9]*\.[0-9]*\.[0-9]*//g") != ${source_branch} ]; then
+                is_valid_pr=1
+            elif [ $(echo ${source_branch} | sed -e "s/^release\/ipad\/[0-9]*\.[0-9]*\.[0-9]*//g") != ${source_branch} ]; then
+                is_valid_pr=1
+            elif [ $(echo ${source_branch} | sed -e "s/^hotfix\/[0-9]*\.[0-9]*\.[0-9]*//g") != ${source_branch} ]; then
+                is_valid_pr=1
+            elif [ $(echo ${source_branch} | sed -e "s/^hotfix\/iphone\/[0-9]*\.[0-9]*\.[0-9]*//g") != ${source_branch} ]; then
+                is_valid_pr=1
+            elif [ $(echo ${source_branch} | sed -e "s/^hotfix\/ipad\/[0-9]*\.[0-9]*\.[0-9]*//g") != ${source_branch} ]; then
                 is_valid_pr=1
             else
-                error_message="The \`master\` branch only accept a pull request from the valid \`release/*\` or \`hotfix/*\` branch. Please double check the branch name and correct it from your side!!!"
+                error_message="The \`master\` branch only accept a pull request from the valid \`release/*\` or \`hotfix/*\` or \`release/iphone/*\` or \`release/ipad/*\` or \`hotfix/iphone/*\` or \`hotfix/ipad/*\` branch. Please double check the branch name and correct it from your side!!!"
             fi;
         elif [ $base_branch == "develop" ]; then
-            if [ $(echo ${source_branch} | sed -e "s/^release\///g") != ${source_branch} ]; then
+            if [ $(echo ${source_branch} | sed -e "s/^release\/[0-9]*\.[0-9]*\.[0-9]*//g") != ${source_branch} ]; then
                 is_valid_pr=1
-            elif [ $(echo ${source_branch} | sed -e "s/^hotfix\///g") != ${source_branch} ]; then
+            elif [ $(echo ${source_branch} | sed -e "s/^release\/iphone\/[0-9]*\.[0-9]*\.[0-9]*//g") != ${source_branch} ]; then
+                is_valid_pr=1
+            elif [ $(echo ${source_branch} | sed -e "s/^release\/ipad\/[0-9]*\.[0-9]*\.[0-9]*//g") != ${source_branch} ]; then
+                is_valid_pr=1
+            elif [ $(echo ${source_branch} | sed -e "s/^hotfix\/[0-9]*\.[0-9]*\.[0-9]*//g") != ${source_branch} ]; then
+                is_valid_pr=1
+            elif [ $(echo ${source_branch} | sed -e "s/^hotfix\/iphone\/[0-9]*\.[0-9]*\.[0-9]*//g") != ${source_branch} ]; then
+                is_valid_pr=1
+            elif [ $(echo ${source_branch} | sed -e "s/^hotfix\/ipad\/[0-9]*\.[0-9]*\.[0-9]*//g") != ${source_branch} ]; then
                 is_valid_pr=1
             elif [ $(echo ${source_branch} | sed -e "s/^feature\///g") != ${source_branch} ]; then
                 is_valid_pr=1
@@ -74,26 +90,42 @@ jobs:
                 is_valid_pr=1
             elif [ -z "$(echo ${source_branch} | sed -e "s/^bot\/release\/[0-9]*\.[0-9]*\.[0-9]*\/develop//g")" ]; then
                 is_valid_pr=1
+            elif [ -z "$(echo ${source_branch} | sed -e "s/^bot\/release\/iphone\/[0-9]*\.[0-9]*\.[0-9]*\/develop//g")" ]; then
+                is_valid_pr=1
+            elif [ -z "$(echo ${source_branch} | sed -e "s/^bot\/release\/ipad\/[0-9]*\.[0-9]*\.[0-9]*\/develop//g")" ]; then
+                is_valid_pr=1
             elif [ -z "$(echo ${source_branch} | sed -e "s/^bot\/hotfix\/[0-9]*\.[0-9]*\.[0-9]*\/develop//g")" ]; then
                 is_valid_pr=1
+            elif [ -z "$(echo ${source_branch} | sed -e "s/^bot\/hotfix\/iphone\/[0-9]*\.[0-9]*\.[0-9]*\/develop//g")" ]; then
+                is_valid_pr=1
+            elif [ -z "$(echo ${source_branch} | sed -e "s/^bot\/hotfix\/ipad\/[0-9]*\.[0-9]*\.[0-9]*\/develop//g")" ]; then
+                is_valid_pr=1
             else
-                error_message="The \`develop\` branch only accept a pull request from the valid \`release/*\` or \`hotfix/*\` or \`feature/*\` or \`bugfix/*\` branch. Please double check the branch name and correct it from your side!!!"
+                error_message="The \`develop\` branch only accept a pull request from the valid \`release/*\` or \`hotfix/*\` or \`release/iphone/*\` or \`release/ipad/*\` or \`hotfix/iphone/*\` or \`hotfix/ipad/*\` or \`feature/*\` or \`bugfix/*\` branch. Please double check the branch name and correct it from your side!!!"
             fi;
         elif [ -z "${base_branch##hotfix/*}" ]; then
             if [ $(echo ${source_branch} | sed -e "s/^bugfix\///g") != ${source_branch} ]; then
                 is_valid_pr=1
             elif [ -z "$(echo ${source_branch} | sed -e "s/^bot\/hotfix\/[0-9]*\.[0-9]*\.[0-9]*//g")" ]; then
                 is_valid_pr=1
+            elif [ -z "$(echo ${source_branch} | sed -e "s/^bot\/hotfix\/iphone\/[0-9]*\.[0-9]*\.[0-9]*//g")" ]; then
+                is_valid_pr=1
+            elif [ -z "$(echo ${source_branch} | sed -e "s/^bot\/hotfix\/ipad\/[0-9]*\.[0-9]*\.[0-9]*//g")" ]; then
+                is_valid_pr=1
             else
-                error_message="The \`hotfix/*\` branch only accept a pull request from the only valid \`bugfix/*\` branch. Please double check the branch name and correct it from your side!!!"
+                error_message="The \`hotfix/*\` or \`hotfix/iphone/*\` or \`hotfix/ipad/*\` branch only accept a pull request from the only valid \`bugfix/*\` branch. Please double check the branch name and correct it from your side!!!"
             fi;
         elif [ -z "${base_branch##release/*}" ]; then
             if [ $(echo ${source_branch} | sed -e "s/^bugfix\///g") != ${source_branch} ]; then
                 is_valid_pr=1
             elif [ - z "$(echo ${source_branch} | sed -e "s/^bot\/release\/[0-9]*\.[0-9]*\.[0-9]*//g")" ]; then
                 is_valid_pr=1
+            elif [ - z "$(echo ${source_branch} | sed -e "s/^bot\/release\/iphone\/[0-9]*\.[0-9]*\.[0-9]*//g")" ]; then
+                is_valid_pr=1
+            elif [ - z "$(echo ${source_branch} | sed -e "s/^bot\/release\/ipad\/[0-9]*\.[0-9]*\.[0-9]*//g")" ]; then
+                is_valid_pr=1
             else
-                error_message="The \`release/*\` branch only accept a pull request from the only valid \`bugfix/*\` branch. Please double check the branch name and correct it from your side!!!"
+                error_message="The \`release/*\` or \`release/iphone/*\` or \`release/ipad/*\` branch only accept a pull request from the only valid \`bugfix/*\` branch. Please double check the branch name and correct it from your side!!!"
             fi;
         fi;  
 
