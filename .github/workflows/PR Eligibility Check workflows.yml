@@ -74,9 +74,9 @@ jobs:
         elif [ $base_branch == "develop" ]; then
             if [ $(echo ${source_branch} | sed -e "s/^release\/[0-9]*\.[0-9]*\.[0-9]*//g") != ${source_branch} ]; then
                 is_valid_pr=1
-            if [ $(echo ${source_branch} | sed -e "s/^release\/iphone\/[0-9]*\.[0-9]*\.[0-9]*//g") != ${source_branch} ]; then
+            elif [ $(echo ${source_branch} | sed -e "s/^release\/iphone\/[0-9]*\.[0-9]*\.[0-9]*//g") != ${source_branch} ]; then
                 is_valid_pr=1
-            if [ $(echo ${source_branch} | sed -e "s/^release\/ipad\/[0-9]*\.[0-9]*\.[0-9]*//g") != ${source_branch} ]; then
+            elif [ $(echo ${source_branch} | sed -e "s/^release\/ipad\/[0-9]*\.[0-9]*\.[0-9]*//g") != ${source_branch} ]; then
                 is_valid_pr=1
             elif [ $(echo ${source_branch} | sed -e "s/^hotfix\/[0-9]*\.[0-9]*\.[0-9]*//g") != ${source_branch} ]; then
                 is_valid_pr=1
