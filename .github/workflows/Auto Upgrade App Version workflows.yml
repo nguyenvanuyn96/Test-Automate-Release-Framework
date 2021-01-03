@@ -20,8 +20,7 @@ jobs:
           releasable_prefix_branchname=''
           releasable_prefix_branchname_verb_ing=''
           platform='' # Empty means the next release is the universal app (both iPhone and iPad platform)
-          platform_lowercase=''
-
+          
           # if contains release/
           if [ $(echo ${branch} | sed -e "s/^release\///g") != ${branch} ]; then
               is_releasable_branch='YES'
@@ -29,9 +28,9 @@ jobs:
               releasable_prefix_branchname_verb_ing='in releasing'
 
               if [ $(echo ${branch} | sed -e "s/^release\/iphone\///g") != ${branch} ]; then
-                  platform='iphone'
+                  platform='iPhone'
               elif [ $(echo ${branch} | sed -e "s/^release\/ipad\///g") != ${branch} ]; then
-                  platform='ipad'
+                  platform='iPad'
               fi;
           elif [ $(echo ${branch} | sed -e "s/^hotfix\///g") != ${branch} ]; then
               is_releasable_branch='YES'
@@ -40,10 +39,8 @@ jobs:
 
               if [ $(echo ${branch} | sed -e "s/^hotfix\/iphone\///g") != ${branch} ]; then
                   platform='iPhone'
-                  platform_lowercase='iphone'
               elif [ $(echo ${branch} | sed -e "s/^hotfix\/ipad\///g") != ${branch} ]; then
                   platform='iPad'
-                  platform_lowercase='ipad'
               fi;
           fi;
 
@@ -51,7 +48,7 @@ jobs:
           echo "::set-output name=branch::${branch}"
           echo "::set-output name=is_releasable_branch::${is_releasable_branch}" 
           echo "::set-output name=platform::${platform_have_spacing}" 
-          echo "::set-output name=platform_lowercase::${platform_lowercase}" 
+          echo "::set-output name=platform_lowercase::${platform,,}" 
           echo "::set-output name=releasable_prefix_branchname_lowercase::${releasable_prefix_branchname}"
           echo "::set-output name=releasable_prefix_branchname_uppercase::${releasable_prefix_branchname^^}"
           echo "::set-output name=releasable_prefix_branchname_capitalize::${releasable_prefix_branchname^}"

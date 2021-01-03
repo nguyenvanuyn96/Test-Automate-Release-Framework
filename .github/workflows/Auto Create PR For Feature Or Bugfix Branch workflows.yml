@@ -24,7 +24,6 @@ jobs:
           create_pr_regex='^\[\(CreatePR\( \(in\)\{0,1\}to \(\S*\)\)*\)\]\s.*$'
 
           matched_message=$(echo ${commit_message} | sed -e "s/$create_pr_regex//g")
-          echo "get_target_branch = \"$get_target_branch\""
           echo "matched_message = \"$matched_message\""
 
           if [ "$matched_message" != "${commit_message}" ]; then
