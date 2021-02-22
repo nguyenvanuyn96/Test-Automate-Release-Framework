@@ -242,7 +242,7 @@ jobs:
 
     - name: 11. Set commit status to success # Need to set commit status to `success` because the release/* or hotfix/* is require a status check of `pr_eligibility_check` workflow
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
-      uses: Sibz/github-status-action@v1
+      uses: Sibz/github-status-action@v1.1.2
       with: 
           authToken: ${{secrets.GITHUB_TOKEN}}
           context: 'pr_eligibility_check'
