@@ -4,11 +4,11 @@ on: create
 
 jobs:
   auto_upgrade_app_version:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
 
     - name: 1. Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@master
         
     - name: 2. Check if branch name is an `release/*` or `hotfix/*`
       id: check-branch
@@ -183,7 +183,7 @@ jobs:
     - name: 6. Find and replace the title `[Unreleased]` of CHANGE-LOG-YYYY.md file to `[Released] x.y.z` or `[Hotfixed] x.y.z`
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: find_and_replace_changelog
-      uses: shitiomatic/str-replace@master
+      uses: jacobtomlinson/gha-find-replace@master
       with:
           find: "\\[Unreleased\\]"
           replace: "[${{ steps.check-branch.outputs.releasable_prefix_branchname_verb_ing_capitalize }}] ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }}"

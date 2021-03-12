@@ -19,7 +19,7 @@ on:
 jobs:
   auto_create_release_app_tag:
     if: ${{ github.event.pull_request.merged == true || github.event.inputs.pr_number != '' || github.event.inputs.source_branch != '' }}
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
     - name: 1. Try to get pr number if have
       if: ${{ github.event.inputs.source_branch == '' }} 
@@ -112,7 +112,7 @@ jobs:
     
     - name: 5. Checkout
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
-      uses: actions/checkout@v2
+      uses: actions/checkout@master
       with:
           ref: "master"
 
@@ -214,7 +214,7 @@ jobs:
 
     - name: 8. Checkout
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
-      uses: actions/checkout@v2
+      uses: actions/checkout@master
       with:
           ref: "${{ steps.check-branch.outputs.branch }}"
 
@@ -244,7 +244,7 @@ jobs:
     - name: 12. Find and replace the title `[Releasing] x.y.z` or `[Hotfixing] x.y.z` of CHANGE-LOG-YYYY.md file to `[Released] x.y.z (dd-mm-YYYY)` or `[Hotfixed] x.y.z (dd-mm-YYYY)`
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: find_and_replace_changelog
-      uses: shitiomatic/str-replace@master
+      uses: jacobtomlinson/gha-find-replace@master
       with:
           find: "\\[${{ steps.check-branch.outputs.releasable_prefix_branchname_verb_ing_capitalize }}\\] ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }}"
           replace: "[${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }} (${{ steps.get_current_datetime.outputs.current_datetime }})"
@@ -321,7 +321,7 @@ jobs:
 
     - name: SCENARINO 1.17. Checkout
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
-      uses: actions/checkout@v2
+      uses: actions/checkout@master
       with:
           ref: "${{ steps.check-branch.outputs.branch }}"
 
@@ -412,7 +412,7 @@ jobs:
 
     - name: SCENARINO 2.11. Checkout
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
-      uses: actions/checkout@v2
+      uses: actions/checkout@master
       with:
           ref: "${{ steps.check-branch.outputs.branch }}"
 
@@ -496,7 +496,7 @@ jobs:
 
     - name: SCENARINO 2.15. Checkout `develop` branch
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
-      uses: actions/checkout@v2
+      uses: actions/checkout@master
       with:
           ref: "develop"
 
@@ -545,7 +545,7 @@ jobs:
 
     - name: SCENARINO 2.17. Checkout the `release/*` or `hotfix/*` branch 
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
-      uses: actions/checkout@v2
+      uses: actions/checkout@master
       with:
           ref: ${{ steps.check-branch.outputs.branch }}
 
@@ -600,7 +600,7 @@ jobs:
     - name: SCENARINO 2.20. Update the content of CHANGE-LOG-YYYY.md file to correct
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
       id: find_and_replace
-      uses: shitiomatic/str-replace@master
+      uses: jacobtomlinson/gha-find-replace@master
       with:
           find: "${{ steps.get_new_changelogs.outputs.find_and_replace_regex }}"
           replace: "${{ steps.get_new_changelogs.outputs.final_changelog }}"

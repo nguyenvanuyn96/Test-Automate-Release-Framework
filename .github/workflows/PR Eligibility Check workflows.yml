@@ -25,7 +25,7 @@ on:
 jobs:
   pr_eligibility_check:
     if: ${{ github.event.pull_request.merged == false }}
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
 
     - name: 1. Try to get branch name of PR
@@ -142,7 +142,7 @@ jobs:
 
     - name: 3. Checkout source_branch
       if: ${{ always() && github.event.inputs.base_branch != '' }}  # If this workflow is triggered by a workflow_dispatch event
-      uses: actions/checkout@v2
+      uses: actions/checkout@master
       with:
           ref: "${{ github.event.inputs.source_branch }}"
 
