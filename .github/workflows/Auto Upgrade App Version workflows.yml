@@ -135,8 +135,6 @@ jobs:
                           sed "$lineNumber s/.*/$newLine/" $filename > $temp_filename
                           # Copy the new file over the original file
                           mv $temp_filename $filename
-                          # remove temp file
-                          rm $temp_filename
 
                       elif [ "$in_buildsetting_check" == "YES" ] && [[ "$line" =~ $currentProjectVersionPattern ]]; then
                           # do the change current project version
@@ -151,8 +149,6 @@ jobs:
                           sed "$lineNumber s/.*/$newLine/" $filename > $temp_filename
                           # Copy the new file over the original file
                           mv $temp_filename $filename
-                          # remove temp file
-                          rm $temp_filename
                           
                       elif [ "$line" == "};" ]; then
                           echo "in_section_check = $in_section_check"
