@@ -134,7 +134,7 @@ jobs:
                           # Create temporary file with new line in place
                           sed "$lineNumber s/.*/$newLine/" $filename > $temp_filename
                           # Copy the new file over the original file
-                          mv /$temp_filename/$filename
+                          mv /"$temp_filename"/"$filename"
                           # remove temp file
                           rm $temp_filename
 
@@ -150,7 +150,7 @@ jobs:
                           # Create temporary file with new line in place
                           sed "$lineNumber s/.*/$newLine/" $filename > $temp_filename
                           # Copy the new file over the original file
-                          mv /$temp_filename/$filename
+                          mv /"$temp_filename"/"$filename"
                           # remove temp file
                           rm $temp_filename
                           
