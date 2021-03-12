@@ -1,9 +1,9 @@
-name: Auto Release Tag
+name: Auto Release App Tag
 on: 
   workflow_dispatch:
       inputs:
           pr_number:
-              description: 'The pr number that merged into master branch. Ex: 14'     
+              description: 'The pr number that merged into master branch. Ex: 14'
               required: false
               default: ''
           source_branch:
@@ -17,7 +17,7 @@ on:
     types:
       - closed
 jobs:
-  auto_create_release_tag:
+  auto_create_release_app_tag:
     if: ${{ github.event.pull_request.merged == true || github.event.inputs.pr_number != '' || github.event.inputs.source_branch != '' }}
     runs-on: ubuntu-latest
     steps:
@@ -27,7 +27,7 @@ jobs:
       run: |
           pr_number=${{ github.event.pull_request.number }}
 
-          if [ -z "$pr_number" ];  then # If this workflow is triggered by a workflow_dispatch
+          if [ -z "$pr_number" ]; then # If this workflow is triggered by a workflow_dispatch
               pr_number=${{ github.event.inputs.pr_number }}
           fi;
 
@@ -62,7 +62,7 @@ jobs:
       run: |
           input_branch=${{ steps.get_pr_info.outputs.branch }}
 
-          if [ -z "$input_branch" ];  then
+          if [ -z "$input_branch" ]; then
               input_branch="${{ github.event.inputs.source_branch }}"
           fi;
 
@@ -71,6 +71,7 @@ jobs:
           releasable_prefix_branchname=''
           releasable_prefix_branchname_verb_ing=''
           releasable_prefix_branchname_v2=''
+          platform='' # Empty means the next release is the universal app (both iPhone and iPad platform)
 
           # if contains release/
           if [ $(echo ${branch} | sed -e "s/^release\///g") != ${branch} ]; then
@@ -78,15 +79,31 @@ jobs:
               releasable_prefix_branchname='release'
               releasable_prefix_branchname_verb_ing='in releasing'
               releasable_prefix_branchname_v2='released'
+
+              if [ $(echo ${branch} | sed -e "s/^release\/iphone\///g") != ${branch} ]; then
+                  platform='iphone'
+              elif  [ $(echo ${branch} | sed -e "s/^release\/ipad\///g") != ${branch} ]; then
+                  platform='ipad'
+              fi;
           elif [ $(echo ${branch} | sed -e "s/^hotfix\///g") != ${branch} ]; then
               is_releasable_branch='YES'
               releasable_prefix_branchname='hotfix'
               releasable_prefix_branchname_verb_ing='in hotfixing'
               releasable_prefix_branchname_v2='hotfixed'
+
+              if [ $(echo ${branch} | sed -e "s/^hotfix\/iphone\///g") != ${branch} ]; then
+                  platform='iPhone'
+              elif  [ $(echo ${branch} | sed -e "s/^hotfix\/ipad\///g") != ${branch} ]; then
+                  platform='iPad'
+              fi;
           fi;
 
+          platform_have_spacing="${platform} "
+
           echo "::set-output name=branch::${branch}"
-          echo "::set-output name=is_releasable_branch::${is_releasable_branch}" 
+          echo "::set-output name=is_releasable_branch::${is_releasable_branch}"
+          echo "::set-output name=platform::${platform_have_spacing}" 
+          echo "::set-output name=platform_lowercase::${platform,,}"
           echo "::set-output name=releasable_prefix_branchname_lowercase::${releasable_prefix_branchname}"
           echo "::set-output name=releasable_prefix_branchname_uppercase::${releasable_prefix_branchname^^}"
           echo "::set-output name=releasable_prefix_branchname_capitalize::${releasable_prefix_branchname^}"
@@ -99,27 +116,93 @@ jobs:
       with:
           ref: "master"
 
-    - name: 6. Find and get the current pod version line string from podspec file
+    - name: 6. Find and get the current app version line string from project.pbxproj file
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
-      id: find_podspec_string
-      uses: uynguyen-wonderlabs/str-replace@master
-      with:
-          find: "\\t*[s|spec].version\\s*=\\s*[\"|'][\\S]*[\"|']"
-          include: ".podspec"
+      id: find_pbxproj_string
+      run: |
+          filename="ZaobaoUniversalApp.xcodeproj/project.pbxproj"
+          branchName="${{ steps.check-branch.outputs.branch }}"
 
-    - name: 7. Get the release version number from podspec file (step 4's result)
+          iPhoneBranchNamePattern="release/iphone/.*"
+          iPadBranchNamePattern="release/ipad/.*"
+
+          iPhoneSectionPattern="\t*baseConfigurationReference = ((?!iPad).)*\.xcconfig.*"
+          iPadSectionPattern="\t*baseConfigurationReference = .*iPad.*\.xcconfig.*"
+          universalSectionPattern="\t*baseConfigurationReference = .*\.xcconfig.*"
+
+          sectionPattern=$universalSectionPattern
+
+          if [[ $branchName =~ $iPadBranchNamePattern ]]; then
+              sectionPattern=$iPadSectionPattern
+          elif [[ $branchName =~ $iPhoneBranchNamePattern ]]; then
+              sectionPattern=$iPhoneSectionPattern
+          fi;
+
+          echo "sectionPattern = $sectionPattern"
+
+          lineNumber=0
+          in_section_check="NO"
+          in_reference_check="NO"
+          in_buildsetting_check="NO"
+
+          currentProjectVersionPattern="\t*CURRENT_PROJECT_VERSION = .*"
+          marketingVersionPattern="\t*MARKETING_VERSION = .*"
+
+          currentProjectVersionLine=""
+          marketingVersionLine=""
+
+          while read line; do
+              # reading each line
+              let "lineNumber += 1"
+              
+              if [ "$in_section_check" == "YES" ] || [ "$line" == "/* Begin XCBuildConfiguration section */" ]; then
+                  in_section_check="YES"
+
+                  if [ "$in_reference_check" == "NO" ]; then
+                      if [[ "$line" =~ $sectionPattern ]]; then
+                          in_reference_check="YES"
+
+                          # echo "in_reference_check = $line"
+                      fi;
+                  elif [ "$line" == "buildSettings = {" ]; then
+                      in_buildsetting_check="YES"
+                  elif [ "$in_buildsetting_check" == "YES" ]; then
+                      if [[ "$line" =~ $marketingVersionPattern ]]; then
+                          marketingVersionLine=$line
+                      elif [[ "$line" =~ $currentProjectVersionPattern ]]; then
+                          currentProjectVersionLine=$line
+                      elif [ "$line" == "};" ]; then
+                          in_reference_check="NO"
+                          in_buildsetting_check="NO"
+                      fi;
+                  fi;
+
+                  if [ ! -z "$currentProjectVersionLine" ] && [ ! -z "$marketingVersionLine" ]; then
+                      break;
+                  elif [ "$line" == "/* End XCBuildConfiguration section */" ]; then
+                      break;
+                  fi;
+              fi;
+          done < $filename
+
+          echo "::set-output name=currentProjectVersionLine::${currentProjectVersionLine}"
+          echo "::set-output name=marketingVersionLine::${marketingVersionLine}"
+
+    - name: 7. Get the release version number from project.pbxproj file (step 6's result)
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: get-release-version
       run: |
-        resultArray=${{steps.find_podspec_string.outputs.resultArray}}
-        truncatedFirstLastBracketString=$(echo "${resultArray:1:-1}")
-        echo "truncatedFirstLastBracketString = ${truncatedFirstLastBracketString}"
+        marketingVersionLine=${{steps.find_pbxproj_string.outputs.marketingVersionLine}}
+        version=$(echo ${marketingVersionLine} | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
 
-        firstString=$truncatedFirstLastBracketString
-        version=$(echo ${firstString} | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
+        currentProjectVersionLine=${{steps.find_pbxproj_string.outputs.currentProjectVersionLine}}
+        build_number=$(echo ${currentProjectVersionLine} | grep -Eo '[0-9]+')
 
         echo "::set-output name=new_release_version::${version}"
+        echo "::set-output name=new_release_build_number::${build_number}"
+        
         echo "This is the version which is detected from release branch name: ${version}"
+        echo "This is the bundle number which is detected from release branch name: ${build_number:}"
         
     - name: 7.1. Print data for debugging
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
@@ -127,6 +210,7 @@ jobs:
         echo "The branch ${{ steps.check-branch.outputs.branch }} is used for checking"
         echo "This branch has is_releasable_branch = ${{ steps.check-branch.outputs.is_releasable_branch }}"
         echo "This branch has release_version = ${{ steps.get-release-version.outputs.new_release_version }}"
+        echo "This branch has release_build_number = ${{ steps.get-release-version.outputs.new_release_build_number }}"
 
     - name: 8. Checkout
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
@@ -160,10 +244,10 @@ jobs:
     - name: 12. Find and replace the title `[Releasing] x.y.z` or `[Hotfixing] x.y.z` of CHANGE-LOG-YYYY.md file to `[Released] x.y.z (dd-mm-YYYY)` or `[Hotfixed] x.y.z (dd-mm-YYYY)`
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: find_and_replace_changelog
-      uses: shitiomatic/str-replace@master
+      uses: jacobtomlinson/gha-find-replace@master
       with:
-          find: "\\[${{ steps.check-branch.outputs.releasable_prefix_branchname_verb_ing_capitalize }}\\] ${{ steps.get-release-version.outputs.new_release_version }}"
-          replace: "[${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }} (${{ steps.get_current_datetime.outputs.current_datetime }})"
+          find: "\\[${{ steps.check-branch.outputs.releasable_prefix_branchname_verb_ing_capitalize }}\\] ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }}"
+          replace: "[${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }} (${{ steps.get_current_datetime.outputs.current_datetime }})"
           include: "${{ steps.get_changelog_file.outputs.change_log_file_name }}"
 
     - name: 13. Check result of Find and replace
@@ -187,7 +271,7 @@ jobs:
       with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           push-branch: ${{ steps.create_bot_release_branch.outputs.bot_branch }}
-          commit-message: "Update changelog title '[${{ steps.check-branch.outputs.releasable_prefix_branchname_verb_ing_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }}' to '[${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }} (${{ steps.get_current_datetime.outputs.current_datetime }})''"
+          commit-message: "Update changelog title '[${{ steps.check-branch.outputs.releasable_prefix_branchname_verb_ing_capitalize }}] ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }}' to '[${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }} (${{ steps.get_current_datetime.outputs.current_datetime }})''"
           force-add: 'true'
           force-push: 'true'
           name: "automate-bot"
@@ -201,13 +285,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           head: ${{ steps.create_bot_release_branch.outputs.bot_branch }}
           base: ${{ steps.check-branch.outputs.branch }}
-          title: "[Bot] Update changelog heading title to [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }} (${{ steps.get_current_datetime.outputs.current_datetime }})"
+          title: "[Bot] Update changelog heading title to [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }} (${{ steps.get_current_datetime.outputs.current_datetime }})"
 
     - name: SCENARINO 1.13. Auto approve `bot/release/*` or `bot/hotfix/*` branch
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
       uses: juliangruber/approve-pull-request-action@v1
       with:
-          github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+          github-token: ${{ secrets.AUTO_APPROVE_WORKFLOW_SECRET }}
           number: "${{ steps.create_bot_release_pr.outputs.number }}"
 
     - name: SCENARINO 1.14. Get latest commit hash of the bot branch
@@ -218,7 +302,7 @@ jobs:
 
           echo "::set-output name=commit_hash::${commit_hash}"
 
-    - name: SCENARINO 1.15. Set commit status to success  # Need to set commit status to `success` because the release/* or hotfix/* is require a status check of `pr_eligibility_check` workflow
+    - name: SCENARINO 1.15. Set commit status to success # Need to set commit status to `success` because the release/* or hotfix/* is require a status check of `pr_eligibility_check` workflow
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
       uses: Sibz/github-status-action@v1
       with: 
@@ -249,11 +333,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           head: ${{ steps.check-branch.outputs.branch }}
           base: master
-          title: "[Bot] Merge updated [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }} (${{ steps.get_current_datetime.outputs.current_datetime }}) into master for releasing"
+          title: "[Bot] Merge updated [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }} (${{ steps.get_current_datetime.outputs.current_datetime }}) into master for releasing"
           body: |
               # Description
               <!--Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.-->
-              Merge updated [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }} (${{ steps.get_current_datetime.outputs.current_datetime }}) into master for releasing
+              Merge updated [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }} (${{ steps.get_current_datetime.outputs.current_datetime }}) into master for releasing
               
               ## Jira tickets
               <!--Please list your relevant jira tickets here.-->
@@ -264,7 +348,7 @@ jobs:
               <!--**Before submitting a pull request,** please make sure the following is done:-->
 
               - [ ] Ensure the test passes 
-              - [ ] Rebase your branch on to `develop` branch.
+              - [ ] Rebase your branch on to `master` branch.
 
               ## What type of PR is this?
               <!--Please delete options that are not relevant.-->
@@ -288,7 +372,7 @@ jobs:
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
       uses: juliangruber/approve-pull-request-action@v1
       with:
-          github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+          github-token: ${{ secrets.AUTO_APPROVE_WORKFLOW_SECRET }}
           number: "${{ steps.create_updated_release_pr.outputs.number }}"
 
     - name: SCENARINO 1.10. Get latest commit hash of the updated `release/*` or `hotfix/*` branch
@@ -299,7 +383,7 @@ jobs:
 
           echo "::set-output name=commit_hash::${commit_hash}"
 
-    - name: SCENARINO 1.21. Set commit status to success  # Need to set commit status to `success` because the release/* or hotfix/* is require a status check of `pr_eligibility_check` workflow
+    - name: SCENARINO 1.21. Set commit status to success # Need to set commit status to `success` because the release/* or hotfix/* is require a status check of `pr_eligibility_check` workflow
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
       uses: Sibz/github-status-action@v1
       with: 
@@ -321,7 +405,7 @@ jobs:
       uses: benc-uk/workflow-dispatch@v1
       with:
         workflow: Auto Release Tag
-        token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+        token: ${{ secrets.AUTO_APPROVE_WORKFLOW_SECRET }}
         inputs: '{ "pr_number": "${{ steps.create_updated_release_pr.outputs.number }}" }'
 
 ###### SCENARINO 2: Go to create release tag ##########################################################################
@@ -342,7 +426,7 @@ jobs:
           can_appending="NO"
           while read line; do
               # reading each line
-              if [ "$line" == "## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }} (${{ steps.get_current_datetime.outputs.current_datetime }})" ]; then
+              if [ "$line" == "## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }} (${{ steps.get_current_datetime.outputs.current_datetime }})" ]; then
                   can_appending="YES"
               elif [[ "$line" == *"## [Released] "* ]]; then
                   new_change_log+=$'\n';
@@ -374,7 +458,7 @@ jobs:
 
           new_change_log_line=$(echo "$new_change_log" | wc -l)
           echo "new_change_log_line = $new_change_log_line"
-          new_change_log="$(echo "$new_change_log" | sed "$new_change_log_line d")" #Remove the last heading title     
+          new_change_log="$(echo "$new_change_log" | sed "$new_change_log_line d")" #Remove the last heading title
           new_change_log="${new_change_log//'%'/'%25'}"
           new_change_log="${new_change_log//$'\n'/'%0A'}"
           new_change_log="${new_change_log//$'\r'/'%0D'}"
@@ -395,7 +479,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
           tag_name: ${{ steps.get-release-version.outputs.new_release_version }}
-          release_name: "${{ steps.check-branch.outputs.releasable_prefix_branchname_capitalize }} ${{ steps.get-release-version.outputs.new_release_version }}"
+          release_name: "${{ steps.check-branch.outputs.releasable_prefix_branchname_capitalize }} ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }}"
           commitish: master
           body: "${{ steps.get_changelog_manually.outputs.unreleased_change_log }}"
           draft: false
@@ -406,9 +490,9 @@ jobs:
       run: |
         repository=${{github.repository}}
         owner="${{github.repository_owner}}/"
-        framework_name="${repository//$owner/''}"
-        echo "SLACK_MESSAGE=- :white_check_mark: The *$framework_name* framework version \\\`${{ steps.get-release-version.outputs.new_release_version }}\\\` has been created new tag :tada::tada::tada:. Click to see the detail <${{ steps.create_release.outputs.html_url }}|${{ steps.check-branch.outputs.releasable_prefix_branchname_capitalize }} ${{ steps.get-release-version.outputs.new_release_version }}>" >> $GITHUB_ENV
-        echo "SLACK_COLOR=green" >> $GITHUB_ENV #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
+        application_name="${repository//$owner/''}"
+        echo "SLACK_MESSAGE=- :white_check_mark: The *$application_name* version \\\`${{ steps.get-release-version.outputs.new_release_version }}\\\` has been created new tag :tada::tada::tada:. Click to see the detail <${{ steps.create_release.outputs.html_url }}|${{ steps.check-branch.outputs.releasable_prefix_branchname_capitalize }} ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }}>" >> $GITHUB_ENV
+        echo "SLACK_COLOR=green" >> $GITHUB_ENV # Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
 
     - name: SCENARINO 2.15. Checkout `develop` branch
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
@@ -423,6 +507,7 @@ jobs:
           filename=${{steps.get_changelog_file.outputs.change_log_file_name}}
           n=0
           new_change_log=""
+          find_and_replace_regex=""
           can_appending="NO"
           while read line; do
               # reading each line
@@ -440,6 +525,7 @@ jobs:
               fi;
 
               if [ "$can_appending" == "NO" ] && [ ! -z "$new_change_log" ]; then 
+                  find_and_replace_regex="((?:\\#\\# \\[Released\\]|\\#\\# \\[Hotfixed\\]) ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }}[\\s\\S]*?)(\\#\\# \\[Released\\]|\\#\\# \\[Hotfixed\\])"
                   break;
               fi;
           done < $filename
@@ -447,7 +533,13 @@ jobs:
           new_change_log="${new_change_log//'%'/'%25'}"
           new_change_log="${new_change_log//$'\n'/'%0A'}"
           new_change_log="${new_change_log//$'\r'/'%0D'}"
+
+          if [ -z "$find_and_replace_regex" ]; then 
+              find_and_replace_regex="((?:\\#\\# \\[Released\\]|\\#\\# \\[Hotfixed\\]) ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }}[\\s\\S]*?)"
+          fi;
+
           echo "::set-output name=unreleased_change_log::${new_change_log}"
+          echo "::set-output name=find_and_replace_regex::${find_and_replace_regex}"
           echo "============================================================"
           echo "new_change_log from develop branch = $new_change_log"
 
@@ -495,7 +587,7 @@ jobs:
           final_changelog+="${new_change_log}"
           final_changelog+=$'\n';
           final_changelog+=$'\n';
-          final_changelog+="## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }} (${{ steps.get_current_datetime.outputs.current_datetime }})"
+          final_changelog+="## [${{ steps.check-branch.outputs.releasable_prefix_branchname_v2_capitalize }}] ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }} (${{ steps.get_current_datetime.outputs.current_datetime }})"
           final_changelog+=$'\n';
           final_changelog+="$released_change_log"
           final_changelog="${final_changelog//'%'/'%25'}"
@@ -508,9 +600,9 @@ jobs:
     - name: SCENARINO 2.20. Update the content of CHANGE-LOG-YYYY.md file to correct
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
       id: find_and_replace
-      uses: shitiomatic/str-replace@master
+      uses: jacobtomlinson/gha-find-replace@master
       with:
-          find: "((?:\\#\\# \\[Released\\]|\\#\\# \\[Hotfixed\\]) ${{ steps.get-release-version.outputs.new_release_version }}[\\s\\S]*?)(\\#\\# \\[Released\\]|\\#\\# \\[Hotfixed\\])"
+          find: "${{ steps.get_new_changelogs.outputs.find_and_replace_regex }}"
           replace: "${{ steps.get_new_changelogs.outputs.final_changelog }}"
           include: "${{ steps.get_changelog_file.outputs.change_log_file_name }}"
 
@@ -541,11 +633,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           head: ${{ steps.create_bot_branch.outputs.bot_branch }}
           base: develop
-          title: "[Bot] Merge ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} ${{ steps.get-release-version.outputs.new_release_version }} into develop"
+          title: "[Bot] Merge back ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }} into develop"
           body: |
               # Description
               <!--Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.-->
-              Merge ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} ${{ steps.get-release-version.outputs.new_release_version }} into develop
+              Merge ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }} into develop
               
               ## Jira tickets
               <!--Please list your relevant jira tickets here.-->
@@ -561,10 +653,10 @@ jobs:
               ## What type of PR is this?
               <!--Please delete options that are not relevant.-->
 
-              - [x] Bug fix (non-breaking change which fixes an issue)
-              - [x] New feature (non-breaking change which adds functionality)
-              - [x] Chore (Minor changes, refactor code, ...)
-              - [x] Documentation Update
+              - [ ] Bug fix (non-breaking change which fixes an issue)
+              - [ ] New feature (non-breaking change which adds functionality)
+              - [ ] Chore (Minor changes, refactor code, ...)
+              - [ ] Documentation Update
 
               ## Related libraries
               <!--Please list your related module PRs.-->
@@ -581,7 +673,7 @@ jobs:
       uses: benc-uk/workflow-dispatch@v1
       with:
         workflow: PR Eligibility Check
-        token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+        token: ${{ secrets.AUTO_APPROVE_WORKFLOW_SECRET }}
         inputs: '{ "base_branch": "develop", "source_branch": "${{ steps.create_bot_branch.outputs.bot_branch }}" }'
 
     - name: SCENARINO 2.24. Prepare slack message
@@ -590,7 +682,7 @@ jobs:
         new_message="${{ env.SLACK_MESSAGE }}"
         new_message="${new_message//'`'/'\`'}"
         new_message+="%0A"
-        new_message+="- :white_check_mark: Already create a PR for merging back \\\`${{steps.check-branch.outputs.branch}}\\\` into \\\`develop\\\`. Click to help review and merge it - <https://github.com/${{github.repository}}/pull/${{ steps.create_pr.outputs.number }}|The PR ${{ steps.create_pr.outputs.number }}>"
+        new_message+="- :white_check_mark: Already created a PR for merging back \\\`${{steps.check-branch.outputs.branch}}\\\` into \\\`develop\\\`. Click to help review and merge it - <https://github.com/${{github.repository}}/pull/${{ steps.create_pr.outputs.number }}|The PR ${{ steps.create_pr.outputs.number }}>"
 
         echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
 

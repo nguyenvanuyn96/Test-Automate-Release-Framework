@@ -1,0 +1,300 @@
+/* Begin XCBuildConfiguration section */
+		EC7559FB241F8E92009E5731 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 19A67F87C147DE3D0266D66D /* Pods-ST175_Prod.debug.xcconfig */;
+			buildSettings = {
+				CURRENT_PROJECT_VERSION = 4;
+				MARKETING_VERSION = 9.2.0;
+			};
+			name = Debug;
+		};
+		EC7559FC241F8E92009E5731 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = AF87A3DD57C24ECBBAB85156 /* Pods-ST175_Prod.release.xcconfig */;
+			buildSettings = {
+				CURRENT_PROJECT_VERSION = 4;
+				MARKETING_VERSION = 9.2.0;
+			};
+			name = Release;
+		};
+		ECB956AA2571220E009D9561 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1D252A6130965FC83286C20C /* Pods-ST175_iPad_Dev.debug.xcconfig */;
+			buildSettings = {
+CURRENT_PROJECT_VERSION = 1;
+MARKETING_VERSION = 1.1.0;
+			};
+			name = Debug;
+		};
+		ECB956AB2571220E009D9561 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2A33F7A84D107D608B048093 /* Pods-ST175_iPad_Dev.release.xcconfig */;
+			buildSettings = {
+CURRENT_PROJECT_VERSION = 1;
+MARKETING_VERSION = 1.1.0;
+			};
+			name = Release;
+		};
+		ECB956D425712812009D9561 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = B0D5E5527C13139F84FCB9E1 /* Pods-ST_iPad_Dev Today Extension.debug.xcconfig */;
+			buildSettings = {
+CURRENT_PROJECT_VERSION = 1;
+MARKETING_VERSION = 1.1.0;
+			};
+			name = Debug;
+		};
+		ECB956D525712812009D9561 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D17A9CC7AE613655DF713F37 /* Pods-ST_iPad_Dev Today Extension.release.xcconfig */;
+			buildSettings = {
+CURRENT_PROJECT_VERSION = 1;
+MARKETING_VERSION = 1.1.0;
+			};
+			name = Release;
+		};
+		ECF7E5CC2472606A00FEBCA7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 67F0CA8E1474C7B70EEB113D /* Pods-ST175_Dev.debug.xcconfig */;
+			buildSettings = {
+				CURRENT_PROJECT_VERSION = 1;
+				MARKETING_VERSION = 9.2.0;
+			};
+			name = Debug;
+		};
+		ECF7E5CD2472606A00FEBCA7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 81ED420D5B4636E6FE453B19 /* Pods-ST175_Dev.release.xcconfig */;
+			buildSettings = {
+				CURRENT_PROJECT_VERSION = 1;
+				MARKETING_VERSION = 9.2.0;
+			};
+			name = Release;
+		};
+		ECF7E718247260AA00FEBCA7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4FC37578F225705319BDE762 /* Pods-ST175_Enterprise.debug.xcconfig */;
+			buildSettings = {
+				CURRENT_PROJECT_VERSION = 1;
+				MARKETING_VERSION = 9.2.0;
+			};
+			name = Debug;
+		};
+		ECF7E719247260AA00FEBCA7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4A22D9186E22473AC2C844C4 /* Pods-ST175_Enterprise.release.xcconfig */;
+			buildSettings = {
+				CURRENT_PROJECT_VERSION = 1;
+				MARKETING_VERSION = 9.2.0;
+			};
+			name = Release;
+		};
+		ECF7E7482472A1D500FEBCA7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C803BD904A55B1932544CA67 /* Pods-ST_Dev Today Extension.debug.xcconfig */;
+			buildSettings = {
+				CURRENT_PROJECT_VERSION = 1;
+				MARKETING_VERSION = 9.2.0;
+			};
+			name = Debug;
+		};
+		ECF7E7492472A1D500FEBCA7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = DF7E9917D949FB8944AC50DE /* Pods-ST_Dev Today Extension.release.xcconfig */;
+			buildSettings = {
+				CURRENT_PROJECT_VERSION = 1;
+				MARKETING_VERSION = 9.2.0;
+			};
+			name = Release;
+		};
+		ECF7E7622472A1DB00FEBCA7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 448B9225D3C4FBA3EA1808CF /* Pods-ST_Enterprise Today Extension.debug.xcconfig */;
+			buildSettings = {
+				CURRENT_PROJECT_VERSION = 1;
+				MARKETING_VERSION = 9.2.0;
+			};
+			name = Debug;
+		};
+		ECF7E7632472A1DB00FEBCA7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5F7BAE208D9CF5D6416ED40C /* Pods-ST_Enterprise Today Extension.release.xcconfig */;
+			buildSettings = {
+				CURRENT_PROJECT_VERSION = 1;
+				MARKETING_VERSION = 9.2.0;
+			};
+			name = Release;
+		};
+		ECFD8B6A2554C71800A84220 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 325F0F1F882CE7FFE5D0C2B9 /* Pods-ST175_iPad_Prod.debug.xcconfig */;
+			buildSettings = {
+CURRENT_PROJECT_VERSION = 1;
+MARKETING_VERSION = 1.1.0;
+			};
+			name = Debug;
+		};
+		ECFD8B6B2554C71800A84220 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4338A938A81258A6EE4306C9 /* Pods-ST175_iPad_Prod.release.xcconfig */;
+			buildSettings = {
+CURRENT_PROJECT_VERSION = 1;
+MARKETING_VERSION = 1.1.0;
+			};
+			name = Release;
+		};
+		ECFD8B892554C74600A84220 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3DE694561FF461CA99B7BF69 /* Pods-ST_iPad_Prod Today Extension.debug.xcconfig */;
+			buildSettings = {
+CURRENT_PROJECT_VERSION = 1;
+MARKETING_VERSION = 1.1.0;
+			};
+			name = Debug;
+		};
+		ECFD8B8A2554C74600A84220 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E6A62476252E0D0131223EB4 /* Pods-ST_iPad_Prod Today Extension.release.xcconfig */;
+			buildSettings = {
+CURRENT_PROJECT_VERSION = 1;
+MARKETING_VERSION = 1.1.0;
+			};
+			name = Release;
+		};
+		EE2359F1244435400077ABF1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = F708DA7F4B70BEBAFA030CAC /* Pods-ST_Prod Today Extension.debug.xcconfig */;
+			buildSettings = {
+				CURRENT_PROJECT_VERSION = 1;
+				MARKETING_VERSION = 9.2.0;
+			};
+			name = Debug;
+		};
+		EE2359F2244435400077ABF1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9C771AAC5E82619F7419F9EB /* Pods-ST_Prod Today Extension.release.xcconfig */;
+			buildSettings = {
+				CURRENT_PROJECT_VERSION = 1;
+				MARKETING_VERSION = 9.2.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		EC7559D6241F8E8D009E5731 /* Build configuration list for PBXProject "ST175Revamp_iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EC7559F8241F8E92009E5731 /* Debug */,
+				EC7559F9241F8E92009E5731 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		ECF7E5CB2472606A00FEBCA7 /* Build configuration list for PBXNativeTarget "ST175_Dev" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ECF7E5CC2472606A00FEBCA7 /* Debug */,
+				ECF7E5CD2472606A00FEBCA7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+
+		EC7559FA241F8E92009E5731 /* Build configuration list for PBXNativeTarget "ST175_Prod" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EC7559FB241F8E92009E5731 /* Debug */,
+				EC7559FC241F8E92009E5731 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		ECF7E717247260AA00FEBCA7 /* Build configuration list for PBXNativeTarget "ST175_Enterprise" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ECF7E718247260AA00FEBCA7 /* Debug */,
+				ECF7E719247260AA00FEBCA7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+
+		ECFD8B692554C71800A84220 /* Build configuration list for PBXNativeTarget "ST175_iPad_Prod" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ECFD8B6A2554C71800A84220 /* Debug */,
+				ECFD8B6B2554C71800A84220 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		ECB956A92571220E009D9561 /* Build configuration list for PBXNativeTarget "ST175_iPad_Dev" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ECB956AA2571220E009D9561 /* Debug */,
+				ECB956AB2571220E009D9561 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+
+		ECF7E7472472A1D500FEBCA7 /* Build configuration list for PBXNativeTarget "ST_Dev Today Extension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ECF7E7482472A1D500FEBCA7 /* Debug */,
+				ECF7E7492472A1D500FEBCA7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EE2359F3244435400077ABF1 /* Build configuration list for PBXNativeTarget "ST_Prod Today Extension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EE2359F1244435400077ABF1 /* Debug */,
+				EE2359F2244435400077ABF1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		ECF7E7612472A1DB00FEBCA7 /* Build configuration list for PBXNativeTarget "ST_Enterprise Today Extension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ECF7E7622472A1DB00FEBCA7 /* Debug */,
+				ECF7E7632472A1DB00FEBCA7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		ECB956D325712812009D9561 /* Build configuration list for PBXNativeTarget "ST_iPad_Dev Today Extension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ECB956D425712812009D9561 /* Debug */,
+				ECB956D525712812009D9561 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		ECFD8B882554C74600A84220 /* Build configuration list for PBXNativeTarget "ST_iPad_Prod Today Extension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ECFD8B892554C74600A84220 /* Debug */,
+				ECFD8B8A2554C74600A84220 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+
+		EC7559FD241F8E92009E5731 /* Build configuration list for PBXNativeTarget "ST175Revamp_iOSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EC7559FE241F8E92009E5731 /* Debug */,
+				EC7559FF241F8E92009E5731 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = EC7559D3241F8E8D009E5731 /* Project object */;
+}

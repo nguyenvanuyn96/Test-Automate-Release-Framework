@@ -1,9 +1,9 @@
-name: "Auto Upgrade Podspec Version"
+name: "Auto Upgrade App Version"
 
 on: create
 
 jobs:
-  auto_upgrade_podspec_version:
+  auto_upgrade_app_version:
     runs-on: ubuntu-latest
     steps:
 
@@ -19,20 +19,36 @@ jobs:
           is_releasable_branch='NO'
           releasable_prefix_branchname=''
           releasable_prefix_branchname_verb_ing=''
-
+          platform='' # Empty means the next release is the universal app (both iPhone and iPad platform)
+          
           # if contains release/
           if [ $(echo ${branch} | sed -e "s/^release\///g") != ${branch} ]; then
               is_releasable_branch='YES'
               releasable_prefix_branchname='release'
               releasable_prefix_branchname_verb_ing='in releasing'
+
+              if [ $(echo ${branch} | sed -e "s/^release\/iphone\///g") != ${branch} ]; then
+                  platform='iPhone'
+              elif [ $(echo ${branch} | sed -e "s/^release\/ipad\///g") != ${branch} ]; then
+                  platform='iPad'
+              fi;
           elif [ $(echo ${branch} | sed -e "s/^hotfix\///g") != ${branch} ]; then
               is_releasable_branch='YES'
               releasable_prefix_branchname='hotfix'
               releasable_prefix_branchname_verb_ing='in hotfixing'
+
+              if [ $(echo ${branch} | sed -e "s/^hotfix\/iphone\///g") != ${branch} ]; then
+                  platform='iPhone'
+              elif [ $(echo ${branch} | sed -e "s/^hotfix\/ipad\///g") != ${branch} ]; then
+                  platform='iPad'
+              fi;
           fi;
 
+          platform_have_spacing="${platform} "
           echo "::set-output name=branch::${branch}"
           echo "::set-output name=is_releasable_branch::${is_releasable_branch}" 
+          echo "::set-output name=platform::${platform_have_spacing}" 
+          echo "::set-output name=platform_lowercase::${platform,,}" 
           echo "::set-output name=releasable_prefix_branchname_lowercase::${releasable_prefix_branchname}"
           echo "::set-output name=releasable_prefix_branchname_uppercase::${releasable_prefix_branchname^^}"
           echo "::set-output name=releasable_prefix_branchname_capitalize::${releasable_prefix_branchname^}"
@@ -42,7 +58,12 @@ jobs:
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: get-release-version
       run: |
-          version=$(echo ${{ steps.check-branch.outputs.branch }} | sed -e "s/^${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }}\///g")
+          version=''
+          if [ ! -z "${{ steps.check-branch.outputs.platform_lowercase }}" ]; then
+              version=$(echo ${{ steps.check-branch.outputs.branch }} | sed -e "s/^${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }}\/${{ steps.check-branch.outputs.platform_lowercase }}\///g")
+          else 
+              version=$(echo ${{ steps.check-branch.outputs.branch }} | sed -e "s/^${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }}\///g")
+          fi;
           echo "::set-output name=new_release_version::${version}"
           echo "The detected release version = ${version}"
 
@@ -54,53 +75,105 @@ jobs:
           echo "::set-output name=bot_branch::${bot_branch}"
           git checkout -b ${bot_branch}
     
-    - name: 5. Find the current spec version string line
-      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
-      id: find_podspec_string
-      uses: jacobtomlinson/gha-find-replace@master
-      with:
-          find: "\\t*[s|spec].version\\s*=\\s*[\"|'][\\S]*[\"|']"
-          include: ".podspec"
-
-    - name: 5.1. Debug logging info
+    - name: 5. Check and replace the app version
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       run: |
-          echo "fileFoundCount = ${{ steps.find_podspec_string.outputs.fileFoundCount }}"
-          echo "resultArray = ${{ steps.find_podspec_string.outputs.resultArray }}"
-    
-    - name: 6. Prepare for update podspec version in file
-      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
-      id: prepare_for_update
-      run: |
-          resultArray=${{steps.find_podspec_string.outputs.resultArray}}
-          truncatedFirstLastBracketString=$(echo "${resultArray:1:-1}")
-          echo "TEMP = ${truncatedFirstLastBracketString}"
+          filename="ZaobaoUniversalApp.xcodeproj/project.pbxproj"
+          temp_filename="ZaobaoUniversalApp.xcodeproj/temp_project.pbxproj"
+          branchName="${{ steps.check-branch.outputs.branch }}"
 
-          firstString=${truncatedFirstLastBracketString}
-          secondString=${{steps.get-release-version.outputs.new_release_version}}
-          new_string="${firstString/[0-9]*[\.]*[0-9]/$secondString}"
+          iPhoneBranchNamePattern="release/iphone/.*"
+          iPadBranchNamePattern="release/ipad/.*"
 
-          echo "firstString = $firstString"
-          echo "secondString = ${secondString}"
-          echo "new_podspec_string = ${new_string}"
+          iPhoneSectionPattern="\t*baseConfigurationReference = ((?!iPad).)*\.xcconfig.*"
+          iPadSectionPattern="\t*baseConfigurationReference = .*iPad.*\.xcconfig.*"
+          universalSectionPattern="\t*baseConfigurationReference = .*\.xcconfig.*"
 
-          echo "::set-output name=podspec_line_string::${new_string}"
+          sectionPattern=$universalSectionPattern
 
-    - name: 7. Find and replace the current spec version to new version
-      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
-      id: find_and_replace
-      uses: jacobtomlinson/gha-find-replace@master
-      with:
-          find: "\\t*[s|spec].version\\s*=\\s*[\"|'][\\S]*[\"|']"
-          replace: ${{ steps.prepare_for_update.outputs.podspec_line_string }}
-          include: ".podspec"
-    
-    - name: 7.1. Check result of Find and replace
-      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
-      run: |
-          echo "Number of files which have been modified = ${{ steps.find_and_replace.outputs.modifiedFiles}}"
-          
-    - name: 8. Get the current change log file name
+          if [[ $branchName =~ $iPadBranchNamePattern ]]; then
+              sectionPattern=$iPadSectionPattern
+          elif [[ $branchName =~ $iPhoneBranchNamePattern ]]; then
+              sectionPattern=$iPhoneSectionPattern
+          fi;
+
+          echo "sectionPattern = $sectionPattern"
+
+          lineNumber=0
+          in_section_check="NO"
+          in_reference_check="NO"
+          in_buildsetting_check="NO"
+
+          currentProjectVersionPattern="\t*CURRENT_PROJECT_VERSION = .*"
+          marketingVersionPattern="\t*MARKETING_VERSION = .*"
+
+          while read line; do
+              # reading each line
+              let "lineNumber += 1"
+              
+              if [ "$in_section_check" == "YES" ] || [ "$line" == "/* Begin XCBuildConfiguration section */" ]; then
+                  in_section_check="YES"
+
+                  if [ "$in_reference_check" == "NO" ]; then
+                      if [[ "$line" =~ $sectionPattern ]]; then
+                          in_reference_check="YES"
+
+                          echo "in_reference_check = $line"
+                      fi;
+                  elif [ "$line" == "buildSettings = {" ]; then
+                      in_buildsetting_check="YES"
+                  elif [ "$in_buildsetting_check" == "YES" ]; then
+                      if [[ "$line" =~ $marketingVersionPattern ]]; then
+                          newMarketingVersion="${{ steps.get-release-version.outputs.new_release_version }}"
+                          newLine=${line/[0-9]*[\.]*[0-9]/$newMarketingVersion}
+
+                          echo "line = $line"
+                          echo "newLine = $newLine"
+                          echo "lineNumber = $lineNumber"
+                          
+                          # Create temporary file with new line in place
+                          sed "$lineNumber s/.*/$newLine/" $filename > $temp_filename
+                          # Copy the new file over the original file
+                          mv $temp_filename $filename
+
+                      elif [ "$in_buildsetting_check" == "YES" ] && [[ "$line" =~ $currentProjectVersionPattern ]]; then
+                          # do the change current project version
+                          newCurrentProjectVersion="1;"
+                          newLine=${line/[0-9]*/$newCurrentProjectVersion}
+
+                          echo "line = $line"
+                          echo "newLine = $newLine"
+                          echo "lineNumber = $lineNumber"
+                          
+                          # Create temporary file with new line in place
+                          sed "$lineNumber s/.*/$newLine/" $filename > $temp_filename
+                          # Copy the new file over the original file
+                          mv $temp_filename $filename
+                          
+                      elif [ "$line" == "};" ]; then
+                          echo "in_section_check = $in_section_check"
+                          echo "in_reference_check = $in_reference_check"
+                          echo "in_buildsetting_check = $in_buildsetting_check"
+
+                          in_reference_check="NO"
+                          in_buildsetting_check="NO"
+
+                          echo "==> Exit build setting/reference"
+                          echo "==> "
+                      fi;
+                  fi;
+
+                  if [ "$line" == "/* End XCBuildConfiguration section */" ]; then
+                      break;
+                  fi;
+              fi;
+          done < $filename
+
+          echo "lineNumber = $lineNumber"
+          git add $filename
+
+
+    - name: 5. Get the current change log file name
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: get_changelog_file
       run: |
@@ -108,21 +181,21 @@ jobs:
           change_log_file_name="CHANGE-LOG-$current_year.md"
           echo "::set-output name=change_log_file_name::${change_log_file_name}"
  
-    - name: 9. Find and replace the title `[Unreleased]` of CHANGE-LOG-YYYY.md file to `[Released] x.y.z` or `[Hotfixed] x.y.z`
+    - name: 6. Find and replace the title `[Unreleased]` of CHANGE-LOG-YYYY.md file to `[Released] x.y.z` or `[Hotfixed] x.y.z`
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: find_and_replace_changelog
       uses: jacobtomlinson/gha-find-replace@master
       with:
           find: "\\[Unreleased\\]"
-          replace: "[${{ steps.check-branch.outputs.releasable_prefix_branchname_verb_ing_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }}"
+          replace: "[${{ steps.check-branch.outputs.releasable_prefix_branchname_verb_ing_capitalize }}] ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }}"
           include: "${{steps.get_changelog_file.outputs.change_log_file_name}}"
 
-    - name: 9.1. Check result of Find and replace
+    - name: 6.1. Check result of Find and replace
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       run: |
           echo "Number of files which have been modified = ${{ steps.find_and_replace_changelog.outputs.modifiedFiles }}"
    
-    - name: 9.2. Prepare slack message
+    - name: 6.2. Prepare slack message
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       run: |
           if [ "${{ steps.find_and_replace_changelog.outputs.modifiedFiles }}" == "0" ]; then
@@ -132,19 +205,19 @@ jobs:
               echo "SLACK_COLOR=yellow" >> $GITHUB_ENV #Can either be one of good (green), warning (yellow), danger (red), or any hex color code (eg. #439FE0)
           fi;
 
-    - name: 10. Commit and Push changes
+    - name: 7. Commit and Push changes
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       uses: dciborow/commit@master
       with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           push-branch: ${{ steps.create_bot_branch.outputs.bot_branch }}
-          commit-message: "Upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
+          commit-message: "Upgrade the ${{ steps.check-branch.outputs.platform }}app version to ${{ steps.get-release-version.outputs.new_release_version }}"
           force-add: 'true'
           force-push: 'true'
           name: "automate-bot"
           email: "automate-bot@sph.com.sg"
 
-    - name: 11. Create bot pull request
+    - name: 8. Create bot pull request
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: create_pr
       uses: thomaseizinger/create-pull-request@master
@@ -152,16 +225,16 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           head: ${{ steps.create_bot_branch.outputs.bot_branch }}
           base: ${{ steps.check-branch.outputs.branch }}
-          title: "[Bot] Upgrade podspec version to ${{ steps.get-release-version.outputs.new_release_version }}"
+          title: "[Bot] Upgrade the ${{ steps.check-branch.outputs.platform }}app version to ${{ steps.get-release-version.outputs.new_release_version }}"
 
-    - name: 12. Auto approve `bot/release/*` or `bot/hotfix/*` branch
+    - name: 9. Auto approve `bot/release/*` or `bot/hotfix/*` branch
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       uses: juliangruber/approve-pull-request-action@v1
       with:
-          github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+          github-token: ${{ secrets.AUTO_APPROVE_WORKFLOW_SECRET }}
           number: "${{ steps.create_pr.outputs.number }}"
 
-    - name: 13. Get latest commit hash of the bot branch
+    - name: 10. Get latest commit hash of the bot branch
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: get_bot_commit
       run: |
@@ -169,7 +242,7 @@ jobs:
 
           echo "::set-output name=commit_hash::${commit_hash}"
 
-    - name: 14. Set commit status to success  # Need to set commit status to `success` because the release/* or hotfix/* is require a status check of `pr_eligibility_check` workflow
+    - name: 11. Set commit status to success # Need to set commit status to `success` because the release/* or hotfix/* is require a status check of `pr_eligibility_check` workflow
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       uses: Sibz/github-status-action@v1
       with: 
@@ -179,20 +252,20 @@ jobs:
           state: "success"
           sha: ${{ steps.get_bot_commit.outputs.commit_hash }}
 
-    - name: 15. Merge approved PR
+    - name: 12. Merge approved PR
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       uses: sudo-bot/action-pull-request-merge@v1.1.1
       with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           number: ${{ steps.create_pr.outputs.number }}
 
-    - name: 16. Prepare slack message
+    - name: 13. Prepare slack message
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       run: |
         new_message="${{ env.SLACK_MESSAGE }}"
         new_message="${new_message//'`'/'\`'}"
         new_message+="%0A"
-        new_message+="- :white_check_mark: The \\\`${{ steps.check-branch.outputs.branch }}\\\` branch has been updated the podspec version and changelog :raised_hands::raised_hands::raised_hands:. *Stay strong and go ahead!!!*"
+        new_message+="- :white_check_mark: The \\\`${{ steps.check-branch.outputs.branch }}\\\` branch has been updated the app version and changelog file :raised_hands::raised_hands::raised_hands:. *Stay strong and go ahead!!!*"
 
         echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
 
@@ -200,7 +273,7 @@ jobs:
             echo "SLACK_COLOR=green" >> $GITHUB_ENV
         fi;
 
-    - name: 17. Create pull request for release branch into master
+    - name: 14. Create pull request for release branch into master
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: create_release_pr
       uses: thomaseizinger/create-pull-request@master
@@ -209,11 +282,11 @@ jobs:
           head: ${{ steps.check-branch.outputs.branch }}
           base: "master"
           draft: "true"
-          title: "[DO NOT MERGE] ${{ steps.check-branch.outputs.releasable_prefix_branchname_capitalize }} ${{ steps.get-release-version.outputs.new_release_version }}"
+          title: "[DO NOT MERGE] ${{ steps.check-branch.outputs.releasable_prefix_branchname_capitalize }} ${{ steps.check-branch.outputs.platform }}${{ steps.get-release-version.outputs.new_release_version }}"
           body: |
               # Description
               <!--Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.-->
-              Merge for ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} version ${{ steps.get-release-version.outputs.new_release_version }}
+              Merge for ${{ steps.check-branch.outputs.releasable_prefix_branchname_lowercase }} ${{ steps.check-branch.outputs.platform }}version ${{ steps.get-release-version.outputs.new_release_version }}
               
               ## Jira tickets
               <!--Please list your relevant jira tickets here.-->
@@ -229,10 +302,10 @@ jobs:
               ## What type of PR is this?
               <!--Please delete options that are not relevant.-->
 
-              - [x] Bug fix (non-breaking change which fixes an issue)
-              - [x] New feature (non-breaking change which adds functionality)
-              - [x] Chore (Minor changes, refactor code, ...)
-              - [x] Documentation Update
+              - [ ] Bug fix (non-breaking change which fixes an issue)
+              - [ ] New feature (non-breaking change which adds functionality)
+              - [ ] Chore (Minor changes, refactor code, ...)
+              - [ ] Documentation Update
 
               ## Related libraries
               <!--Please list your related module PRs.-->
@@ -244,21 +317,21 @@ jobs:
 
               - NA
 
-    - name: 18. Invoke PR Eligibility Check workflow
+    - name: 15. Invoke PR Eligibility Check workflow
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       uses: benc-uk/workflow-dispatch@v1
       with:
         workflow: PR Eligibility Check
-        token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+        token: ${{ secrets.AUTO_APPROVE_WORKFLOW_SECRET }}
         inputs: '{ "base_branch": "master", "source_branch": "${{ steps.check-branch.outputs.branch }}" }'
 
-    - name: 19. Prepare slack message
+    - name: 16. Prepare slack message
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       run: |
         new_message="${{ env.SLACK_MESSAGE }}"
         new_message="${new_message//'`'/'\`'}"
         new_message+="%0A"
-        new_message+="==> Already create a PR for release the \\\`${{ steps.check-branch.outputs.branch }}\\\`. Click to open <https://github.com/${{github.repository}}/pull/${{ steps.create_release_pr.outputs.number }}|PR ${{ steps.create_release_pr.outputs.number }}>"
+        new_message+="==> Already created a PR for release the \\\`${{ steps.check-branch.outputs.branch }}\\\`. Click to open <https://github.com/${{github.repository}}/pull/${{ steps.create_release_pr.outputs.number }}|PR ${{ steps.create_release_pr.outputs.number }}>"
 
         echo "SLACK_MESSAGE=${new_message}" >> $GITHUB_ENV
 
@@ -266,14 +339,14 @@ jobs:
             echo "SLACK_COLOR=green" >> $GITHUB_ENV
         fi;
 
-    - name: 19.1. Prepare slack message
+    - name: 16.1. Prepare slack message
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: prepare_slack
       run: |
         echo "::set-output name=message::${{ env.SLACK_MESSAGE }}"
         echo "::set-output name=color::${{ env.SLACK_COLOR }}"
 
-    - name: 19.2. Notify to slack channel
+    - name: 16.2. Notify to slack channel
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       uses: actions-ecosystem/action-slack-notifier@v1
       with:
