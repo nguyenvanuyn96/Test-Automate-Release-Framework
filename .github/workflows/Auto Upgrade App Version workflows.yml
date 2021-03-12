@@ -132,7 +132,7 @@ jobs:
                           echo "lineNumber = $lineNumber"
                           
                           # Create temporary file with new line in place
-                          sed '$lineNumber s/$line/$newLine/' $filename > $temp_filename
+                          sed "$lineNumber s/.*/$newLine/" $filename > $temp_filename
                           # Copy the new file over the original file
                           mv /$temp_filename/$filename
                           # remove temp file
@@ -148,7 +148,7 @@ jobs:
                           echo "lineNumber = $lineNumber"
                           
                           # Create temporary file with new line in place
-                          sed '$lineNumber s/$line/$newLine/' $filename > $temp_filename
+                          sed "$lineNumber s/.*/$newLine/" $filename > $temp_filename
                           # Copy the new file over the original file
                           mv /$temp_filename/$filename
                           # remove temp file
