@@ -79,6 +79,7 @@ jobs:
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       run: |
           filename="ZaobaoUniversalApp.xcodeproj/project.pbxproj"
+          temp_filename="ZaobaoUniversalApp.xcodeproj/temp_project.pbxproj"
           branchName="${{ steps.check-branch.outputs.branch }}"
 
           iPhoneBranchNamePattern="release/iphone/.*"
@@ -130,10 +131,12 @@ jobs:
                           echo "newLine = $newLine"
                           echo "lineNumber = $lineNumber"
                           
-                          command="sed -i '' '$lineNumber s/$line/$newLine/' $filename"
-                          echo "command = $command"
-                          # do the change marketing version
-                          eval $command
+                          # Create temporary file with new line in place
+                          sed '$lineNumber s/$line/$newLine/' $filename > $temp_filename"
+                          # Copy the new file over the original file
+                          mv /$temp_filename/$filename
+                          # remove temp file
+                          rm $temp_filename
 
                       elif [ "$in_buildsetting_check" == "YES" ] && [[ "$line" =~ $currentProjectVersionPattern ]]; then
                           # do the change current project version
@@ -143,11 +146,13 @@ jobs:
                           echo "line = $line"
                           echo "newLine = $newLine"
                           echo "lineNumber = $lineNumber"
-
-                          command="sed -i '' '$lineNumber s/$line/$newLine/' $filename"
-                          echo "command = $command"
-                          # do the change marketing version
-                          eval $command
+                          
+                          # Create temporary file with new line in place
+                          sed '$lineNumber s/$line/$newLine/' $filename > $temp_filename"
+                          # Copy the new file over the original file
+                          mv /$temp_filename/$filename
+                          # remove temp file
+                          rm $temp_filename
                           
                       elif [ "$line" == "};" ]; then
                           echo "in_section_check = $in_section_check"
