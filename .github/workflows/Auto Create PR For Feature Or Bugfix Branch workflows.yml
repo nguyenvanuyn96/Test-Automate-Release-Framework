@@ -7,7 +7,7 @@ on:
       - bugfix/*
 jobs:
   auto_create_feature_or_bugfix_pull_request:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
 
     - name: 1. Checkout

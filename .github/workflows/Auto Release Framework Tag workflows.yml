@@ -19,7 +19,7 @@ on:
 jobs:
   auto_create_release_framework_tag:
     if: ${{ github.event.pull_request.merged == true || github.event.inputs.pr_number != '' || github.event.inputs.source_branch != '' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
     - name: 1. Try to get pr number if have
       if: ${{ github.event.inputs.source_branch == '' }} 

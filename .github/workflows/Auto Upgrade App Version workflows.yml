@@ -4,7 +4,7 @@ on: create
 
 jobs:
   auto_upgrade_app_version:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
 
     - name: 1. Checkout
