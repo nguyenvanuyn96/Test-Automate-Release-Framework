@@ -142,7 +142,7 @@ jobs:
 
     - name: 3. Checkout source_branch
       if: ${{ always() && github.event.inputs.base_branch != '' }}  # If this workflow is triggered by a workflow_dispatch event
-      uses: actions/checkout@master
+      uses: actions/checkout@v2
       with:
           ref: "${{ github.event.inputs.source_branch }}"
 

@@ -96,7 +96,7 @@ jobs:
     
     - name: 5. Checkout
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
-      uses: actions/checkout@master
+      uses: actions/checkout@v2
       with:
           ref: "master"
 
@@ -131,7 +131,7 @@ jobs:
 
     - name: 8. Checkout
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
-      uses: actions/checkout@master
+      uses: actions/checkout@v2
       with:
           ref: "${{ steps.check-branch.outputs.branch }}"
 
@@ -238,7 +238,7 @@ jobs:
 
     - name: SCENARINO 1.17. Checkout
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
-      uses: actions/checkout@master
+      uses: actions/checkout@v2
       with:
           ref: "${{ steps.check-branch.outputs.branch }}"
 
@@ -329,7 +329,7 @@ jobs:
 
     - name: SCENARINO 2.11. Checkout
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
-      uses: actions/checkout@master
+      uses: actions/checkout@v2
       with:
           ref: "${{ steps.check-branch.outputs.branch }}"
 
@@ -413,7 +413,7 @@ jobs:
 
     - name: SCENARINO 2.15. Checkout `develop` branch
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
-      uses: actions/checkout@master
+      uses: actions/checkout@v2
       with:
           ref: "develop"
 
@@ -462,7 +462,7 @@ jobs:
 
     - name: SCENARINO 2.17. Checkout the `release/*` or `hotfix/*` branch 
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
-      uses: actions/checkout@master
+      uses: actions/checkout@v2
       with:
           ref: ${{ steps.check-branch.outputs.branch }}
 

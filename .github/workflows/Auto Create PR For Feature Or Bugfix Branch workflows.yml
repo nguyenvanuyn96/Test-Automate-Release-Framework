@@ -11,7 +11,7 @@ jobs:
     steps:
 
     - name: 1. Checkout
-      uses: actions/checkout@master
+      uses: actions/checkout@v2
    
     - name: 2. Check prefix of commit message
       id: check-commit-message
