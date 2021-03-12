@@ -1,7 +1,7 @@
 # Change logs
 This is change log of TKProductDetails module in 2021.
 
-## [Unreleased]
+## [In releasing] iPad 1.1.1
 - Fix bug
 
 
