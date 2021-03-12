@@ -22,7 +22,7 @@
 			baseConfigurationReference = 1D252A6130965FC83286C20C /* Pods-ST175_iPad_Dev.debug.xcconfig */;
 			buildSettings = {
 CURRENT_PROJECT_VERSION = 1;
-MARKETING_VERSION = 1.1.0;
+MARKETING_VERSION = 1.1.1;
 			};
 			name = Debug;
 		};
@@ -31,7 +31,7 @@ MARKETING_VERSION = 1.1.0;
 			baseConfigurationReference = 2A33F7A84D107D608B048093 /* Pods-ST175_iPad_Dev.release.xcconfig */;
 			buildSettings = {
 CURRENT_PROJECT_VERSION = 1;
-MARKETING_VERSION = 1.1.0;
+MARKETING_VERSION = 1.1.1;
 			};
 			name = Release;
 		};
@@ -40,7 +40,7 @@ MARKETING_VERSION = 1.1.0;
 			baseConfigurationReference = B0D5E5527C13139F84FCB9E1 /* Pods-ST_iPad_Dev Today Extension.debug.xcconfig */;
 			buildSettings = {
 CURRENT_PROJECT_VERSION = 1;
-MARKETING_VERSION = 1.1.0;
+MARKETING_VERSION = 1.1.1;
 			};
 			name = Debug;
 		};
@@ -49,7 +49,7 @@ MARKETING_VERSION = 1.1.0;
 			baseConfigurationReference = D17A9CC7AE613655DF713F37 /* Pods-ST_iPad_Dev Today Extension.release.xcconfig */;
 			buildSettings = {
 CURRENT_PROJECT_VERSION = 1;
-MARKETING_VERSION = 1.1.0;
+MARKETING_VERSION = 1.1.1;
 			};
 			name = Release;
 		};
@@ -130,7 +130,7 @@ MARKETING_VERSION = 1.1.0;
 			baseConfigurationReference = 325F0F1F882CE7FFE5D0C2B9 /* Pods-ST175_iPad_Prod.debug.xcconfig */;
 			buildSettings = {
 CURRENT_PROJECT_VERSION = 1;
-MARKETING_VERSION = 1.1.0;
+MARKETING_VERSION = 1.1.1;
 			};
 			name = Debug;
 		};
@@ -139,7 +139,7 @@ MARKETING_VERSION = 1.1.0;
 			baseConfigurationReference = 4338A938A81258A6EE4306C9 /* Pods-ST175_iPad_Prod.release.xcconfig */;
 			buildSettings = {
 CURRENT_PROJECT_VERSION = 1;
-MARKETING_VERSION = 1.1.0;
+MARKETING_VERSION = 1.1.1;
 			};
 			name = Release;
 		};
@@ -148,7 +148,7 @@ MARKETING_VERSION = 1.1.0;
 			baseConfigurationReference = 3DE694561FF461CA99B7BF69 /* Pods-ST_iPad_Prod Today Extension.debug.xcconfig */;
 			buildSettings = {
 CURRENT_PROJECT_VERSION = 1;
-MARKETING_VERSION = 1.1.0;
+MARKETING_VERSION = 1.1.1;
 			};
 			name = Debug;
 		};
@@ -157,7 +157,7 @@ MARKETING_VERSION = 1.1.0;
 			baseConfigurationReference = E6A62476252E0D0131223EB4 /* Pods-ST_iPad_Prod Today Extension.release.xcconfig */;
 			buildSettings = {
 CURRENT_PROJECT_VERSION = 1;
-MARKETING_VERSION = 1.1.0;
+MARKETING_VERSION = 1.1.1;
 			};
 			name = Release;
 		};
