@@ -57,9 +57,9 @@ jobs:
     - name: 5. Find the current spec version string line
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: find_podspec_string
-      uses: jacobtomlinson/gha-find-replace@master
+      uses: nguyenvanuyn96/str-find-action@master
       with:
-          find: "\\t*[s|spec].version\\s*=\\s*[\"|'][\\S]*[\"|']"
+          find: "\\t*(s|spec).version\\s*=\\s*[\"|'][\\S]*[\"|']"
           include: ".podspec"
 
     - name: 5.1. Debug logging info
@@ -72,12 +72,12 @@ jobs:
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: prepare_for_update
       run: |
-          resultArray=${{steps.find_podspec_string.outputs.resultArray}}
+          resultArray="${{ steps.find_podspec_string.outputs.resultArray }}"
           truncatedFirstLastBracketString=$(echo "${resultArray:1:-1}")
           echo "TEMP = ${truncatedFirstLastBracketString}"
 
-          firstString=${truncatedFirstLastBracketString}
-          secondString=${{steps.get-release-version.outputs.new_release_version}}
+          firstString="${truncatedFirstLastBracketString}"
+          secondString="${{ steps.get-release-version.outputs.new_release_version }}"
           new_string="${firstString/[0-9]*[\.]*[0-9]/$secondString}"
 
           echo "firstString = $firstString"
@@ -89,9 +89,9 @@ jobs:
     - name: 7. Find and replace the current spec version to new version
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: find_and_replace
-      uses: jacobtomlinson/gha-find-replace@master
+      uses: nguyenvanuyn96/str-find-and-replace-action@master
       with:
-          find: "\\t*[s|spec].version\\s*=\\s*[\"|'][\\S]*[\"|']"
+          find: "\\t*(s|spec).version\\s*=\\s*[\"|'][\\S]*[\"|']"
           replace: ${{ steps.prepare_for_update.outputs.podspec_line_string }}
           include: ".podspec"
     
@@ -111,7 +111,7 @@ jobs:
     - name: 9. Find and replace the title `[Unreleased]` of CHANGE-LOG-YYYY.md file to `[Released] x.y.z` or `[Hotfixed] x.y.z`
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: find_and_replace_changelog
-      uses: jacobtomlinson/gha-find-replace@master
+      uses: nguyenvanuyn96/str-find-and-replace-action@master
       with:
           find: "\\[Unreleased\\]"
           replace: "[${{ steps.check-branch.outputs.releasable_prefix_branchname_verb_ing_capitalize }}] ${{ steps.get-release-version.outputs.new_release_version }}"
@@ -158,7 +158,7 @@ jobs:
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       uses: juliangruber/approve-pull-request-action@v1
       with:
-          github-token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+          github-token: ${{ secrets.AUTO_APPROVE_WORKFLOW_SECRET }}
           number: "${{ steps.create_pr.outputs.number }}"
 
     - name: 13. Get latest commit hash of the bot branch
@@ -169,12 +169,22 @@ jobs:
 
           echo "::set-output name=commit_hash::${commit_hash}"
 
-    - name: 14. Set commit status to success  # Need to set commit status to `success` because the release/* or hotfix/* is require a status check of `pr_eligibility_check` workflow
+    - name: 14.1. Set commit status to success  # Need to set commit status to `success` because the release/* or hotfix/* is require a status check of `pr_eligibility_check` workflow
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       uses: Sibz/github-status-action@v1
       with: 
           authToken: ${{secrets.GITHUB_TOKEN}}
           context: 'pr_eligibility_check'
+          description: "Passed"
+          state: "success"
+          sha: ${{ steps.get_bot_commit.outputs.commit_hash }}
+
+    - name: 14.2. Set commit status to success  # Need to set commit status to `success` because the release/* or hotfix/* is require a status check of `ci/bitrise/fef78e11a0d4722f/pr` workflow
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
+      uses: Sibz/github-status-action@v1
+      with: 
+          authToken: ${{secrets.GITHUB_TOKEN}}
+          context: 'ci/bitrise/fef78e11a0d4722f/pr'
           description: "Passed"
           state: "success"
           sha: ${{ steps.get_bot_commit.outputs.commit_hash }}
@@ -249,7 +259,7 @@ jobs:
       uses: benc-uk/workflow-dispatch@v1
       with:
         workflow: PR Eligibility Check
-        token: ${{ secrets.NGUYENVANUYN96_WORKFLOW_SECRET }}
+        token: ${{ secrets.AUTO_APPROVE_WORKFLOW_SECRET }}
         inputs: '{ "base_branch": "master", "source_branch": "${{ steps.check-branch.outputs.branch }}" }'
 
     - name: 19. Prepare slack message

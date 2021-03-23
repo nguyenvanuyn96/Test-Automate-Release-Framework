@@ -180,9 +180,11 @@ if [ $is_need_check_branch_name == "YES" ]; then
     # ====================================== STEP 2. =======================================
     # ======================================================================================
 
-    # Check if the branch name is a feature/* or bugfix/* or hotfix/* or master or develop
+    # Check if the branch name is a feature/* or bugfix/* or enhance/* or hotfix/* or master or develop
     elif [ $(echo ${current_branch} | sed -e "s/^feature\///g") != ${current_branch} ]; then # if contains feature/
         echo "==> $current_branch MATCHED the branch name feature/* rule"
+    elif [ $(echo ${current_branch} | sed -e "s/^enhance\///g") != ${current_branch} ]; then # if contains enhance/
+        echo "==> $current_branch MATCHED the branch name enhance/* rule"
     elif [ $(echo ${current_branch} | sed -e "s/^bugfix\///g") != ${current_branch} ]; then # if contains bugfix/
         echo "==> $current_branch MATCHED the branch name bugfix/* rule"
     elif [ "master" == "$current_branch" ]; then # if contains master
@@ -190,7 +192,7 @@ if [ $is_need_check_branch_name == "YES" ]; then
     elif [ "develop" == "$current_branch" ]; then # if contains develop
         echo "==> $current_branch MATCHED the branch name develop"
     else
-        echo "==> Your branch name does NOT match any rules: develop|master|feature/*|bugfix/*|hotfix/*|release/*|hotfix/ipad/*|release/ipad/*|hotfix/iphone/*|release/iphone/*"
+        echo "==> Your branch name does NOT match any rules: develop|master|feature/*|enhance/*|bugfix/*|hotfix/*|release/*|hotfix/ipad/*|release/ipad/*|hotfix/iphone/*|release/iphone/*"
 	    exit 1
     fi;
 fi;

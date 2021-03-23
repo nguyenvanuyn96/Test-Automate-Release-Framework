@@ -172,7 +172,6 @@ jobs:
           echo "lineNumber = $lineNumber"
           git add $filename
 
-
     - name: 5. Get the current change log file name
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       id: get_changelog_file
@@ -242,12 +241,22 @@ jobs:
 
           echo "::set-output name=commit_hash::${commit_hash}"
 
-    - name: 11. Set commit status to success # Need to set commit status to `success` because the release/* or hotfix/* is require a status check of `pr_eligibility_check` workflow
+    - name: 11.1. Set commit status to success # Need to set commit status to `success` because the release/* or hotfix/* is require a status check of `pr_eligibility_check` workflow
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
       uses: Sibz/github-status-action@v1
       with: 
           authToken: ${{secrets.GITHUB_TOKEN}}
           context: 'pr_eligibility_check'
+          description: "Passed"
+          state: "success"
+          sha: ${{ steps.get_bot_commit.outputs.commit_hash }}
+
+    - name: 11.2. Set commit status to success  # Need to set commit status to `success` because the release/* or hotfix/* is require a status check of `ci/bitrise/fef78e11a0d4722f/pr` workflow
+      if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
+      uses: Sibz/github-status-action@v1
+      with: 
+          authToken: ${{secrets.GITHUB_TOKEN}}
+          context: 'ci/bitrise/fef78e11a0d4722f/pr'
           description: "Passed"
           state: "success"
           sha: ${{ steps.get_bot_commit.outputs.commit_hash }}

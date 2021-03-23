@@ -1,9 +1,9 @@
 name: PR Eligibility Check
-on: 
+on:
     workflow_dispatch:
         inputs:
             source_branch:
-                description: 'The source branch. Ex: release/1.0.0'     
+                description: 'The source branch. Ex: release/1.0.0'
                 required: true
                 default: ''
             base_branch:
@@ -86,6 +86,8 @@ jobs:
                 is_valid_pr=1
             elif [ $(echo ${source_branch} | sed -e "s/^feature\///g") != ${source_branch} ]; then
                 is_valid_pr=1
+            elif [ $(echo ${source_branch} | sed -e "s/^enhance\///g") != ${source_branch} ]; then
+                is_valid_pr=1
             elif [ $(echo ${source_branch} | sed -e "s/^bugfix\///g") != ${source_branch} ]; then
                 is_valid_pr=1
             elif [ -z "$(echo ${source_branch} | sed -e "s/^bot\/release\/[0-9]*\.[0-9]*\.[0-9]*\/develop//g")" ]; then
@@ -101,10 +103,12 @@ jobs:
             elif [ -z "$(echo ${source_branch} | sed -e "s/^bot\/hotfix\/ipad\/[0-9]*\.[0-9]*\.[0-9]*\/develop//g")" ]; then
                 is_valid_pr=1
             else
-                error_message="The \`develop\` branch only accept a pull request from the valid \`release/*\` or \`hotfix/*\` or \`release/iphone/*\` or \`release/ipad/*\` or \`hotfix/iphone/*\` or \`hotfix/ipad/*\` or \`feature/*\` or \`bugfix/*\` branch. Please double check the branch name and correct it from your side!!!"
+                error_message="The \`develop\` branch only accept a pull request from the valid \`release/*\` or \`hotfix/*\` or \`release/iphone/*\` or \`release/ipad/*\` or \`hotfix/iphone/*\` or \`hotfix/ipad/*\` or \`feature/*\` or \`enhance/*\` or \`bugfix/*\` branch. Please double check the branch name and correct it from your side!!!"
             fi;
         elif [ -z "${base_branch##hotfix/*}" ]; then
             if [ $(echo ${source_branch} | sed -e "s/^bugfix\///g") != ${source_branch} ]; then
+                is_valid_pr=1
+            elif [ $(echo ${source_branch} | sed -e "s/^enhance\///g") != ${source_branch} ]; then
                 is_valid_pr=1
             elif [ -z "$(echo ${source_branch} | sed -e "s/^bot\/hotfix\/[0-9]*\.[0-9]*\.[0-9]*//g")" ]; then
                 is_valid_pr=1
@@ -113,19 +117,21 @@ jobs:
             elif [ -z "$(echo ${source_branch} | sed -e "s/^bot\/hotfix\/ipad\/[0-9]*\.[0-9]*\.[0-9]*//g")" ]; then
                 is_valid_pr=1
             else
-                error_message="The \`hotfix/*\` or \`hotfix/iphone/*\` or \`hotfix/ipad/*\` branch only accept a pull request from the only valid \`bugfix/*\` branch. Please double check the branch name and correct it from your side!!!"
+                error_message="The \`hotfix/*\` or \`hotfix/iphone/*\` or \`hotfix/ipad/*\` branch only accept a pull request from the only valid \`bugfix/*\` or \`enhance/*\` branch. Please double check the branch name and correct it from your side!!!"
             fi;
         elif [ -z "${base_branch##release/*}" ]; then
             if [ $(echo ${source_branch} | sed -e "s/^bugfix\///g") != ${source_branch} ]; then
                 is_valid_pr=1
-            elif [ - z "$(echo ${source_branch} | sed -e "s/^bot\/release\/[0-9]*\.[0-9]*\.[0-9]*//g")" ]; then
+            elif [ $(echo ${source_branch} | sed -e "s/^enhance\///g") != ${source_branch} ]; then
                 is_valid_pr=1
-            elif [ - z "$(echo ${source_branch} | sed -e "s/^bot\/release\/iphone\/[0-9]*\.[0-9]*\.[0-9]*//g")" ]; then
+            elif [ -z "$(echo ${source_branch} | sed -e "s/^bot\/release\/[0-9]*\.[0-9]*\.[0-9]*//g")" ]; then
                 is_valid_pr=1
-            elif [ - z "$(echo ${source_branch} | sed -e "s/^bot\/release\/ipad\/[0-9]*\.[0-9]*\.[0-9]*//g")" ]; then
+            elif [ -z "$(echo ${source_branch} | sed -e "s/^bot\/release\/iphone\/[0-9]*\.[0-9]*\.[0-9]*//g")" ]; then
+                is_valid_pr=1
+            elif [ -z "$(echo ${source_branch} | sed -e "s/^bot\/release\/ipad\/[0-9]*\.[0-9]*\.[0-9]*//g")" ]; then
                 is_valid_pr=1
             else
-                error_message="The \`release/*\` or \`release/iphone/*\` or \`release/ipad/*\` branch only accept a pull request from the only valid \`bugfix/*\` branch. Please double check the branch name and correct it from your side!!!"
+                error_message="The \`release/*\` or \`release/iphone/*\` or \`release/ipad/*\` branch only accept a pull request from the only valid \`bugfix/*\` or \`enhance/*\` branch. Please double check the branch name and correct it from your side!!!"
             fi;
         fi;  
 

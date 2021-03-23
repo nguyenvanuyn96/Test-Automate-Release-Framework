@@ -1,10 +1,11 @@
-name: "Auto Create PR For feature/* or bugfix/* Branch"
+name: "Auto Create PR For feature/* or enhance/* or bugfix/* Branch"
 
 on: 
   push:
     branches:
       - feature/*
       - bugfix/*
+      - enhance/*
 jobs:
   auto_create_feature_or_bugfix_pull_request:
     runs-on: ubuntu-latest
@@ -50,6 +51,17 @@ jobs:
           
           jira_ticket_id_regex='^feature\/\([A-Z]*-*[0-9]*\)_\S*$'
           jira_ticket_id=$(echo "$branch" | sed -n "s/$jira_ticket_id_regex/\1/p")
+
+          if [ -z "$jira_ticket_id_regex" ]; then 
+            jira_ticket_id_regex='^enhance\/\([A-Z]*-*[0-9]*\)_\S*$'
+            jira_ticket_id=$(echo "$branch" | sed -n "s/$jira_ticket_id_regex/\1/p")
+          fi;
+
+          if [ -z "$jira_ticket_id_regex" ]; then 
+            jira_ticket_id_regex='^bugfix\/\([A-Z]*-*[0-9]*\)_\S*$'
+            jira_ticket_id=$(echo "$branch" | sed -n "s/$jira_ticket_id_regex/\1/p")
+          fi;
+
           jira_ticket_url="NA"
 
           if [ ! -z "$jira_ticket_id" ] ;then
