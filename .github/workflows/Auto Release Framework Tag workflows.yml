@@ -404,7 +404,7 @@ jobs:
 
     - name: 22.1. Set commit status to success # Need to set commit status to `success` because the develop is require a status check of `pr_eligibility_check` workflow
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
-      uses: Sibz/github-status-action@v1
+      uses: Sibz/github-status-action@v1.1.5
       with: 
           authToken: ${{secrets.GITHUB_TOKEN}}
           context: 'pr_eligibility_check'
@@ -414,7 +414,7 @@ jobs:
 
     - name: 22.2. Set commit status to success # Need to set commit status to `success` because the develop is require a status check of `ci/bitrise/fef78e11a0d4722f/pr` workflow
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
-      uses: Sibz/github-status-action@v1
+      uses: Sibz/github-status-action@v1.1.5
       with: 
           authToken: ${{secrets.GITHUB_TOKEN}}
           context: 'ci/bitrise/fef78e11a0d4722f/pr'
