@@ -325,7 +325,7 @@ jobs:
 
     - name: SCENARINO 1.26. Invoke Auto Release Tag workflow to process the create release tag
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
-      uses: benc-uk/workflow-dispatch@v1
+      uses: benc-uk/workflow-dispatch@v1.1
       with:
         workflow: Auto Release Framework Tag
         token: ${{ secrets.AUTO_APPROVE_WORKFLOW_SECRET }}
@@ -336,7 +336,7 @@ jobs:
 
     - name: SCENARINO 2.11. Checkout
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'YES' }}
-      uses: benc-uk/workflow-dispatch@v1
+      uses: benc-uk/workflow-dispatch@v1.1
       with:
         workflow: Auto Release Framework Tag
         token: ${{ secrets.AUTO_APPROVE_WORKFLOW_SECRET }}

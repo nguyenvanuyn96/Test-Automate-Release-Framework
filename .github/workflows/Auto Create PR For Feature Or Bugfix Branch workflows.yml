@@ -116,7 +116,7 @@ jobs:
 
     - name: 5. Invoke PR Eligibility Check workflow
       if: ${{ steps.check-commit-message.outputs.is_need_create_pr =='YES' }}
-      uses: benc-uk/workflow-dispatch@v1
+      uses: benc-uk/workflow-dispatch@v1.1
       with:
         workflow: PR Eligibility Check
         token: ${{ secrets.AUTO_APPROVE_WORKFLOW_SECRET }}
