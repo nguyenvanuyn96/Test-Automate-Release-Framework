@@ -228,7 +228,7 @@ jobs:
 
     - name: 9. Auto approve `bot/release/*` or `bot/hotfix/*` branch
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
-      uses: juliangruber/approve-pull-request-action@v1
+      uses: juliangruber/approve-pull-request-action@v1.0.1
       with:
           github-token: ${{ secrets.AUTO_APPROVE_WORKFLOW_SECRET }}
           number: "${{ steps.create_pr.outputs.number }}"
