@@ -323,7 +323,7 @@ jobs:
 
     - name: SCENARINO 1.15.1. Set commit status to success # Need to set commit status to `success` because the release/* or hotfix/* is require a status check of `pr_eligibility_check` workflow
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
-      uses: Sibz/github-status-action@v1
+      uses: Sibz/github-status-action@v1.1.5
       with: 
           authToken: ${{secrets.GITHUB_TOKEN}}
           context: 'pr_eligibility_check'
@@ -333,7 +333,7 @@ jobs:
 
     - name: SCENARINO 1.15.2. Set commit status to success # Need to set commit status to `success` because the release/* or hotfix/* is require a status check of `ci/bitrise/fef78e11a0d4722f/pr` workflow
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
-      uses: Sibz/github-status-action@v1
+      uses: Sibz/github-status-action@v1.1.5
       with: 
           authToken: ${{secrets.GITHUB_TOKEN}}
           context: 'ci/bitrise/fef78e11a0d4722f/pr'
@@ -401,7 +401,7 @@ jobs:
 
     - name: SCENARINO 1.23. Set commit status to success # Need to set commit status to `success` because the release/* or hotfix/* is require a status check of `pr_eligibility_check` workflow
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
-      uses: Sibz/github-status-action@v1
+      uses: Sibz/github-status-action@v1.1.5
       with: 
           authToken: ${{secrets.GITHUB_TOKEN}}
           context: 'pr_eligibility_check'
@@ -411,7 +411,7 @@ jobs:
 
     - name: SCENARINO 1.24. Set commit status to success # Need to set commit status to `success` because the release/* or hotfix/* is require a status check of `ci/bitrise/fef78e11a0d4722f/pr` workflow
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
-      uses: Sibz/github-status-action@v1
+      uses: Sibz/github-status-action@v1.1.5
       with: 
           authToken: ${{secrets.GITHUB_TOKEN}}
           context: 'ci/bitrise/fef78e11a0d4722f/pr'
