@@ -263,7 +263,7 @@ jobs:
 
     - name: 12. Merge approved PR
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
-      uses: sudo-bot/action-pull-request-merge@v1.1.1
+      uses: sudo-bot/action-pull-request-merge@v1.2.0
       with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           number: ${{ steps.create_pr.outputs.number }}
