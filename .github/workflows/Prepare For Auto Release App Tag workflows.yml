@@ -308,7 +308,7 @@ jobs:
 
     - name: SCENARINO 1.13. Auto approve `bot/release/*` or `bot/hotfix/*` branch
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
-      uses: juliangruber/approve-pull-request-action@v1
+      uses: juliangruber/approve-pull-request-action@v2
       with:
           github-token: ${{ secrets.AUTO_APPROVE_WORKFLOW_SECRET }}
           number: "${{ steps.create_bot_release_pr.outputs.number }}"
@@ -386,7 +386,7 @@ jobs:
 
     - name: SCENARINO 1.21. Auto approve the updated `bot/release/*/master` or `bot/hotfix/*/master` branch
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' && steps.check_changelog_file.outputs.is_updated == 'NO' }}
-      uses: juliangruber/approve-pull-request-action@v1
+      uses: juliangruber/approve-pull-request-action@v2
       with:
           github-token: ${{ secrets.AUTO_APPROVE_WORKFLOW_SECRET }}
           number: "${{ steps.create_updated_release_pr.outputs.number }}"
