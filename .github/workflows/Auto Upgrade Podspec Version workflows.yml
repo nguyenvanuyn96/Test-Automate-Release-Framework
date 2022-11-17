@@ -256,7 +256,7 @@ jobs:
 
     - name: 18. Invoke PR Eligibility Check workflow
       if: ${{ steps.check-branch.outputs.is_releasable_branch == 'YES' }}
-      uses: benc-uk/workflow-dispatch@v1
+      uses: benc-uk/workflow-dispatch@v121
       with:
         workflow: PR Eligibility Check
         token: ${{ secrets.AUTO_APPROVE_WORKFLOW_SECRET }}
